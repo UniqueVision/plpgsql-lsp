@@ -1,6 +1,6 @@
 {
-  "name": "lsp-sample-server",
-  "description": "Example implementation of a language server in node.",
+  "name": "plpgsql-lsp-server",
+  "description": "Implementation of a language server in node.",
   "version": "1.0.0",
   "author": "Microsoft Corporation",
   "license": "MIT",
