@@ -194,14 +194,24 @@ connection.onCompletion(
     // info and always provide the same completion items.
     return [
       {
-        label: 'TypeScript',
+        label: 'SELECT',
         kind: CompletionItemKind.Text,
         data: 1
       },
       {
-        label: 'JavaScript',
+        label: 'INSERT',
         kind: CompletionItemKind.Text,
         data: 2
+      },
+      {
+        label: 'UPDATE',
+        kind: CompletionItemKind.Text,
+        data: 3
+      },
+      {
+        label: 'DELETE',
+        kind: CompletionItemKind.Text,
+        data: 4
       }
     ];
   }
@@ -212,11 +222,17 @@ connection.onCompletion(
 connection.onCompletionResolve(
   (item: CompletionItem): CompletionItem => {
     if (item.data === 1) {
-      item.detail = 'TypeScript details';
-      item.documentation = 'TypeScript documentation';
+      item.detail = 'SELECT statements';
+      item.documentation = 'SELECT * FROM tablename';
     } else if (item.data === 2) {
-      item.detail = 'JavaScript details';
-      item.documentation = 'JavaScript documentation';
+      item.detail = 'INSERT statements';
+      item.documentation = 'INSERT INTO tablename (field, ...) VALUES (value, ...)';
+    } else if (item.data === 3) {
+      item.detail = 'UPDATE statements';
+      item.documentation = 'UPDATE tablename SET field = value, ...';
+    } else if (item.data === 4) {
+      item.detail = 'DELETE statements';
+      item.documentation = 'DELETE FROM tablename';
     }
     return item;
   }
