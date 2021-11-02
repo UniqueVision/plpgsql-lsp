@@ -1,0 +1,17 @@
+{
+  "editor.tabSize": 2,
+  "eslint.enable": true,
+  "files.trimFinalNewlines": true,
+  "editor.formatOnSave": true,
+  "editor.comments.insertSpace": true,
+  "editor.trimAutoWhitespace": true,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "editor.useTabStops": true,
+  "editor.insertSpaces": false,
+  "typescript.tsc.autoDetect": "off",
+  "typescript.preferences.quoteStyle": "single",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+}
