@@ -25,13 +25,13 @@
       "type": "object",
       "title": "Example configuration",
       "properties": {
-        "languageServerExample.maxNumberOfProblems": {
+        "plPgSqlLanguageServer.maxNumberOfProblems": {
           "scope": "resource",
           "type": "number",
           "default": 100,
           "description": "Controls the maximum number of problems produced by the server."
         },
-        "languageServerExample.trace.server": {
+        "plPgSqlLanguageServer.trace.server": {
           "scope": "window",
           "type": "string",
           "enum": [
