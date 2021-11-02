@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path';
-import { workspace, ExtensionContext } from 'vscode';
+import { workspace, ExtensionContext, languages, TextDocument, TextEdit } from 'vscode';
 
 import {
   LanguageClient,
@@ -63,3 +63,11 @@ export function deactivate(): Thenable<void> | undefined {
   }
   return client.stop();
 }
+
+
+languages.registerDocumentFormattingEditProvider('postgres', {
+  provideDocumentFormattingEdits(document: TextDocument): TextEdit[] {
+    const firstLine = document.lineAt(0);
+    return [TextEdit.insert(firstLine.range.start, '-- Formatting...\n')];
+  }
+});
