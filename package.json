@@ -25,13 +25,37 @@
       "type": "object",
       "title": "Example configuration",
       "properties": {
-        "plPgSqlLanguageServer.maxNumberOfProblems": {
+        "plpgsqlLanguageServer.host": {
+          "scope": "resource",
+          "type": "string",
+          "default": "localhost",
+          "description": "The default host."
+        },
+        "plpgsqlLanguageServer.port": {
           "scope": "resource",
           "type": "number",
-          "default": 100,
-          "description": "Controls the maximum number of problems produced by the server."
+          "default": 5432,
+          "description": "The default port."
         },
-        "plPgSqlLanguageServer.trace.server": {
+        "plpgsqlLanguageServer.database": {
+          "scope": "resource",
+          "type": "string",
+          "default": "postgres",
+          "description": "The default database."
+        },
+        "plpgsqlLanguageServer.user": {
+          "scope": "resource",
+          "type": "string",
+          "default": "postgres",
+          "description": "The default user."
+        },
+        "plpgsqlLanguageServer.password": {
+          "scope": "resource",
+          "type": "string",
+          "default": "postgres",
+          "description": "The default password."
+        },
+        "plpgsqlLanguageServer.trace.server": {
           "scope": "window",
           "type": "string",
           "enum": [

@@ -12,7 +12,6 @@ import {
   DidChangeConfigurationNotification,
   CompletionItem,
   CompletionItemKind,
-  TextDocumentPositionParams,
   TextDocumentSyncKind,
   InitializeResult
 } from 'vscode-languageserver/node';
@@ -21,16 +20,195 @@ import {
   TextDocument
 } from 'vscode-languageserver-textdocument';
 
+import { LanguageServerSettings, DEFAULT_SETTINGS } from './settings';
+import { PostgresPool, makePool } from './postgres/client';
+
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
 const connection = createConnection(ProposedFeatures.all);
-
 // Create a simple text document manager.
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
+
+let globalPgPool: PostgresPool | null = null;
 
 let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
 let hasDiagnosticRelatedInformationCapability = false;
+
+// The global settings, used when the `workspace/configuration` request is not supported by the client.
+// Please note that this is not the case when using this server with the client provided in this example
+// but could happen with other clients.
+let globalSettings: LanguageServerSettings = DEFAULT_SETTINGS;
+
+// Cache the settings of all open documents
+const documentSettings: Map<string, Thenable<LanguageServerSettings>> = new Map();
+
+// 本来は resource を引数とすべきかもしれないが、簡単化のため省略
+function getPostgresPool(setting: LanguageServerSettings) {
+  if (globalPgPool === null) {
+      globalPgPool = makePool(setting);
+  }
+  return globalPgPool;
+}
+
+function getDocumentSettings(resource: string): Thenable<LanguageServerSettings> {
+  if (!hasConfigurationCapability) {
+    return Promise.resolve(globalSettings);
+  }
+  let result = documentSettings.get(resource);
+  if (!result) {
+    result = connection.workspace.getConfiguration({
+      scopeUri: resource,
+      section: 'plpgsqlLanguageServer'
+    });
+    documentSettings.set(resource, result);
+  }
+  return result;
+}
+
+async function validateTextDocument(textDocument: TextDocument): Promise<void> {
+  const settings = await getDocumentSettings(textDocument.uri);
+
+  const text = textDocument.getText();
+  const diagnostics: Diagnostic[] = [];
+  const pgPool = getPostgresPool(settings);
+  const pgClient = await pgPool.connect();
+
+  try {
+    await pgClient.query('BEGIN');
+    await pgClient.query(text);
+  }
+  catch (error: unknown) {
+    const diagnosic: Diagnostic = {
+      severity: DiagnosticSeverity.Error,
+      range: {
+        start: textDocument.positionAt(0),
+        end: textDocument.positionAt(text.length-1)
+      },
+      message: `${error}`,
+    };
+    if (hasDiagnosticRelatedInformationCapability) {
+      diagnosic.relatedInformation = [
+        {
+          location: {
+            uri: textDocument.uri,
+            range: Object.assign({}, diagnosic.range)
+          },
+          message: 'Syntax errors'
+        }
+      ];
+    }
+    diagnostics.push(diagnosic);
+  }
+  finally {
+    await pgClient.query('ROLLBACK');
+    pgClient.release();
+  }
+
+  // Send the computed diagnostics to VSCode.
+  connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
+}
+
+async function getStoredProcedureCompletionItems(textDocumentUri: string) {
+  const settings = await getDocumentSettings(textDocumentUri);
+  const pgClient = await getPostgresPool(settings).connect();
+
+  let procedures: CompletionItem[] = [];
+  try {
+    const results = await pgClient.query(`
+      SELECT
+        distinct on (routine_name) routine_name
+      FROM
+        information_schema.routines
+      ORDER BY
+        routines.routine_name
+    `);
+    const formattedResults = results.rows.map((row, index) => {
+      const procedure_name = `${row["routine_name"]}`;
+      return {
+        label: procedure_name,
+        kind: CompletionItemKind.Function,
+        data: index,
+        detail: procedure_name,
+        document: procedure_name
+      };
+    });
+    procedures = procedures.concat(formattedResults);
+  }
+  catch (error: unknown) {
+    connection.console.log(`${error}`);
+  }
+  finally {
+    pgClient.release();
+  }
+  return procedures;
+}
+
+async function getTableCompletionItems(textDocumentUri: string) {
+  const settings = await getDocumentSettings(textDocumentUri);
+  const pgClient = await getPostgresPool(settings).connect();
+
+  let procedures: CompletionItem[] = [];
+  try {
+    const results = await pgClient.query(`
+      WITH partition_parents AS (
+        SELECT
+          relnamespace::regnamespace::TEXT || '.' || relname AS table_name
+        FROM
+          pg_class
+        WHERE
+          relkind = 'p'
+      )
+      ,unpartitioned_tables AS (
+        SELECT
+          relnamespace::regnamespace::TEXT || '.' || relname AS table_name
+        FROM
+          pg_class
+        WHERE
+          relkind = 'r' AND NOT relispartition
+      )
+      SELECT
+        *
+      FROM
+        partition_parents
+      UNION
+      SELECT
+        *
+      FROM
+        unpartitioned_tables
+      ORDER BY
+        table_name
+    `);
+    const formattedResults = results.rows.map((row, index) => {
+      const table_name = `${row["table_name"]}`;
+      return {
+        label: table_name,
+        kind: CompletionItemKind.Struct,
+        data: index,
+        detail: table_name,
+        document: table_name
+      };
+    });
+    procedures = procedures.concat(formattedResults);
+  }
+  catch (error: unknown) {
+    connection.console.log(`${error}`);
+  }
+  finally {
+    pgClient.release();
+  }
+  return procedures;
+}
+
+async function getCompletionItems(textDocumentUri: string) {
+  const procedures = await getStoredProcedureCompletionItems(textDocumentUri);
+  const tables = await getTableCompletionItems(textDocumentUri);
+
+  return procedures.concat(tables).map((item, index) => {
+    item.data = index;
+    return item;
+  });
+}
 
 connection.onInitialize((params: InitializeParams) => {
   const capabilities = params.capabilities;
@@ -80,52 +258,27 @@ connection.onInitialized(() => {
   }
 });
 
-// The example settings
-interface ExampleSettings {
-  maxNumberOfProblems: number;
-}
-
-// The global settings, used when the `workspace/configuration` request is not supported by the client.
-// Please note that this is not the case when using this server with the client provided in this example
-// but could happen with other clients.
-const defaultSettings: ExampleSettings = { maxNumberOfProblems: 1000 };
-let globalSettings: ExampleSettings = defaultSettings;
-
-// Cache the settings of all open documents
-const documentSettings: Map<string, Thenable<ExampleSettings>> = new Map();
-
 connection.onDidChangeConfiguration(change => {
   if (hasConfigurationCapability) {
     // Reset all cached document settings
     documentSettings.clear();
   } else {
-    globalSettings = <ExampleSettings>(
-      (change.settings.plPgSqlLanguageServer || defaultSettings)
+    globalSettings = <LanguageServerSettings>(
+      (change.settings.plpgsqlLanguageServer || DEFAULT_SETTINGS)
     );
   }
 
   // Revalidate all open text documents
-  // documents.all().forEach(validateTextDocument);
+  documents.all().forEach(validateTextDocument);
 });
-
-function getDocumentSettings(resource: string): Thenable<ExampleSettings> {
-  if (!hasConfigurationCapability) {
-    return Promise.resolve(globalSettings);
-  }
-  let result = documentSettings.get(resource);
-  if (!result) {
-    result = connection.workspace.getConfiguration({
-      scopeUri: resource,
-      section: 'plPgSqlLanguageServer'
-    });
-    documentSettings.set(resource, result);
-  }
-  return result;
-}
 
 // Only keep settings for open documents
 documents.onDidClose(e => {
   documentSettings.delete(e.document.uri);
+});
+
+documents.onDidChangeContent(change => {
+	validateTextDocument(change.document);
 });
 
 connection.onDidChangeWatchedFiles(_change => {
@@ -135,32 +288,8 @@ connection.onDidChangeWatchedFiles(_change => {
 
 // This handler provides the initial list of the completion items.
 connection.onCompletion(
-  (_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
-    // The pass parameter contains the position of the text document in
-    // which code complete got requested. For the example we ignore this
-    // info and always provide the same completion items.
-    return [
-      {
-        label: 'SELECT',
-        kind: CompletionItemKind.Text,
-        data: 1
-      },
-      {
-        label: 'INSERT',
-        kind: CompletionItemKind.Text,
-        data: 2
-      },
-      {
-        label: 'UPDATE',
-        kind: CompletionItemKind.Text,
-        data: 3
-      },
-      {
-        label: 'DELETE',
-        kind: CompletionItemKind.Text,
-        data: 4
-      }
-    ];
+  textDocumentPosition => {
+    return getCompletionItems(textDocumentPosition.textDocument.uri);
   }
 );
 
@@ -168,19 +297,6 @@ connection.onCompletion(
 // the completion list.
 connection.onCompletionResolve(
   (item: CompletionItem): CompletionItem => {
-    if (item.data === 1) {
-      item.detail = 'SELECT statements';
-      item.documentation = 'SELECT * FROM tablename';
-    } else if (item.data === 2) {
-      item.detail = 'INSERT statements';
-      item.documentation = 'INSERT INTO tablename (field, ...) VALUES (value, ...)';
-    } else if (item.data === 3) {
-      item.detail = 'UPDATE statements';
-      item.documentation = 'UPDATE tablename SET field = value, ...';
-    } else if (item.data === 4) {
-      item.detail = 'DELETE statements';
-      item.documentation = 'DELETE FROM tablename';
-    }
     return item;
   }
 );

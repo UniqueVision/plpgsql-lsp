@@ -47,7 +47,7 @@ export function activate(context: ExtensionContext) {
 
   // Create the language client and start the client.
   client = new LanguageClient(
-    'plPgSqlLanguageServer',
+    'plpgsqlLanguageServer',
     'PL/pgSQL Language Server',
     serverOptions,
     clientOptions
@@ -67,7 +67,8 @@ export function deactivate(): Thenable<void> | undefined {
 
 languages.registerDocumentFormattingEditProvider('postgres', {
   provideDocumentFormattingEdits(document: TextDocument): TextEdit[] {
-    const firstLine = document.lineAt(0);
-    return [TextEdit.insert(firstLine.range.start, '-- Formatting...\n')];
+    return [];
+    // const firstLine = document.lineAt(0);
+    // return [TextEdit.insert(firstLine.range.start, '-- Formatting...\n')];
   }
 });
