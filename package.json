@@ -21,6 +21,19 @@
   ],
   "main": "./client/out/extension",
   "contributes": {
+    "languages": [
+      {
+        "id": "postgres",
+        "extensions": [
+          ".pgsql",
+          ".psql"
+        ],
+        "aliases": [
+          "Postgres"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
     "configuration": {
       "type": "object",
       "title": "Example configuration",
