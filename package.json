@@ -1,5 +1,6 @@
 {
   "name": "vscode-plpgsql-lsp",
+  "displayName": "PL/pgSQL Language Server",
   "description": "VSCode PL/pgSQL Language Server.",
   "license": "MIT",
   "version": "1.0.0",
