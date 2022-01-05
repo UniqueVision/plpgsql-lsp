@@ -46,7 +46,7 @@ const documentSettings: Map<string, Thenable<LanguageServerSettings>> = new Map(
 // 本来は resource を引数とすべきかもしれないが、簡単化のため省略
 function getPostgresPool(setting: LanguageServerSettings) {
   if (globalPgPool === null) {
-      globalPgPool = makePool(setting);
+    globalPgPool = makePool(setting);
   }
   return globalPgPool;
 }
@@ -83,7 +83,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
       severity: DiagnosticSeverity.Error,
       range: {
         start: textDocument.positionAt(0),
-        end: textDocument.positionAt(text.length-1)
+        end: textDocument.positionAt(text.length - 1)
       },
       message: `${error}`,
     };
@@ -115,21 +115,51 @@ async function getStoredProcedureCompletionItems(textDocumentUri: string) {
 
   let procedures: CompletionItem[] = [];
   try {
+    // const results = await pgClient.query(`
+    //   SELECT
+    //     distinct on (routine_name) routine_name
+    //     ,type_udt_name
+    //     ,routine_definition
+    //   FROM
+    //     information_schema.routines
+    //   ORDER BY
+    //     routines.routine_name
+    // `);
+
+    // https://dataedo.com/kb/query/postgresql/list-stored-procedures
     const results = await pgClient.query(`
-      SELECT
-        distinct on (routine_name) routine_name
-      FROM
-        information_schema.routines
-      ORDER BY
-        routines.routine_name
+      select
+        proname
+        ,pg_get_functiondef(oid) AS definition
+      from pg_proc
+      WHERE
+        proname LIKE '%beluga%'
     `);
+
     const formattedResults = results.rows.map((row, index) => {
-      const procedure_name = `${row["routine_name"]}`;
+      // const procedure_name = `${row["routine_name"]}`;
+      // const routine_definition = `${row["routine_definition"]}`;
+
+      const procedure_name = `${row["proname"]}`;
+      const routine_definition = `${row["definition"]}`;
+      const func_params = routine_definition.match(/\(.*\)/g);
+      const func_param = func_params ? func_params[0] : '';
+      // func_param = func_param.replace(', ', ',\n');
+
+      const func_param_items = func_param.match(/\(\w*\s|,\s\w*\s/g) || [];
+      let params_customize = '(';
+      func_param_items.forEach((item, index) => {
+        params_customize += '\n\t';
+        const param_name = item.replace('(', '').replace(/\s/g, '').replace(',', '');
+        params_customize += `${index == 0 ? '' : ','}${param_name} := ${param_name}`;
+      });
+      params_customize += ` ${func_param_items.length > 0 ? '\n' : ''});`;
+
       return {
-        label: procedure_name,
+        label: procedure_name + params_customize,
         kind: CompletionItemKind.Function,
         data: index,
-        detail: procedure_name,
+        detail: routine_definition,
         document: procedure_name
       };
     });
@@ -278,7 +308,7 @@ documents.onDidClose(e => {
 });
 
 documents.onDidChangeContent(change => {
-	validateTextDocument(change.document);
+  validateTextDocument(change.document);
 });
 
 connection.onDidChangeWatchedFiles(_change => {
