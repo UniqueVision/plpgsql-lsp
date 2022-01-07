@@ -5,7 +5,7 @@
 - [x] syntax error check.
 - [x] table name completion.
 - [x] stored procedure/function name completion.
-- [ ] stored procedure/function args completion.
+- [x] stored procedure/function args completion.
 
 ## Usage
 
