@@ -115,52 +115,43 @@ async function getStoredProcedureCompletionItems(textDocumentUri: string) {
 
   let procedures: CompletionItem[] = [];
   try {
-    // const results = await pgClient.query(`
-    //   SELECT
-    //     distinct on (routine_name) routine_name
-    //     ,type_udt_name
-    //     ,routine_definition
-    //   FROM
-    //     information_schema.routines
-    //   ORDER BY
-    //     routines.routine_name
-    // `);
-
     // https://dataedo.com/kb/query/postgresql/list-stored-procedures
     const results = await pgClient.query(`
       select
-        proname
-        ,pg_get_functiondef(oid) AS definition
-      from pg_proc
-      WHERE
-        proname LIKE '%beluga%'
+        t_pg_proc.proname
+        ,CASE
+          WHEN t_pg_language.lanname = 'internal' THEN t_pg_proc.prosrc
+          ELSE pg_get_functiondef(t_pg_proc.oid)
+        END AS definition
+      from pg_proc AS t_pg_proc
+      left join pg_language AS t_pg_language on t_pg_proc.prolang = t_pg_language.oid
     `);
 
     const formattedResults = results.rows.map((row, index) => {
-      // const procedure_name = `${row["routine_name"]}`;
-      // const routine_definition = `${row["routine_definition"]}`;
+      const proname = `${row["proname"]}`;
+      const definition = `${row["definition"]}`;
 
-      const procedure_name = `${row["proname"]}`;
-      const routine_definition = `${row["definition"]}`;
-      const func_params = routine_definition.match(/\(.*\)/g);
+      // definitionから引数リストをとります
+      const func_params = definition.match(/\(.*\)/g);
       const func_param = func_params ? func_params[0] : '';
-      // func_param = func_param.replace(', ', ',\n');
-
       const func_param_items = func_param.match(/\(\w*\s|,\s\w*\s/g) || [];
+
+      // 引数リストからクエリーを生成します
       let params_customize = '(';
       func_param_items.forEach((item, index) => {
         params_customize += '\n\t';
         const param_name = item.replace('(', '').replace(/\s/g, '').replace(',', '');
         params_customize += `${index == 0 ? '' : ','}${param_name} := ${param_name}`;
       });
-      params_customize += ` ${func_param_items.length > 0 ? '\n' : ''});`;
+      params_customize += `${func_param_items.length > 0 ? '\n' : ''})`;
 
+      // CompletionItem返します
       return {
-        label: procedure_name + params_customize,
+        label: proname + params_customize,
         kind: CompletionItemKind.Function,
         data: index,
-        detail: routine_definition,
-        document: procedure_name
+        detail: definition,
+        document: proname
       };
     });
     procedures = procedures.concat(formattedResults);
