@@ -117,14 +117,19 @@ async function getStoredProcedureCompletionItems(textDocumentUri: string) {
   try {
     // https://dataedo.com/kb/query/postgresql/list-stored-procedures
     const results = await pgClient.query(`
-      select
+      SELECT
         t_pg_proc.proname
         ,CASE
-          WHEN t_pg_language.lanname = 'internal' THEN t_pg_proc.prosrc
-          ELSE pg_get_functiondef(t_pg_proc.oid)
+          WHEN t_pg_language.lanname = 'internal' THEN
+            t_pg_proc.prosrc
+          ELSE
+            pg_get_functiondef(t_pg_proc.oid)
         END AS definition
-      from pg_proc AS t_pg_proc
-      left join pg_language AS t_pg_language on t_pg_proc.prolang = t_pg_language.oid
+      FROM
+        pg_proc AS t_pg_proc
+      LEFT JOIN pg_language AS t_pg_language ON (
+        t_pg_proc.prolang = t_pg_language.oid
+      )
     `);
 
     const formattedResults = results.rows.map((row, index) => {
@@ -147,11 +152,12 @@ async function getStoredProcedureCompletionItems(textDocumentUri: string) {
 
       // CompletionItem返します
       return {
-        label: proname + params_customize,
+        label: proname,
         kind: CompletionItemKind.Function,
         data: index,
         detail: definition,
-        document: proname
+        document: proname,
+        insertText: proname + params_customize
       };
     });
     procedures = procedures.concat(formattedResults);
@@ -172,31 +178,19 @@ async function getTableCompletionItems(textDocumentUri: string) {
   let procedures: CompletionItem[] = [];
   try {
     const results = await pgClient.query(`
-      WITH partition_parents AS (
-        SELECT
-          relnamespace::regnamespace::TEXT || '.' || relname AS table_name
-        FROM
-          pg_class
-        WHERE
-          relkind = 'p'
-      )
-      ,unpartitioned_tables AS (
-        SELECT
-          relnamespace::regnamespace::TEXT || '.' || relname AS table_name
-        FROM
-          pg_class
-        WHERE
-          relkind = 'r' AND NOT relispartition
-      )
       SELECT
-        *
+        relnamespace::regnamespace::TEXT || '.' || relname AS table_name
       FROM
-        partition_parents
+        pg_class
+      WHERE
+        relkind = 'p'
       UNION
       SELECT
-        *
+        relnamespace::regnamespace::TEXT || '.' || relname AS table_name
       FROM
-        unpartitioned_tables
+        pg_class
+      WHERE
+        relkind = 'r' AND NOT relispartition
       ORDER BY
         table_name
     `);
