@@ -19,6 +19,8 @@ import {
 let defaultClient: LanguageClient;
 const clients: Map<string, LanguageClient> = new Map();
 
+const PLPGSQL_LANGUAGE_SERVER_SECTION = 'plpgsqlLanguageServer';
+
 let sortedWorkspaceFolders: string[] | undefined;
 function getSortedWorkspaceFolders(): string[] {
   if (sortedWorkspaceFolders === undefined) {
@@ -38,7 +40,9 @@ function getSortedWorkspaceFolders(): string[] {
 }
 
 function createLanguageClient(serverOptions: ServerOptions, clientOptions: LanguageClientOptions) {
-  return new LanguageClient('plpgsqlLanguageServer', 'PL/pgSQL Language Server', serverOptions, clientOptions);
+  return new LanguageClient(
+    PLPGSQL_LANGUAGE_SERVER_SECTION, 'PL/pgSQL Language Server', serverOptions, clientOptions)
+    ;
 }
 
 Workspace.onDidChangeWorkspaceFolders(() => sortedWorkspaceFolders = undefined);
@@ -48,7 +52,9 @@ export function activate(context: ExtensionContext) {
   const module = context.asAbsolutePath(
     path.join('server', 'out', 'server.js')
   );
-  const outputChannel: OutputChannel = Window.createOutputChannel('plpgsqlLanguageServer');
+  const outputChannel: OutputChannel = Window.createOutputChannel(
+    PLPGSQL_LANGUAGE_SERVER_SECTION
+  );
 
   function didOpenTextDocument(document: TextDocument): void {
     // We are only interested in language mode text
@@ -75,7 +81,7 @@ export function activate(context: ExtensionContext) {
           // Notify the server about file changes to '.clientrc files contained in the workspace
           fileEvents: Workspace.createFileSystemWatcher('**/.clientrc')
         },
-        diagnosticCollectionName: 'plpgsqlLanguageServer',
+        diagnosticCollectionName: PLPGSQL_LANGUAGE_SERVER_SECTION,
         outputChannel
       };
       defaultClient = createLanguageClient(serverOptions, clientOptions);
@@ -103,7 +109,7 @@ export function activate(context: ExtensionContext) {
           // Notify the server about file changes to '.clientrc files contained in the workspace
           fileEvents: Workspace.createFileSystemWatcher('**/.clientrc')
         },
-        diagnosticCollectionName: 'plpgsqlLanguageServer',
+        diagnosticCollectionName: PLPGSQL_LANGUAGE_SERVER_SECTION,
         workspaceFolder: folder,
         outputChannel
       };
