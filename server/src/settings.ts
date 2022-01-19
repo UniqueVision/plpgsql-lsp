@@ -5,6 +5,7 @@ export interface LanguageServerSettings {
   database: string;
   user?: string;
   password?: string;
+  definitionFiles?: string[];
 }
 
 export const DEFAULT_SETTINGS: LanguageServerSettings = {
@@ -12,5 +13,6 @@ export const DEFAULT_SETTINGS: LanguageServerSettings = {
   port: 5432,
   database: 'postgres',
   user: 'postgres',
-  password: 'postgres'
+  password: 'postgres',
+  definitionFiles: ['**/*.pgsql', '**/*.psql']
 };

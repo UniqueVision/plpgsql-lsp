@@ -11,6 +11,7 @@ import {
   CompletionItem,
   TextDocumentSyncKind,
   InitializeResult,
+  DefinitionParams,
 } from 'vscode-languageserver/node';
 import {
   TextDocument
@@ -20,6 +21,7 @@ import { LanguageServerSettings, DEFAULT_SETTINGS } from './settings';
 import { getCompletionItems } from './postgres/completionItems';
 import { validateTextDocument as _validateTextDocument } from './postgres/validateTextDocument';
 import { Space } from './space';
+import { getDefinitionLinks, loadDefinitionInWorkspace, updateFileDefinition } from './workspace/goToDefinition';
 
 let globalSpace: Space;
 
@@ -46,7 +48,9 @@ connection.onInitialize((params: InitializeParams) => {
       // Tell the client that this server supports code completion.
       completionProvider: {
         resolveProvider: true
-      }
+      },
+      // Tell the client that this server supports go to definition.
+      definitionProvider: true
     }
   };
   if (globalSpace.hasWorkspaceFolderCapability) {
@@ -59,7 +63,7 @@ connection.onInitialize((params: InitializeParams) => {
   return result;
 });
 
-connection.onInitialized(() => {
+connection.onInitialized(async () => {
   if (globalSpace.hasConfigurationCapability) {
     // Register for all configuration changes.
     connection.client.register(DidChangeConfigurationNotification.type, undefined);
@@ -90,13 +94,26 @@ documents.onDidClose(e => {
   globalSpace.documentSettings.delete(e.document.uri);
 });
 
+documents.onDidOpen(async (params) => {
+  connection.console.log("onDidOpen");
+  if (globalSpace.definitionMap.isEmpty()) {
+    await loadDefinitionInWorkspace(globalSpace, params.document.uri);
+  }
+});
+
 documents.onDidChangeContent(async (change) => {
+  connection.console.log("onDidChangeContent");
   await validateTextDocument(change.document);
+});
+
+documents.onDidSave(async (params) => {
+  connection.console.log("onDidSave");
+  await updateFileDefinition(globalSpace, params.document.uri);
 });
 
 connection.onDidChangeWatchedFiles(_change => {
   // Monitored files have change in VSCode
-  connection.console.log('We received an file change event');
+  connection.console.log('onDidChangeWatchedFiles');
 });
 
 // This handler provides the initial list of the completion items.
@@ -113,6 +130,10 @@ connection.onCompletionResolve(
     return item;
   }
 );
+
+connection.onDefinition((params: DefinitionParams) => {
+  return getDefinitionLinks(globalSpace, params);
+});
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events

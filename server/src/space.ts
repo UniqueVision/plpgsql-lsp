@@ -2,7 +2,10 @@ import { ClientCapabilities, Connection, TextDocuments } from 'vscode-languagese
 import { DEFAULT_SETTINGS, LanguageServerSettings } from './settings';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { PLPGSQL_LANGUAGE_SERVER_SECTION } from './helpers';
+import { DefinitionMap } from './store/definitionMap';
 import { PostgresPool, makePool } from './postgres/client';
+
+export type Resource = string;
 
 /**
  * Global Space of Language Server.
@@ -16,7 +19,7 @@ export class Space {
 
   globalSettings: LanguageServerSettings;
   // Cache the settings of all open documents
-  documentSettings: Map<string, Thenable<LanguageServerSettings>>;
+  documentSettings: Map<Resource, Thenable<LanguageServerSettings>>;
 
   // Create a simple text document manager.
   documents: TextDocuments<TextDocument>;
@@ -27,6 +30,7 @@ export class Space {
 
   pgPool?: PostgresPool;
 
+  definitionMap: DefinitionMap;
 
   constructor(connection: Connection, documents: TextDocuments<TextDocument>, capabilities: ClientCapabilities) {
     this.globalSettings = DEFAULT_SETTINGS;
@@ -35,6 +39,7 @@ export class Space {
     this.connection = connection;
     this.documents = documents;
 
+    this.definitionMap = new DefinitionMap();
 
     // Does the client support the `workspace/configuration` request?
     // If not, we fall back using global settings.
@@ -62,7 +67,7 @@ export class Space {
     return this.pgPool;
   }
 
-  getDocumentSettings(resource: string): Thenable<LanguageServerSettings> {
+  getDocumentSettings(resource: Resource): Thenable<LanguageServerSettings> {
     if (!this.hasConfigurationCapability) {
       return Promise.resolve(this.globalSettings);
     }
@@ -75,5 +80,21 @@ export class Space {
       this.documentSettings.set(resource, result);
     }
     return result;
+  }
+
+  async getWorkSpaceFolder(resource: Resource) {
+    const workspaces = await this.connection.workspace.getWorkspaceFolders();
+    if (workspaces === null) {
+      return undefined;
+    }
+    const workspaceCandidates = workspaces.filter(workspace => {
+      return resource.startsWith(workspace.uri);
+    });
+
+    if (workspaceCandidates.length == 0) {
+      return undefined;
+    }
+
+    return workspaceCandidates.sort((a, b) => b.uri.length - a.uri.length)[0];
   }
 }
