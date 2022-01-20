@@ -1,50 +1,51 @@
-import { Connection, Diagnostic, DiagnosticSeverity } from 'vscode-languageserver';
-import { TextDocument } from 'vscode-languageserver-textdocument';
-import { Space } from '../space';
+import { Diagnostic, DiagnosticSeverity } from "vscode-languageserver"
+import { TextDocument } from "vscode-languageserver-textdocument"
+
+import { Space } from "../space"
 
 export async function validateTextDocument(
-  space: Space,
-  textDocument: TextDocument,
+    space: Space,
+    textDocument: TextDocument,
 ): Promise<void> {
-  const diagnostics: Diagnostic[] = [];
+    const diagnostics: Diagnostic[] = []
 
-  const pgClient = await space.getPgPool(
-    await space.getDocumentSettings(textDocument.uri)
-  ).connect();
+    const pgClient = await space.getPgPool(
+        await space.getDocumentSettings(textDocument.uri),
+    ).connect()
 
-  const text = textDocument.getText();
+    const text = textDocument.getText()
 
-  try {
-    await pgClient.query('BEGIN');
-    await pgClient.query(text);
-  }
-  catch (error: unknown) {
-    const diagnosic: Diagnostic = {
-      severity: DiagnosticSeverity.Error,
-      range: {
-        start: textDocument.positionAt(0),
-        end: textDocument.positionAt(text.length - 1)
-      },
-      message: `${error}`,
-    };
-    if (space.hasDiagnosticRelatedInformationCapability) {
-      diagnosic.relatedInformation = [
-        {
-          location: {
-            uri: textDocument.uri,
-            range: Object.assign({}, diagnosic.range)
-          },
-          message: 'Syntax errors'
-        }
-      ];
+    try {
+        await pgClient.query("BEGIN")
+        await pgClient.query(text)
     }
-    diagnostics.push(diagnosic);
-  }
-  finally {
-    await pgClient.query('ROLLBACK');
-    pgClient.release();
-  }
+    catch (error: unknown) {
+        const diagnosic: Diagnostic = {
+            severity: DiagnosticSeverity.Error,
+            range: {
+                start: textDocument.positionAt(0),
+                end: textDocument.positionAt(text.length - 1),
+            },
+            message: `${error}`,
+        }
+        if (space.hasDiagnosticRelatedInformationCapability) {
+            diagnosic.relatedInformation = [
+                {
+                    location: {
+                        uri: textDocument.uri,
+                        range: Object.assign({}, diagnosic.range),
+                    },
+                    message: "Syntax errors",
+                },
+            ]
+        }
+        diagnostics.push(diagnosic)
+    }
+    finally {
+        await pgClient.query("ROLLBACK")
+        pgClient.release()
+    }
 
-  // Send the computed diagnostics to VSCode.
-  space.connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
+    // Send the computed diagnostics to VSCode.
+    space.connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
 }
