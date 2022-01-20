@@ -5,8 +5,10 @@ import { DefinitionLink, DefinitionParams, LocationLink, Position, Range } from 
 
 import { getWordRangeAtPosition } from "../helpers"
 import { Statement } from "../postgres/statement"
+import { console } from "../server"
 import { LanguageServerSettings } from "../settings"
 import { Resource, Space } from "../space"
+
 type Candidate = { definition: string, definitionLink: DefinitionLink };
 
 export async function loadDefinitionInWorkspace(space: Space, resource: Resource) {
@@ -22,12 +24,12 @@ export async function loadDefinitionInWorkspace(space: Space, resource: Resource
             try {
                 await Promise.all(files.map(async (file) => {
                     resource = `${workspace.uri}/${file}`
-                    space.console.log(`resource: ${resource}`)
+                    console.log(`resource: ${resource}`)
                     await updateFileDefinition(space, resource)
                 }))
             }
             catch (error: unknown) {
-                space.console.error(`${error}`)
+                console.error(`${error}`)
                 continue
             }
         }
@@ -45,7 +47,7 @@ export async function updateFileDefinition(space: Space, resource: Resource) {
         .concat(getCompositeTypeStmts(stmts, resource))
         .concat(getCreateFunctionStmts(space, stmts, resource))
 
-    space.console.log(`createStmts: ${JSON.stringify(createStmts)}`)
+    console.log(`createStmts: ${JSON.stringify(createStmts)}`)
     space.definitionMap.updateCandidates(space, resource, createStmts)
 }
 
@@ -130,9 +132,9 @@ export function getDefinitionLinks(
     }
 
     const word = document.getText(wordRange)
-    space.console.log(`definition uri: ${uri}`)
-    space.console.log(`definition word: "${word}"`)
-    space.console.log(`definition links: "${JSON.stringify(space.definitionMap.getDefinitionLinks(word))}"`)
+    console.log(`definition uri: ${uri}`)
+    console.log(`definition word: "${word}"`)
+    console.log(`definition links: "${JSON.stringify(space.definitionMap.getDefinitionLinks(word))}"`)
 
     return space.definitionMap.getDefinitionLinks(word)
 }

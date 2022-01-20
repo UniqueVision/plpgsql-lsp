@@ -57,10 +57,6 @@ export class Space {
         )
     }
 
-    get console() {
-        return this.connection.console
-    }
-
     async getPgClient(setting: LanguageServerSettings) {
         if (this.pgPool === undefined) {
             this.pgPool = makePool(setting)

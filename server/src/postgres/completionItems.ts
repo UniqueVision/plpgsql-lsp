@@ -1,5 +1,6 @@
 import { CompletionItem, CompletionItemKind, TextDocumentIdentifier } from "vscode-languageserver"
 
+import { console } from "../server"
 import { LanguageServerSettings } from "../settings"
 import { Space } from "../space"
 
@@ -61,7 +62,7 @@ async function getStoredProcedureCompletionItems(
         procedures = procedures.concat(formattedResults)
     }
     catch (error: unknown) {
-        space.console.log(`${error}`)
+        console.log(`${error}`)
     }
     finally {
         pgClient.release()
@@ -104,7 +105,7 @@ async function getTableCompletionItems(
         procedures = procedures.concat(formattedResults)
     }
     catch (error: unknown) {
-        space.console.log(`${error}`)
+        console.log(`${error}`)
     }
     finally {
         pgClient.release()

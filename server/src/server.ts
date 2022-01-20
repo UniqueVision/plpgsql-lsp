@@ -29,6 +29,7 @@ const connection = createConnection(ProposedFeatures.all)
 
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
+export const console = connection.console
 
 async function validateTextDocument(textDocument: TextDocument) {
     await _validateTextDocument(
@@ -71,7 +72,7 @@ connection.onInitialized(async () => {
     }
     if (globalSpace.hasWorkspaceFolderCapability) {
         connection.workspace.onDidChangeWorkspaceFolders(_event => {
-            connection.console.log("Workspace folder change event received.")
+            console.log("Workspace folder change event received.")
         })
     }
 })
@@ -96,25 +97,25 @@ documents.onDidClose(e => {
 })
 
 documents.onDidOpen(async (params) => {
-    connection.console.log("onDidOpen")
+    console.log("onDidOpen")
     if (globalSpace.definitionMap.isEmpty()) {
         await loadDefinitionInWorkspace(globalSpace, params.document.uri)
     }
 })
 
 documents.onDidChangeContent(async (change) => {
-    connection.console.log("onDidChangeContent")
+    console.log("onDidChangeContent")
     await validateTextDocument(change.document)
 })
 
 documents.onDidSave(async (params) => {
-    connection.console.log("onDidSave")
+    console.log("onDidSave")
     await updateFileDefinition(globalSpace, params.document.uri)
 })
 
 connection.onDidChangeWatchedFiles(_change => {
     // Monitored files have change in VSCode
-    connection.console.log("onDidChangeWatchedFiles")
+    console.log("onDidChangeWatchedFiles")
 })
 
 // This handler provides the initial list of the completion items.
