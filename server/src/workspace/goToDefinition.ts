@@ -59,25 +59,24 @@ function getCreateStmts(stmts: Statement[], resource: Resource): Candidate[] {
             if (schemaname === undefined || relname === undefined) {
                 return []
             }
+            const definitionLink = LocationLink.create(
+                resource,
+                Range.create(Position.create(0, 0), Position.create(0, 0)),
+                Range.create(Position.create(0, 0), Position.create(0, 0)),
+            )
+            const candidates = [{
+                definition: `${schemaname}.${relname}`,
+                definitionLink,
+            }]
 
-            return [
-                {
-                    definition: `${schemaname}.${relname}`,
-                    definitionLink: LocationLink.create(
-                        resource,
-                        Range.create(Position.create(0, 0), Position.create(0, 0)),
-                        Range.create(Position.create(0, 0), Position.create(0, 0)),
-                    ),
-                },
-                {
+            if (schemaname === "public") {
+                candidates.push({
                     definition: relname,
-                    definitionLink: LocationLink.create(
-                        resource,
-                        Range.create(Position.create(0, 0), Position.create(0, 0)),
-                        Range.create(Position.create(0, 0), Position.create(0, 0)),
-                    ),
-                },
-            ]
+                    definitionLink,
+                })
+            }
+
+            return candidates
         })
 }
 
