@@ -10,7 +10,7 @@ export function getWordRangeAtPosition(document: TextDocument, position: Positio
     const line = Math.min(lines.length - 1, Math.max(0, position.line))
     const lineText = lines[line]
     const character = Math.min(lineText.length - 1, Math.max(0, position.character))
-    const separator = /[\s,()'":=]/
+    const separator = /[\s,()':=;]/
     let startChar = character
     while (startChar > 0 && !separator.test(lineText.charAt(startChar - 1)))
         --startChar

@@ -142,6 +142,13 @@ export function getDefinitionLinks(
     }
 
     const word = document.getText(wordRange)
+    const sanitizedWord = word
+        // for public."table_name_$$ || partition_key || $$"
+        .replace(/"([a-zA-Z_]\w*)_\$\$$/, "$1")
+        // for public."table_name"
+        .replace(/(^[a-zA-Z_]\w*\.)"([a-zA-Z_]\w*)"$/, "$1$2")
 
-    return space.definitionMap.getDefinitionLinks(word)
+    console.log(`word: ${JSON.stringify(word)}, sanitizedWord: ${JSON.stringify(sanitizedWord)}`)
+
+    return space.definitionMap.getDefinitionLinks(sanitizedWord)
 }
