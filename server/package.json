@@ -14,7 +14,6 @@
   "scripts": {},
   "dependencies": {
     "@types/glob": "^7.2.0",
-    "dig-ts": "^1.0.8",
     "libpg-query": "^13.1.2",
     "pg": "^8.7.1",
     "vscode-languageserver": "^7.0.0",
