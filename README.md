@@ -1,4 +1,4 @@
-# pl/pgSQL Language Server
+# PL/pgSQL Language Server
 
 ## Features
 
@@ -6,6 +6,7 @@
 - [x] table name completion.
 - [x] stored procedure/function name completion.
 - [x] stored procedure/function args completion.
+- [x] support Multi-root Workspaces.
 
 ## Usage
 
