@@ -75,6 +75,19 @@
           "type": "string",
           "default": "postgres",
           "description": "The default password."
+        },
+        "plpgsqlLanguageServer.definitionFiles": {
+          "scope": "resource",
+          "type": "array",
+          "default": [
+            "sql/table/*.sql",
+            "**/*.psql",
+            "**/*.pgsql"
+          ],
+          "description": "definition file list (allow glob).",
+          "items": {
+            "type": "string"
+          }
         }
       }
     }
