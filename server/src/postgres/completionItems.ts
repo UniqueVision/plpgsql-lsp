@@ -62,7 +62,7 @@ async function getStoredProcedureCompletionItems(
         procedures = procedures.concat(formattedResults)
     }
     catch (error: unknown) {
-        console.log(`${error}`)
+        console.error(`${error}`)
     }
     finally {
         pgClient.release()
@@ -105,7 +105,7 @@ async function getTableCompletionItems(
         procedures = procedures.concat(formattedResults)
     }
     catch (error: unknown) {
-        console.log(`${error}`)
+        console.error(`${error}`)
     }
     finally {
         pgClient.release()

@@ -72,7 +72,7 @@ connection.onInitialized(async () => {
     }
     if (globalSpace.hasWorkspaceFolderCapability) {
         connection.workspace.onDidChangeWorkspaceFolders(_event => {
-            console.log("Workspace folder change event received.")
+            // console.log("Workspace folder change event received.")
         })
     }
 })
@@ -97,25 +97,25 @@ documents.onDidClose(e => {
 })
 
 documents.onDidOpen(async (params) => {
-    console.log("onDidOpen")
+    // console.log("onDidOpen")
     if (globalSpace.definitionMap.isEmpty()) {
         await loadDefinitionInWorkspace(globalSpace, params.document.uri)
     }
 })
 
 documents.onDidChangeContent(async (change) => {
-    console.log("onDidChangeContent")
+    // console.log("onDidChangeContent")
     await validateTextDocument(change.document)
 })
 
 documents.onDidSave(async (params) => {
-    console.log("onDidSave")
+    // console.log("onDidSave")
     await updateFileDefinition(globalSpace, params.document.uri)
 })
 
 connection.onDidChangeWatchedFiles(_change => {
     // Monitored files have change in VSCode
-    console.log("onDidChangeWatchedFiles")
+    // console.log("onDidChangeWatchedFiles")
 })
 
 // This handler provides the initial list of the completion items.
