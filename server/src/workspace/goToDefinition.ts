@@ -5,8 +5,6 @@ import { Resource, Space } from '../space';
 import { parseQuery } from 'libpg-query';
 import { readFileSync } from 'fs';
 import { sync as glob } from "glob";
-import { dig } from 'dig-ts';
-
 type Candidate = { definition: string, definitionLink: DefinitionLink };
 
 export async function loadDefinitionInWorkspace(space: Space, resource: Resource) {
@@ -37,7 +35,13 @@ export async function loadDefinitionInWorkspace(space: Space, resource: Resource
 export async function updateFileDefinition(space: Space, resource: Resource) {
   const query = await parseQuery(readFileSync(resource.replace(/^file:\/\//, "")).toString());
 
-  const createStmts: Candidate[] = getCreateStmts(query["stmts"], resource);
+  const stmts = query?.["stmts"];
+  if (stmts === undefined) {
+    return;
+  }
+  const createStmts: Candidate[] = getCreateStmts(stmts, resource)
+    .concat(getCompositeTypeStmts(stmts, resource))
+    .concat(getCreateFunctionStmts(stmts, resource));
 
   space.console.log(`createStmts: ${JSON.stringify(createStmts)}`);
   space.definitionMap.updateCandidates(space, resource, createStmts);
@@ -46,11 +50,15 @@ export async function updateFileDefinition(space: Space, resource: Resource) {
 function getCreateStmts(stmts: any, resource: Resource): Candidate[] {
   return stmts
     .filter((stmt: any) => {
-      return dig(stmt, "stmt", "CreateStmt", "relation", "schemaname").get() !== undefined && dig(stmt, "stmt", "CreateStmt", "relation", "relname").get() !== undefined;
-    }).map((stmt: any) => {
+      return (
+        stmt?.["stmt"]?.["CreateStmt"]?.["relation"]?.["schemaname"] !== undefined
+        && stmt?.["stmt"]?.["CreateStmt"]?.["relation"]?.["relname"] !== undefined
+      );
+    })
+    .map((stmt: any) => {
       const definition = [
-        stmt["stmt"]["CreateStmt"]["relation"]["schemaname"],
-        stmt["stmt"]["CreateStmt"]["relation"]["relname"]
+        stmt?.["stmt"]?.["CreateStmt"]?.["relation"]?.["schemaname"],
+        stmt?.["stmt"]?.["CreateStmt"]?.["relation"]?.["relname"]
       ].join(".");
 
       const definitionLink = LocationLink.create(
@@ -64,6 +72,55 @@ function getCreateStmts(stmts: any, resource: Resource): Candidate[] {
         definitionLink
       };
     });
+}
+
+function getCompositeTypeStmts(stmts: any, resource: Resource): Candidate[] {
+  return stmts
+    .filter((stmt: any) => {
+      return (
+        stmt?.["stmt"]?.["CompositeTypeStmt"]?.["typevar"]?.["relname"] !== undefined
+      );
+    })
+    .map((stmt: any) => {
+      const definition = stmt?.["stmt"]?.["CompositeTypeStmt"]?.["typevar"]?.["relname"];
+
+      const definitionLink = LocationLink.create(
+        resource,
+        Range.create(Position.create(0, 0), Position.create(0, 0)),
+        Range.create(Position.create(0, 0), Position.create(0, 0))
+      );
+
+      return {
+        definition,
+        definitionLink
+      };
+    });
+}
+
+function getCreateFunctionStmts(stmts: any, resource: Resource): Candidate[] {
+  return stmts
+    .filter((stmt: any) => {
+      const funcname = stmt?.["stmt"]?.["CreateFunctionStmt"]?.["funcname"];
+      return funcname !== undefined && funcname.length !== 0;
+    })
+    .map((stmt: any) => {
+      return stmt["stmt"]["CreateFunctionStmt"]["funcname"]
+        .filter((funcname: any) => {
+          return funcname?.["String"]?.["str"] !== undefined;
+        })
+        .map((enableFuncname: any) => {
+          const definitionLink = LocationLink.create(
+            resource,
+            Range.create(Position.create(0, 0), Position.create(0, 0)),
+            Range.create(Position.create(0, 0), Position.create(0, 0))
+          );
+
+          return {
+            definition: enableFuncname["String"]["str"],
+            definitionLink
+          };
+        });
+    }).flat();
 }
 
 export function getDefinitionLinks(

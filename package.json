@@ -80,7 +80,6 @@
           "scope": "resource",
           "type": "array",
           "default": [
-            "sql/table/*.sql",
             "**/*.psql",
             "**/*.pgsql"
           ],
