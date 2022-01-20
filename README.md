@@ -6,6 +6,7 @@
 - [x] table name completion.
 - [x] stored procedure/function name completion.
 - [x] stored procedure/function args completion.
+- [x] go to the file top of type/table/function definition.
 - [x] support Multi-root Workspaces.
 
 ## Usage
