@@ -60,14 +60,24 @@ function getCreateStmts(stmts: Statement[], resource: Resource): Candidate[] {
                 return []
             }
 
-            return [{
-                definition: `${schemaname}.${relname}`,
-                definitionLink: LocationLink.create(
-                    resource,
-                    Range.create(Position.create(0, 0), Position.create(0, 0)),
-                    Range.create(Position.create(0, 0), Position.create(0, 0)),
-                ),
-            }]
+            return [
+                {
+                    definition: `${schemaname}.${relname}`,
+                    definitionLink: LocationLink.create(
+                        resource,
+                        Range.create(Position.create(0, 0), Position.create(0, 0)),
+                        Range.create(Position.create(0, 0), Position.create(0, 0)),
+                    ),
+                },
+                {
+                    definition: relname,
+                    definitionLink: LocationLink.create(
+                        resource,
+                        Range.create(Position.create(0, 0), Position.create(0, 0)),
+                        Range.create(Position.create(0, 0), Position.create(0, 0)),
+                    ),
+                },
+            ]
         })
 }
 
