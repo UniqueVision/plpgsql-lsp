@@ -21,31 +21,11 @@ const clients: Map<string, LanguageClient> = new Map();
 
 const PLPGSQL_LANGUAGE_SERVER_SECTION = 'plpgsqlLanguageServer';
 
-let sortedWorkspaceFolders: string[] | undefined;
-function getSortedWorkspaceFolders(): string[] {
-  if (sortedWorkspaceFolders === undefined) {
-    sortedWorkspaceFolders = Workspace.workspaceFolders ? Workspace.workspaceFolders.map(folder => {
-      let result = folder.uri.toString();
-      if (result.charAt(result.length - 1) !== '/') {
-        result = result + '/';
-      }
-      return result;
-    }).sort(
-      (a, b) => {
-        return a.length - b.length;
-      }
-    ) : [];
-  }
-  return sortedWorkspaceFolders;
-}
-
 function createLanguageClient(serverOptions: ServerOptions, clientOptions: LanguageClientOptions) {
   return new LanguageClient(
     PLPGSQL_LANGUAGE_SERVER_SECTION, 'PL/pgSQL Language Server', serverOptions, clientOptions)
     ;
 }
-
-Workspace.onDidChangeWorkspaceFolders(() => sortedWorkspaceFolders = undefined);
 
 export function activate(context: ExtensionContext) {
   // The server is implemented in node
