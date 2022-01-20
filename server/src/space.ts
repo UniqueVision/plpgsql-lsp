@@ -61,12 +61,16 @@ export class Space {
         return this.connection.console
     }
 
-    getPgPool(setting: LanguageServerSettings) {
+    async getPgClient(setting: LanguageServerSettings) {
         if (this.pgPool === undefined) {
             this.pgPool = makePool(setting)
         }
 
-        return this.pgPool
+        if (this.pgPool === undefined) {
+            return
+        }
+
+        return await this.pgPool.connect()
     }
 
     getDocumentSettings(resource: Resource): Thenable<LanguageServerSettings> {

@@ -8,10 +8,12 @@ export async function validateTextDocument(
     textDocument: TextDocument,
 ): Promise<void> {
     const diagnostics: Diagnostic[] = []
-
-    const pgClient = await space.getPgPool(
+    const pgClient = await space.getPgClient(
         await space.getDocumentSettings(textDocument.uri),
-    ).connect()
+    )
+    if (pgClient === undefined) {
+        return
+    }
 
     const text = textDocument.getText()
 

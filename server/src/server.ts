@@ -60,7 +60,7 @@ connection.onInitialize((params: InitializeParams) => {
             },
         }
     }
-    
+
     return result
 })
 
@@ -82,8 +82,8 @@ connection.onDidChangeConfiguration(change => {
         globalSpace.documentSettings.clear()
     } else {
         globalSpace.globalSettings = <LanguageServerSettings>(
-      (change.settings.plpgsqlLanguageServer || DEFAULT_SETTINGS)
-    )
+            change.settings.plpgsqlLanguageServer || DEFAULT_SETTINGS
+        )
     }
 
     // Revalidate all open text documents

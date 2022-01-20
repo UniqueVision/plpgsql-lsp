@@ -6,7 +6,10 @@ import { Space } from "../space"
 async function getStoredProcedureCompletionItems(
     space: Space, settings: LanguageServerSettings,
 ) {
-    const pgClient = await space.getPgPool(settings).connect()
+    const pgClient = await space.getPgClient(settings)
+    if (pgClient === undefined) {
+        return []
+    }
 
     let procedures: CompletionItem[] = []
     try {
@@ -70,7 +73,10 @@ async function getStoredProcedureCompletionItems(
 async function getTableCompletionItems(
     space: Space, settings: LanguageServerSettings,
 ) {
-    const pgClient = await space.getPgPool(settings).connect()
+    const pgClient = await space.getPgClient(settings)
+    if (pgClient === undefined) {
+        return []
+    }
 
     let procedures: CompletionItem[] = []
     try {
