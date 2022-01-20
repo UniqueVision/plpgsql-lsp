@@ -45,7 +45,7 @@ export async function updateFileDefinition(space: Space, resource: Resource) {
     }
     const createStmts: Candidate[] = getCreateStmts(stmts, resource)
         .concat(getCompositeTypeStmts(stmts, resource))
-        .concat(getCreateFunctionStmts(space, stmts, resource))
+        .concat(getCreateFunctionStmts(stmts, resource))
 
     // console.log(`createStmts: ${JSON.stringify(createStmts)}`)
     space.definitionMap.updateCandidates(space, resource, createStmts)
@@ -90,7 +90,7 @@ function getCompositeTypeStmts(stmts: Statement[], resource: Resource): Candidat
         })
 }
 
-function getCreateFunctionStmts(space: Space, stmts: Statement[], resource: Resource): Candidate[] {
+function getCreateFunctionStmts(stmts: Statement[], resource: Resource): Candidate[] {
     return stmts
         .flatMap(stmt => {
             const funcnames = stmt?.stmt?.CreateFunctionStmt?.funcname
