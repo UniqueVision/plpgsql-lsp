@@ -13,11 +13,14 @@
   },
   "scripts": {},
   "dependencies": {
+    "@types/glob": "^7.2.0",
+    "libpg-query": "^13.1.2",
     "pg": "^8.7.1",
     "vscode-languageserver": "^7.0.0",
     "vscode-languageserver-textdocument": "^1.0.1"
   },
   "devDependencies": {
+    "@types/node": "^17.0.10",
     "@types/pg": "^8.6.2"
   }
 }

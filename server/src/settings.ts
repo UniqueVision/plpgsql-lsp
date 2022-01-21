@@ -2,15 +2,17 @@
 export interface LanguageServerSettings {
   host: string;
   port: number;
-  database: string;
+  database?: string;
   user?: string;
   password?: string;
+  definitionFiles?: string[];
 }
 
 export const DEFAULT_SETTINGS: LanguageServerSettings = {
-  host: 'localhost',
+  host: "localhost",
   port: 5432,
-  database: 'postgres',
-  user: 'postgres',
-  password: 'postgres'
-};
+  database: undefined,
+  user: undefined,
+  password: undefined,
+  definitionFiles: undefined,
+}
