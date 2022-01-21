@@ -9,10 +9,10 @@ export interface LanguageServerSettings {
 }
 
 export const DEFAULT_SETTINGS: LanguageServerSettings = {
-    host: "localhost",
-    port: 5432,
-    database: undefined,
-    user: undefined,
-    password: undefined,
-    definitionFiles: ["**/*.pgsql", "**/*.psql"],
+  host: "localhost",
+  port: 5432,
+  database: undefined,
+  user: undefined,
+  password: undefined,
+  definitionFiles: undefined,
 }
