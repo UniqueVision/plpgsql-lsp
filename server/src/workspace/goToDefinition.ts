@@ -142,12 +142,38 @@ export function getDefinitionLinks(
 
     const word = document.getText(wordRange)
     const sanitizedWord = word
-        // for public."table_name_$$ || partition_key || $$"
+        // for dynamic partition table
+        //   (
+        //      public."table_name_$$ || partition_key || $$",
+        //             "table_name_$$ || partition_key || $$"
+        //   )
         .replace(/"([a-zA-Z_]\w*)_\$\$$/, "$1")
-        // for public."table_name"
-        .replace(/(^[a-zA-Z_]\w*\.)"([a-zA-Z_]\w*)"$/, "$1$2")
+        // for quoted table (public."table_name", "table_name")
+        .replace(/(^[a-zA-Z_]\w*\.)?"([a-zA-Z_]\w*)"$/, "$1$2")
 
-    console.log(`word: ${JSON.stringify(word)}, sanitizedWord: ${JSON.stringify(sanitizedWord)}`)
+    // Generic match.
+    const definitionLinks = space.definitionMap.getDefinitionLinks(sanitizedWord)
+    if (definitionLinks !== undefined) {
+        console.log(`word: ${JSON.stringify(word)}, sanitizedWord: ${JSON.stringify(sanitizedWord)}`)
+        return definitionLinks
+    }
 
-    return space.definitionMap.getDefinitionLinks(sanitizedWord)
+    // Specific match.
+    const sanitizedWord2 = word
+        // for number partition table (public."table_name_1234", "table_name_1234")
+        .replace(/"?([a-zA-Z_]\w*)_[0-9]+"?$/, "$1")
+        // for uuid partition table
+        //   (
+        //      public."table_name_12345678-1234-1234-1234-123456789012",
+        //             "table_name_12345678-1234-1234-1234-123456789012"
+        //   )
+        .replace(/"([a-zA-Z_]\w*)_[0-9]{8}-[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{12}"$/, "$1")
+
+    console.log([
+        `word: ${JSON.stringify(word)}`,
+        `sanitizedWord: ${JSON.stringify(sanitizedWord)}`,
+        `sanitizedWord2: ${JSON.stringify(sanitizedWord2)}`
+    ].join(", "))
+
+    return space.definitionMap.getDefinitionLinks(sanitizedWord2)
 }
