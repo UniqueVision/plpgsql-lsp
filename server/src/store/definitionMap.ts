@@ -41,8 +41,8 @@ export class DefinitionMap {
             this.fileDefinitions.delete(filepath)
         }
 
-        if (candidates === undefined) {
-            return
+        if (candidates === undefined || candidates.length === 0) {
+            return undefined
         }
 
         // Update new definition of a target uri.
