@@ -22,7 +22,9 @@
   "plpgsqlLanguageServer.user": "your_database_user",
   "plpgsqlLanguageServer.password": "your_database_password",
   "plpgsqlLanguageServer.definitionFiles": [
-    "**/*.sql" // Support glob.
+    "**/*.sql", // Support glob.
+    "**/*.psql",
+    "**/*.pgsql"
   ],
   // The supported extention types are ['*.pgsql', '*.psql'].
 	// If you want to use this extension in '*.sql',
