@@ -14,22 +14,22 @@ async function getStoredProcedureCompletionItems(
 
     let procedures: CompletionItem[] = []
     try {
-    // https://dataedo.com/kb/query/postgresql/list-stored-procedures
+        // https://dataedo.com/kb/query/postgresql/list-stored-procedures
         const results = await pgClient.query(`
-      SELECT
-        t_pg_proc.proname
-        ,CASE
-          WHEN t_pg_language.lanname = 'internal' THEN
-            t_pg_proc.prosrc
-          ELSE
-            pg_get_functiondef(t_pg_proc.oid)
-        END AS definition
-      FROM
-        pg_proc AS t_pg_proc
-      LEFT JOIN pg_language AS t_pg_language ON (
-        t_pg_proc.prolang = t_pg_language.oid
-      )
-    `)
+            SELECT
+                t_pg_proc.proname
+                ,CASE
+                WHEN t_pg_language.lanname = 'internal' THEN
+                    t_pg_proc.prosrc
+                ELSE
+                    pg_get_functiondef(t_pg_proc.oid)
+                END AS definition
+            FROM
+                pg_proc AS t_pg_proc
+            LEFT JOIN pg_language AS t_pg_language ON (
+                t_pg_proc.prolang = t_pg_language.oid
+            )
+        `)
 
         const formattedResults = results.rows.map((row, index) => {
             const proname = `${row["proname"]}`
@@ -82,15 +82,15 @@ async function getTableCompletionItems(
     let procedures: CompletionItem[] = []
     try {
         const results = await pgClient.query(`
-      SELECT
-        relnamespace::regnamespace::TEXT || '.' || relname AS table_name
-      FROM
-        pg_class
-      WHERE
-        relkind = 'p' OR (relkind = 'r' AND NOT relispartition)
-      ORDER BY
-        table_name
-    `)
+            SELECT
+                relnamespace::regnamespace::TEXT || '.' || relname AS table_name
+            FROM
+                pg_class
+            WHERE
+                relkind = 'p' OR (relkind = 'r' AND NOT relispartition)
+            ORDER BY
+                table_name
+        `)
         const formattedResults = results.rows.map((row, index) => {
             const tableName = `${row["table_name"]}`
 
