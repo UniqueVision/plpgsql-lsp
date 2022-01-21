@@ -15,6 +15,7 @@
 ## リリース手順
 
 1. `package.json`のバージョン番号を上げる。
+1. `npm install` でモジュールを更新する。
 1. `npm run package`で`vscode-plpgsql-lsp-#.#.#.vsix`を生成する。
 1. [VSCode Marketplace](https://marketplace.visualstudio.com/manage/publishers/uniquevision)にログインする。
 1. `PL/pgSQL Language Server`の`More Actions`の下、`Update`を選択して`.vsix`ファイルを入れる。
