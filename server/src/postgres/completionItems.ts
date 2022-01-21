@@ -88,6 +88,14 @@ async function getTableCompletionItems(
                 pg_class
             WHERE
                 relkind = 'p' OR (relkind = 'r' AND NOT relispartition)
+            UNION
+            SELECT
+                relname AS table_name
+            FROM
+                pg_class
+            WHERE
+                relkind = 'p' OR (relkind = 'r' AND NOT relispartition)
+                AND relnamespace::regnamespace::TEXT = 'public'
             ORDER BY
                 table_name
         `)
