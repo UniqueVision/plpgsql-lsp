@@ -22,7 +22,8 @@
   "plpgsqlLanguageServer.user": "your_database_user",
   "plpgsqlLanguageServer.password": "your_database_password",
   "plpgsqlLanguageServer.definitionFiles": [
-    "**/*.sql", // Support glob.
+    // Support glob.
+    "**/*.sql",
     "**/*.psql",
     "**/*.pgsql"
   ],
