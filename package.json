@@ -84,7 +84,7 @@
             "**/*.psql",
             "**/*.pgsql"
           ],
-          "description": "definition file list (allow glob).",
+          "description": "definition file list (table/type/function).",
           "items": {
             "type": "string"
           }
