@@ -28,8 +28,7 @@
     "**/*.pgsql"
   ],
   // The supported extention types are ['*.pgsql', '*.psql'].
-	// If you want to use this extension in '*.sql',
-	// add the following settings.
+	// If you want to use this extension in '*.sql', add the following settings.
   "files.associations": {
     "*.sql": "postgres"
   }
