@@ -4,6 +4,7 @@
   "description": "VSCode PL/pgSQL Language Server.",
   "license": "MIT",
   "version": "1.4.0",
+  "icon": "images/postgres.png",
   "repository": {
     "type": "git",
     "url": "https://gitlab.com/uniquevision/utilities/plpgsql-lsp"
