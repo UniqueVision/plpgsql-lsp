@@ -1,10 +1,12 @@
 import { ClientCapabilities, Connection, TextDocuments } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
-
 import { PLPGSQL_LANGUAGE_SERVER_SECTION } from "./helpers"
 import { makePool, PostgresPool } from "./postgres/client"
 import { DEFAULT_SETTINGS, LanguageServerSettings } from "./settings"
 import { DefinitionMap } from "./store/definitionMap"
+const path = require('path');
+const minimatch = require("minimatch")
+
 
 export type Resource = string;
 
@@ -52,8 +54,8 @@ export class Space {
         )
         this.hasDiagnosticRelatedInformationCapability = !!(
             capabilities.textDocument &&
-      capabilities.textDocument.publishDiagnostics &&
-      capabilities.textDocument.publishDiagnostics.relatedInformation
+            capabilities.textDocument.publishDiagnostics &&
+            capabilities.textDocument.publishDiagnostics.relatedInformation
         )
     }
 
@@ -99,5 +101,19 @@ export class Space {
         }
 
         return workspaceCandidates.sort((a, b) => b.uri.length - a.uri.length)[0]
+    }
+
+    async isDefinitionMapTarget(resource: Resource) {
+        const settings = await this.getDocumentSettings(resource)
+        const workSpaceUri = (await this.getWorkSpaceFolder(resource))?.uri || ''
+
+        if (settings.definitionFiles === undefined) {
+            return false
+        }
+        return settings.definitionFiles.some(
+            filePattern => {
+                return minimatch(resource, path.join(workSpaceUri, filePattern))
+            }
+        )
     }
 }
