@@ -1,4 +1,5 @@
-import { Diagnostic, DiagnosticSeverity } from "vscode-languageserver"
+import { DatabaseError } from "pg"
+import { Diagnostic, DiagnosticSeverity, Position, Range } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { Space } from "../space"
@@ -22,14 +23,30 @@ export async function validateTextDocument(
         await pgClient.query(text)
     }
     catch (error: unknown) {
+        let errorRange: Range | undefined = undefined
+        if (error instanceof DatabaseError && error.position !== undefined) {
+            const errorPosition = Number(error.position)
+            const errorLines = text.slice(0, errorPosition).split("\n")
+            errorRange = Range.create(
+                Position.create(errorLines.length - 1, 0),
+                Position.create(
+                    errorLines.length - 1,
+                    errorLines[errorLines.length - 1].length,
+                ),
+            )
+        }
+        else {
+            errorRange = Range.create(
+                textDocument.positionAt(0),
+                textDocument.positionAt(text.length - 1),
+            )
+        }
         const diagnosic: Diagnostic = {
             severity: DiagnosticSeverity.Error,
-            range: {
-                start: textDocument.positionAt(0),
-                end: textDocument.positionAt(text.length - 1),
-            },
+            range: errorRange,
             message: `${error}`,
         }
+
         if (space.hasDiagnosticRelatedInformationCapability) {
             diagnosic.relatedInformation = [
                 {
