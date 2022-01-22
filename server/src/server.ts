@@ -148,7 +148,7 @@ connection.onDefinition((params: DefinitionParams) => {
         const startRange = definitionLink.targetSelectionRange.start
         console.log(
             "Jump to the definition!! 🚀 "
-            + `${definitionLink.targetUri}:${startRange.line}:${startRange.character}`)
+            + `${definitionLink.targetUri}:${startRange.line + 1}:${startRange.character + 1}`)
     }
 
     return definitionLinks
