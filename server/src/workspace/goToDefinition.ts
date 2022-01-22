@@ -1,128 +1,181 @@
 import { readFileSync } from "fs"
 import { sync as glob } from "glob"
 import { parseQuery } from "libpg-query"
-import { DefinitionLink, DefinitionParams, LocationLink, Position, Range } from "vscode-languageserver"
+import {
+    DefinitionLink, DefinitionParams, LocationLink
+} from "vscode-languageserver"
 
-import { getWordRangeAtPosition } from "../helpers"
+import { findIndex, getRange, getWordRangeAtPosition } from "../helpers"
 import { Statement } from "../postgres/statement"
 import { console } from "../server"
 import { LanguageServerSettings } from "../settings"
 import { Resource, Space } from "../space"
+import { Candidate } from '../store/definitionMap'
 
-type Candidate = { definition: string, definitionLink: DefinitionLink };
 
-export async function loadDefinitionInWorkspace(space: Space, resource: Resource) {
-    const settings: LanguageServerSettings = await space.getDocumentSettings(resource)
+export async function loadDefinitionFilesInWorkspace(
+    space: Space, resource: Resource
+) {
+    const settings = await space.getDocumentSettings(
+        resource
+    )
     const workspace = await space.getWorkSpaceFolder(resource)
     if (workspace === undefined) {
         return
     }
 
     if (settings.definitionFiles) {
-        for (const filePattern of settings.definitionFiles) {
-            const files = glob(filePattern)
+        console.log("Definition files loading...")
+
+        const files = [...new Set(settings.definitionFiles.flatMap(
+            filePattern => {
+                return glob(filePattern)
+            }
+        ))]
+
+        for (const file of files) {
+            resource = `${workspace.uri}/${file}`
             try {
-                await Promise.all(files.map(async (file) => {
-                    resource = `${workspace.uri}/${file}`
-                    // console.log(`resource: ${resource}`)
-                    await updateFileDefinition(space, resource)
-                }))
+                await updateFileDefinition(space, resource)
             }
             catch (error: unknown) {
-                console.error(`${error}`)
-                continue
+                console.error(`${resource} cannot load the definitions. ${error}`)
             }
         }
+
+        console.log("Definition files loaded!! 👍")
     }
 }
 
 export async function updateFileDefinition(space: Space, resource: Resource) {
-    const query = await parseQuery(readFileSync(resource.replace(/^file:\/\//, "")).toString())
+    const fileText = readFileSync(resource.replace(/^file:\/\//, "")).toString()
+    const query = await parseQuery(fileText)
 
-    const stmts = query?.["stmts"]
+    const stmts: Statement[] | undefined = query?.["stmts"]
     if (stmts === undefined) {
         return
     }
-    const candidates: Candidate[] = getCreateStmts(stmts, resource)
-        .concat(getCompositeTypeStmts(stmts, resource))
-        .concat(getCreateFunctionStmts(stmts, resource))
+    const candidates = stmts.flatMap(stmt => {
+        if (stmt?.stmt?.CreateStmt !== undefined) {
+            return getCreateStmts(fileText, stmt, resource)
+        }
+        else if (stmt?.stmt?.CompositeTypeStmt !== undefined) {
+            return getCompositeTypeStmts(fileText, stmt, resource)
+        }
+        else if (stmt?.stmt?.CreateFunctionStmt !== undefined) {
+            return getCreateFunctionStmts(fileText, stmt, resource)
+        }
+        else {
+            return []
+        }
+    })
 
-    // console.log(`candidates: ${JSON.stringify(candidates)}`)
-    space.definitionMap.updateCandidates(space, resource, candidates)
+    space.definitionMap.updateCandidates(resource, candidates)
+    return candidates
 }
 
-function getCreateStmts(stmts: Statement[], resource: Resource): Candidate[] {
-    return stmts
-        .flatMap(stmt => {
-            const schemaname = stmt?.stmt?.CreateStmt?.relation?.schemaname
-            const relname = stmt?.stmt?.CreateStmt?.relation?.relname
-            if (schemaname === undefined || relname === undefined) {
-                return []
-            }
-            const definitionLink = LocationLink.create(
+function getCreateStmts(
+    fileText: string, stmt: Statement, resource: Resource
+): Candidate[] {
+    const createStmt = stmt?.stmt?.CreateStmt
+    if (createStmt === undefined) {
+        return []
+    }
+
+    const schemaname = createStmt.relation.schemaname
+    const relname = createStmt.relation.relname
+    const definitionLink = LocationLink.create(
+        resource,
+        getRange(
+            fileText,
+            stmt.stmt_location,
+            stmt.stmt_location + stmt.stmt_len
+        ),
+        getRange(
+            fileText,
+            createStmt.relation.location,
+            createStmt.relation.location
+            + (schemaname !== undefined ? (schemaname + '.').length : 0)
+            + relname.length
+        ),
+    )
+    const candidates = [{
+        definition: (schemaname || "public") + "." + relname,
+        definitionLink,
+    }]
+
+    // When default schema, add raw relname candidate.
+    if (schemaname === undefined || schemaname === "public") {
+        candidates.push({
+            definition: relname,
+            definitionLink,
+        })
+    }
+
+    return candidates
+}
+
+function getCompositeTypeStmts(
+    fileText: string, stmt: Statement, resource: Resource
+): Candidate[] {
+    const compositTypeStmt = stmt?.stmt?.CompositeTypeStmt
+    if (compositTypeStmt === undefined) {
+        return []
+    }
+    const definition = compositTypeStmt.typevar.relname
+
+    return [{
+        definition,
+        definitionLink: LocationLink.create(
+            resource,
+            getRange(
+                fileText,
+                stmt.stmt_location,
+                stmt.stmt_location + stmt.stmt_len
+            ),
+            getRange(
+                fileText,
+                compositTypeStmt.typevar.location,
+                compositTypeStmt.typevar.location + definition.length
+            ),
+        ),
+    }]
+}
+
+function getCreateFunctionStmts(
+    fileText: string, stmt: Statement, resource: Resource
+): Candidate[] {
+    const createFunctionStmt = stmt?.stmt?.CreateFunctionStmt
+    if (createFunctionStmt === undefined) {
+        return []
+    }
+
+    return createFunctionStmt.funcname.flatMap(funcname => {
+        const definition = funcname.String.str
+        if (definition === undefined) {
+            return []
+        }
+        const functionNameLocation = findIndex(
+            fileText, definition, stmt.stmt_location
+        )
+
+        return [{
+            definition,
+            definitionLink: LocationLink.create(
                 resource,
-                Range.create(Position.create(0, 0), Position.create(0, 0)),
-                Range.create(Position.create(0, 0), Position.create(0, 0)),
-            )
-            const candidates = [{
-                definition: `${schemaname}.${relname}`,
-                definitionLink,
-            }]
-
-            if (schemaname === "public") {
-                candidates.push({
-                    definition: relname,
-                    definitionLink,
-                })
-            }
-
-            return candidates
-        })
-}
-
-function getCompositeTypeStmts(stmts: Statement[], resource: Resource): Candidate[] {
-    return stmts
-        .flatMap(stmt => {
-            const definition = stmt?.stmt?.CompositeTypeStmt?.typevar?.relname
-            if (definition === undefined) {
-                return []
-            }
-
-            return [{
-                definition,
-                definitionLink: LocationLink.create(
-                    resource,
-                    Range.create(Position.create(0, 0), Position.create(0, 0)),
-                    Range.create(Position.create(0, 0), Position.create(0, 0)),
+                getRange(
+                    fileText,
+                    stmt.stmt_location,
+                    stmt.stmt_location + stmt.stmt_len
                 ),
-            }]
-        })
-}
-
-function getCreateFunctionStmts(stmts: Statement[], resource: Resource): Candidate[] {
-    return stmts
-        .flatMap(stmt => {
-            const funcnames = stmt?.stmt?.CreateFunctionStmt?.funcname
-            if (funcnames === undefined || funcnames.length === 0) {
-                return []
-            }
-
-            return funcnames.flatMap(funcname => {
-                const definition = funcname?.String?.str
-                if (definition === undefined) {
-                    return []
-                }
-
-                return [{
-                    definition,
-                    definitionLink: LocationLink.create(
-                        resource,
-                        Range.create(Position.create(0, 0), Position.create(0, 0)),
-                        Range.create(Position.create(0, 0), Position.create(0, 0)),
-                    ),
-                }]
-            })
-        })
+                getRange(
+                    fileText,
+                    functionNameLocation,
+                    functionNameLocation + definition.length
+                ),
+            ),
+        }]
+    })
 }
 
 export function getDefinitionLinks(
@@ -141,39 +194,55 @@ export function getDefinitionLinks(
     }
 
     const word = document.getText(wordRange)
+
+    // General match.
     const sanitizedWord = word
         // for dynamic partition table
-        //   (
-        //      public."table_name_$$ || partition_key || $$",
+        //   ex)
+        //     public."table_name_$$ || partition_key || $$"
         //             "table_name_$$ || partition_key || $$"
-        //   )
         .replace(/"([a-zA-Z_]\w*)_\$\$$/, "$1")
-        // for quoted table (public."table_name", "table_name")
+        // for quoted table
+        //   ex)
+        //     public."table_name"
+        //            "table_name"
         .replace(/(^[a-zA-Z_]\w*\.)?"([a-zA-Z_]\w*)"$/, "$1$2")
 
-    // Generic match.
     const definitionLinks = space.definitionMap.getDefinitionLinks(sanitizedWord)
     if (definitionLinks !== undefined) {
-        console.log(`word: ${JSON.stringify(word)}, sanitizedWord: ${JSON.stringify(sanitizedWord)}`)
+        logSanitizedWord([word, sanitizedWord])
+
         return definitionLinks
     }
 
-    // Specific match.
+    // Specific partition table match.
     const sanitizedWord2 = word
-        // for number partition table (public."table_name_1234", "table_name_1234")
+        // for number partition table
+        //   ex)
+        //     public.table_name_1234
+        //            table_name_1234
+        //     public."table_name_1234"
+        //            "table_name_1234"
         .replace(/"?([a-zA-Z_]\w*)_[0-9]+"?$/, "$1")
         // for uuid partition table
-        //   (
-        //      public."table_name_12345678-1234-1234-1234-123456789012",
-        //             "table_name_12345678-1234-1234-1234-123456789012"
-        //   )
-        .replace(/"([a-zA-Z_]\w*)_[0-9]{8}-[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{12}"$/, "$1")
+        //   ex)
+        //     public."table_name_12345678-1234-1234-1234-123456789012"
+        //            "table_name_12345678-1234-1234-1234-123456789012"
+        .replace(
+            /"([a-zA-Z_]\w*)_[0-9]{8}-[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{12}"$/, "$1"
+        )
 
-    console.log([
-        `word: ${JSON.stringify(word)}`,
-        `sanitizedWord: ${JSON.stringify(sanitizedWord)}`,
-        `sanitizedWord2: ${JSON.stringify(sanitizedWord2)}`
-    ].join(", "))
+    logSanitizedWord([word, sanitizedWord, sanitizedWord2])
 
     return space.definitionMap.getDefinitionLinks(sanitizedWord2)
+}
+
+
+function logSanitizedWord(sanitizingWords: string[]) {
+    console.log(
+        "Sanitized jump target word: "
+        + sanitizingWords.map(word => {
+            return JSON.stringify(word)
+        }).join(" => ")
+    )
 }

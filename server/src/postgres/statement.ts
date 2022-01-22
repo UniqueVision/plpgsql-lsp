@@ -1,9 +1,12 @@
+import { uinteger } from 'vscode-languageserver'
 
 export interface Statement {
-  stmt: StatementData
+  stmt: StatementItem
+  stmt_location: uinteger
+  stmt_len: uinteger
 }
 
-export interface StatementData {
+export interface StatementItem {
   CreateStmt?: CreateStmt
   CompositeTypeStmt?: CompositeTypeStmt
   CreateFunctionStmt?: CreateFunctionStmt
@@ -15,25 +18,28 @@ export interface CreateStmt {
 
 export interface CreateStmtRelation {
   schemaname?: string
-  relname?:string
+  relname: string
+  location: uinteger
 }
 
 export interface CompositeTypeStmt {
-  typevar?: CompositeTypeStmtTypevar
+  typevar: CompositeTypeStmtTypevar
 }
 
 export interface CompositeTypeStmtTypevar {
-  relname?: string
+  relname: string
+  relpersistence: string
+  location: uinteger
 }
 
 export interface CreateFunctionStmt {
-  funcname?: CreateFunctionStmtFuncName[]
+  funcname: CreateFunctionStmtFuncName[]
 }
 
 export interface CreateFunctionStmtFuncName {
-  String?: CreateFunctionStmtFuncNameString
+  String: CreateFunctionStmtFuncNameString
 }
 
 export interface CreateFunctionStmtFuncNameString {
-  str?: string
+  str: string
 }

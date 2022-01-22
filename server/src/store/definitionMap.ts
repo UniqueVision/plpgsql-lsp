@@ -1,10 +1,8 @@
 import { DefinitionLink } from "vscode-languageserver"
 
-import { Space } from "../space"
-
-
-type FilePath = string;
-type Definition = string;
+export type FilePath = string;
+export type Definition = string;
+export type Candidate = { definition: string, definitionLink: DefinitionLink };
 
 export class DefinitionMap {
     candidates: Map<Definition, DefinitionLink[]>
@@ -23,20 +21,23 @@ export class DefinitionMap {
         return this.candidates.get(definition)
     }
 
-    updateCandidates(space: Space,
-        filepath: FilePath, candidates: { definition: Definition, definitionLink: DefinitionLink }[] | undefined,
-    ) {
+    updateCandidates(filepath: FilePath, candidates: Candidate[] | undefined) {
         const oldDefinitions = this.fileDefinitions.get(filepath)
 
         // Remove old definition of a target uri.
         if (oldDefinitions !== undefined) {
-            for (const candidate in oldDefinitions) {
-                const oldDefinitions = this.candidates.get(candidate)
-                if (oldDefinitions === undefined) continue
+            for (const candidate of oldDefinitions) {
+                const oldDefinitionLinks = this.candidates.get(candidate)
+                if (oldDefinitionLinks === undefined) continue
 
-                this.candidates.set(candidate, oldDefinitions.filter(definition => {
-                    definition.targetUri !== filepath
-                }))
+                this.candidates.set(
+                    candidate,
+                    oldDefinitionLinks.filter(
+                        definition => {
+                            definition.targetUri !== filepath
+                        }
+                    )
+                )
             }
             this.fileDefinitions.delete(filepath)
         }
