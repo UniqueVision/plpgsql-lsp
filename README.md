@@ -16,7 +16,7 @@
 
 ## VSCode Settings sample
 
-```json
+```jsonc
 {
   "plpgsqlLanguageServer.database": "your_database_name",
   "plpgsqlLanguageServer.user": "your_database_user",
