@@ -1,18 +1,18 @@
 // The example settings
 export interface LanguageServerSettings {
-  host: string;
-  port: number;
-  database?: string;
-  user?: string;
-  password?: string;
-  definitionFiles?: string[];
+    host: string;
+    port: number;
+    database?: string;
+    user?: string;
+    password?: string;
+    definitionFiles?: string[];
 }
 
 export const DEFAULT_SETTINGS: LanguageServerSettings = {
-  host: "localhost",
-  port: 5432,
-  database: undefined,
-  user: undefined,
-  password: undefined,
-  definitionFiles: undefined,
+    host: "localhost",
+    port: 5432,
+    database: undefined,
+    user: undefined,
+    password: undefined,
+    definitionFiles: undefined,
 }

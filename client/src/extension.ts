@@ -41,7 +41,7 @@ export function activate(context: ExtensionContext) {
     )
 
     function didOpenTextDocument(document: TextDocument): void {
-    // We are only interested in language mode text
+        // We are only interested in language mode text
         if (document.languageId !== "postgres" || (document.uri.scheme !== "file" && document.uri.scheme !== "untitled")) {
             return
         }
@@ -133,7 +133,7 @@ export function deactivate(): Thenable<void> | undefined {
 Languages.registerDocumentFormattingEditProvider("postgres", {
     provideDocumentFormattingEdits(_document: TextDocument): TextEdit[] {
         return []
-    // const firstLine = document.lineAt(0);
-    // return [TextEdit.insert(firstLine.range.start, '-- Formatting...\n')];
+        // const firstLine = document.lineAt(0);
+        // return [TextEdit.insert(firstLine.range.start, '-- Formatting...\n')];
     },
 })

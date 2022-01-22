@@ -1,16 +1,16 @@
-import { uinteger, Position, Range } from "vscode-languageserver"
+import { Position, Range, uinteger } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 export const PLPGSQL_LANGUAGE_SERVER_SECTION = "plpgsqlLanguageServer"
 
 export function getWordRangeAtPosition(
-    document: TextDocument, position: Position
+    document: TextDocument, position: Position,
 ): Range | undefined {
     const lines = document.getText().split("\n")
     const line = Math.min(lines.length - 1, Math.max(0, position.line))
     const lineText = lines[line]
     const character = Math.min(
-        lineText.length - 1, Math.max(0, position.character)
+        lineText.length - 1, Math.max(0, position.character),
     )
     const separator = /[\s,()':=;]/
     let startChar = character
@@ -26,10 +26,10 @@ export function getWordRangeAtPosition(
 }
 
 export function findIndex(
-    fileText: string, searchWord: string, byteOffset?: uinteger
+    fileText: string, searchWord: string, byteOffset?: uinteger,
 ) {
     return Buffer.from(fileText).indexOf(
-        searchWord, byteOffset
+        searchWord, byteOffset,
     )
 }
 
@@ -41,15 +41,15 @@ export function getPosition(fileText: string, index: uinteger) {
 
     return Position.create(
         textLines.length - 1,
-        textLines[textLines.length - 1].length
+        textLines[textLines.length - 1].length,
     )
 }
 
 export function getRange(
-    fileText: string, startIndex: uinteger, endIndex: uinteger
+    fileText: string, startIndex: uinteger, endIndex: uinteger,
 ) {
     return Range.create(
         getPosition(fileText, startIndex),
-        getPosition(fileText, endIndex)
+        getPosition(fileText, endIndex),
     )
 }

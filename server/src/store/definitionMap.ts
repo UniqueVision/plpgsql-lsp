@@ -35,8 +35,8 @@ export class DefinitionMap {
                     oldDefinitionLinks.filter(
                         definition => {
                             definition.targetUri !== filepath
-                        }
-                    )
+                        },
+                    ),
                 )
             }
             this.fileDefinitions.delete(filepath)

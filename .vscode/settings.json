@@ -1,5 +1,5 @@
 {
-  "editor.tabSize": 2,
+  "editor.tabSize": 4,
   "eslint.enable": true,
   "files.trimFinalNewlines": true,
   "editor.formatOnSave": true,

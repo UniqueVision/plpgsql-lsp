@@ -2,23 +2,20 @@ import { readFileSync } from "fs"
 import { sync as glob } from "glob"
 import { parseQuery } from "libpg-query"
 import {
-    DefinitionLink, DefinitionParams, LocationLink
+    DefinitionLink, DefinitionParams, LocationLink,
 } from "vscode-languageserver"
 
 import { findIndex, getRange, getWordRangeAtPosition } from "../helpers"
 import { Statement } from "../postgres/statement"
 import { console } from "../server"
-import { LanguageServerSettings } from "../settings"
 import { Resource, Space } from "../space"
-import { Candidate } from '../store/definitionMap'
+import { Candidate } from "../store/definitionMap"
 
 
 export async function loadDefinitionFilesInWorkspace(
-    space: Space, resource: Resource
+    space: Space, resource: Resource,
 ) {
-    const settings = await space.getDocumentSettings(
-        resource
-    )
+    const settings = await space.getDocumentSettings(resource)
     const workspace = await space.getWorkSpaceFolder(resource)
     if (workspace === undefined) {
         return
@@ -28,9 +25,7 @@ export async function loadDefinitionFilesInWorkspace(
         console.log("Definition files loading...")
 
         const files = [...new Set(settings.definitionFiles.flatMap(
-            filePattern => {
-                return glob(filePattern)
-            }
+            filePattern => { return glob(filePattern) },
         ))]
 
         for (const file of files) {
@@ -71,11 +66,12 @@ export async function updateFileDefinition(space: Space, resource: Resource) {
     })
 
     space.definitionMap.updateCandidates(resource, candidates)
+
     return candidates
 }
 
 function getCreateStmts(
-    fileText: string, stmt: Statement, resource: Resource
+    fileText: string, stmt: Statement, resource: Resource,
 ): Candidate[] {
     const createStmt = stmt?.stmt?.CreateStmt
     if (createStmt === undefined) {
@@ -89,14 +85,14 @@ function getCreateStmts(
         getRange(
             fileText,
             stmt.stmt_location,
-            stmt.stmt_location + stmt.stmt_len
+            stmt.stmt_location + stmt.stmt_len,
         ),
         getRange(
             fileText,
             createStmt.relation.location,
             createStmt.relation.location
-            + (schemaname !== undefined ? (schemaname + '.').length : 0)
-            + relname.length
+            + (schemaname !== undefined ? (schemaname + ".").length : 0)
+            + relname.length,
         ),
     )
     const candidates = [{
@@ -116,7 +112,7 @@ function getCreateStmts(
 }
 
 function getCompositeTypeStmts(
-    fileText: string, stmt: Statement, resource: Resource
+    fileText: string, stmt: Statement, resource: Resource,
 ): Candidate[] {
     const compositTypeStmt = stmt?.stmt?.CompositeTypeStmt
     if (compositTypeStmt === undefined) {
@@ -131,19 +127,19 @@ function getCompositeTypeStmts(
             getRange(
                 fileText,
                 stmt.stmt_location,
-                stmt.stmt_location + stmt.stmt_len
+                stmt.stmt_location + stmt.stmt_len,
             ),
             getRange(
                 fileText,
                 compositTypeStmt.typevar.location,
-                compositTypeStmt.typevar.location + definition.length
+                compositTypeStmt.typevar.location + definition.length,
             ),
         ),
     }]
 }
 
 function getCreateFunctionStmts(
-    fileText: string, stmt: Statement, resource: Resource
+    fileText: string, stmt: Statement, resource: Resource,
 ): Candidate[] {
     const createFunctionStmt = stmt?.stmt?.CreateFunctionStmt
     if (createFunctionStmt === undefined) {
@@ -156,7 +152,7 @@ function getCreateFunctionStmts(
             return []
         }
         const functionNameLocation = findIndex(
-            fileText, definition, stmt.stmt_location
+            fileText, definition, stmt.stmt_location,
         )
 
         return [{
@@ -166,12 +162,12 @@ function getCreateFunctionStmts(
                 getRange(
                     fileText,
                     stmt.stmt_location,
-                    stmt.stmt_location + stmt.stmt_len
+                    stmt.stmt_location + stmt.stmt_len,
                 ),
                 getRange(
                     fileText,
                     functionNameLocation,
-                    functionNameLocation + definition.length
+                    functionNameLocation + definition.length,
                 ),
             ),
         }]
@@ -229,7 +225,7 @@ export function getDefinitionLinks(
         //     public."table_name_12345678-1234-1234-1234-123456789012"
         //            "table_name_12345678-1234-1234-1234-123456789012"
         .replace(
-            /"([a-zA-Z_]\w*)_[0-9]{8}-[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{12}"$/, "$1"
+            /"([a-zA-Z_]\w*)_[0-9]{8}-[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{12}"$/, "$1",
         )
 
     logSanitizedWord([word, sanitizedWord, sanitizedWord2])
@@ -243,6 +239,6 @@ function logSanitizedWord(sanitizingWords: string[]) {
         "Sanitized jump target word: "
         + sanitizingWords.map(word => {
             return JSON.stringify(word)
-        }).join(" => ")
+        }).join(" => "),
     )
 }
