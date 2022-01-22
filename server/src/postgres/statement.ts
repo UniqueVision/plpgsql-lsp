@@ -1,4 +1,4 @@
-import { uinteger } from 'vscode-languageserver'
+import { uinteger } from "vscode-languageserver"
 
 export interface Statement {
   stmt: StatementItem
