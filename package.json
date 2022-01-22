@@ -3,7 +3,7 @@
   "displayName": "PL/pgSQL Language Server",
   "description": "VSCode PL/pgSQL Language Server.",
   "license": "MIT",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "icon": "images/postgres.png",
   "repository": {
     "type": "git",
