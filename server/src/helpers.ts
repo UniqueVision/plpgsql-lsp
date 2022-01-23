@@ -25,7 +25,7 @@ export function getWordRangeAtPosition(
         return Range.create(line, startChar, line, endChar)
 }
 
-export function findIndex(
+export function findIndexFromBuffer(
     fileText: string, searchWord: string, byteOffset?: uinteger,
 ) {
     return Buffer.from(fileText).indexOf(
@@ -33,7 +33,7 @@ export function findIndex(
     )
 }
 
-export function getPosition(fileText: string, index: uinteger) {
+export function getPositionFromBuffer(fileText: string, index: uinteger) {
     const textLines = Buffer.from(fileText)
         .slice(0, index)
         .toString()
@@ -45,16 +45,16 @@ export function getPosition(fileText: string, index: uinteger) {
     )
 }
 
-export function getRange(
+export function getRangeFromBuffer(
     fileText: string, startIndex: uinteger, endIndex: uinteger,
 ) {
     return Range.create(
-        getPosition(fileText, startIndex),
-        getPosition(fileText, endIndex),
+        getPositionFromBuffer(fileText, startIndex),
+        getPositionFromBuffer(fileText, endIndex),
     )
 }
 
-export function getLine(
+export function getLineRangeFromBuffer(
     fileText: string, index: uinteger, offsetLine: uinteger = 0,
 ) {
     const textLines = Buffer.from(fileText)
@@ -63,31 +63,51 @@ export function getLine(
         .split("\n")
 
     let line: uinteger | undefined = undefined
-    let character: uinteger | undefined = undefined
+    let startCharacter: uinteger | undefined = undefined
+    let endCharacter: uinteger | undefined = undefined
     if (offsetLine !== 0) {
         const allTextLines = Buffer.from(fileText)
             .toString()
             .split("\n")
         line = textLines.length - 1 + offsetLine
-        character = allTextLines[line]?.length
+        startCharacter = getNonSpaceCharacter(allTextLines[line])
+        endCharacter = Math.max(startCharacter, allTextLines[line]?.length)
     }
     else {
         line = textLines.length - 1
-        character = textLines[line]?.length
+        startCharacter = getNonSpaceCharacter(textLines[line])
+        endCharacter = Math.max(startCharacter, textLines[line]?.length)
     }
-    if (character === undefined) {
+
+    if (
+        startCharacter !== undefined
+        && endCharacter !== undefined
+        && !isNaN(endCharacter)
+    ) {
+        return Range.create(
+            Position.create(line, startCharacter),
+            Position.create(line, endCharacter),
+        )
+
+    }
+    else {
         return undefined
     }
-
-    return Range.create(
-        Position.create(line, 0),
-        Position.create(line, character),
-    )
 }
 
-export function getTextAll(textDocument: TextDocument) {
+export function getTextAllRange(textDocument: TextDocument) {
     return Range.create(
         textDocument.positionAt(0),
         textDocument.positionAt(textDocument.getText().length - 1),
     )
+}
+
+export function getNonSpaceCharacter(lineText: string) {
+    for (let index = 0; index < lineText.length; index++) {
+        if (lineText[index] !== " ") {
+            return index
+        }
+    }
+
+    return lineText.length
 }

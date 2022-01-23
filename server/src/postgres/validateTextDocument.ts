@@ -1,8 +1,12 @@
 import { DatabaseError } from "pg"
-import { Diagnostic, DiagnosticSeverity, Position, Range } from "vscode-languageserver"
+import {
+    Diagnostic, DiagnosticSeverity, Position, Range, uinteger,
+} from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { getLine, getTextAll } from "../helpers"
+import {
+    getLineRangeFromBuffer, getNonSpaceCharacter, getTextAllRange,
+} from "../helpers"
 import { Space } from "../space"
 import { getFunctionList } from "../workspace/getFunctionList"
 import { PostgresClient } from "./client"
@@ -35,7 +39,10 @@ export async function validateTextDocument(
             const errorPosition = Number(error.position)
             const errorLines = fileText.slice(0, errorPosition).split("\n")
             errorRange = Range.create(
-                Position.create(errorLines.length - 1, 0),
+                Position.create(
+                    errorLines.length - 1,
+                    getNonSpaceCharacter(errorLines[errorLines.length - 1]),
+                ),
                 Position.create(
                     errorLines.length - 1,
                     errorLines[errorLines.length - 1].length,
@@ -43,7 +50,7 @@ export async function validateTextDocument(
             )
         }
         else {
-            errorRange = getTextAll(textDocument)
+            errorRange = getTextAllRange(textDocument)
         }
         const diagnosic: Diagnostic = {
             severity: DiagnosticSeverity.Error,
@@ -58,7 +65,7 @@ export async function validateTextDocument(
                         uri: textDocument.uri,
                         range: Object.assign({}, diagnosic.range),
                     },
-                    message: "Syntax errors",
+                    message: "Syntax error",
                 },
             ]
         }
@@ -119,21 +126,22 @@ async function checkStaticAnalysis(
                         plpgsql_check_function_tb('${functionName}') AS pcf
                 `,
             )
+            const rows: StaticAnalysisItem[] = result.rows
 
-            if (result.rows.length === 0) {
+            if (rows.length === 0) {
                 continue
             }
-            for (const row of result.rows) {
+            for (const row of rows) {
                 let range: Range | undefined = undefined
                 if (location === undefined) {
-                    range = getTextAll(textDocument)
+                    range = getTextAllRange(textDocument)
                 }
                 else {
-                    range = getLine(
+                    range = getLineRangeFromBuffer(
                         fileText,
                         location,
                         row.lineno ? row.lineno - 1 : 0,
-                    ) || getTextAll(textDocument)
+                    ) || getTextAllRange(textDocument)
                 }
 
                 const diagnosic: Diagnostic = {
@@ -153,7 +161,7 @@ async function checkStaticAnalysis(
                                 uri: textDocument.uri,
                                 range: Object.assign({}, diagnosic.range),
                             },
-                            message: "Static analysis error",
+                            message: `Static analysis ${row.level}`,
                         },
                     ]
                 }
@@ -168,4 +176,18 @@ async function checkStaticAnalysis(
     }
 
     return diagnostics
+}
+
+interface StaticAnalysisItem {
+    procedure: string
+    lineno: uinteger
+    statement: string
+    sqlstate: string
+    message: string
+    detail: string
+    hint: string
+    level: string
+    position: string
+    query: string
+    context: string
 }
