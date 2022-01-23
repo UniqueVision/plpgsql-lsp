@@ -11,6 +11,43 @@ import { console } from "../server"
 import { Resource, Space } from "../space"
 import { Candidate } from "../store/definitionMap"
 
+export function getDefinitionLinks(
+    space: Space,
+    params: DefinitionParams,
+): DefinitionLink[] | undefined {
+    const uri = params.textDocument.uri
+    const document = space.documents.get(uri)
+    if (document === undefined) {
+        return undefined
+    }
+
+    const wordRange = getWordRangeAtPosition(document, params.position)
+    if (wordRange === undefined) {
+        return undefined
+    }
+
+    const word = document.getText(wordRange)
+
+    const sanitizedWordCandidates = [
+        // General match.
+        sanitizeQuotedTable(sanitizeDynamicPartitionTable(word)),
+        // Specific partition table match.
+        sanitizeUuidPartitionTable(sanitizeNumberPartitionTable(word)),
+    ]
+
+    for (const { index, wordCandidate } of sanitizedWordCandidates.map(
+        (wordCandidate, index) => { return { index, wordCandidate } })
+    ) {
+        const definitionLinks = space.definitionMap.getDefinitionLinks(wordCandidate)
+        if (definitionLinks !== undefined) {
+            logSanitizedWord(word, sanitizedWordCandidates.slice(0, index))
+
+            return definitionLinks
+        }
+    }
+
+    return []
+}
 
 export async function loadDefinitionFilesInWorkspace(
     space: Space, resource: Resource,
@@ -178,65 +215,6 @@ function getCreateFunctionStmts(
     })
 }
 
-export function getDefinitionLinks(
-    space: Space,
-    params: DefinitionParams,
-): DefinitionLink[] | undefined {
-    const uri = params.textDocument.uri
-    const document = space.documents.get(uri)
-    if (document === undefined) {
-        return undefined
-    }
-
-    const wordRange = getWordRangeAtPosition(document, params.position)
-    if (wordRange === undefined) {
-        return undefined
-    }
-
-    const word = document.getText(wordRange)
-
-    // General match.
-    const sanitizedWord = word
-        // for dynamic partition table
-        //   ex)
-        //     public."table_name_$$ || partition_key || $$"
-        //             "table_name_$$ || partition_key || $$"
-        .replace(/"([a-zA-Z_]\w*)_\$\$$/, "$1")
-        // for quoted table
-        //   ex)
-        //     public."table_name"
-        //            "table_name"
-        .replace(/(^[a-zA-Z_]\w*\.)?"([a-zA-Z_]\w*)"$/, "$1$2")
-
-    const definitionLinks = space.definitionMap.getDefinitionLinks(sanitizedWord)
-    if (definitionLinks !== undefined) {
-        logSanitizedWord([word, sanitizedWord])
-
-        return definitionLinks
-    }
-
-    // Specific partition table match.
-    const sanitizedWord2 = word
-        // for number partition table
-        //   ex)
-        //     public.table_name_1234
-        //            table_name_1234
-        //     public."table_name_1234"
-        //            "table_name_1234"
-        .replace(/"?([a-zA-Z_]\w*)_[0-9]+"?$/, "$1")
-        // for uuid partition table
-        //   ex)
-        //     public."table_name_12345678-1234-1234-1234-123456789012"
-        //            "table_name_12345678-1234-1234-1234-123456789012"
-        .replace(
-            /"([a-zA-Z_]\w*)_[0-9]{8}-[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{12}"$/, "$1",
-        )
-
-    logSanitizedWord([word, sanitizedWord, sanitizedWord2])
-
-    return space.definitionMap.getDefinitionLinks(sanitizedWord2)
-}
-
 async function getDefaultSchema(
     space: Space, resource: Resource, defaultSchema?: string,
 ) {
@@ -250,11 +228,56 @@ async function getDefaultSchema(
     }
 }
 
-function logSanitizedWord(sanitizingWords: string[]) {
+function logSanitizedWord(word: string, sanitizingWords: string[]) {
     console.log(
         "Sanitized jump target word: "
-        + sanitizingWords.map(word => {
+        + [word].concat(sanitizingWords).map(word => {
             return JSON.stringify(word)
         }).join(" => "),
     )
+}
+
+/**
+ * sanitize quoted table.
+ *     ex)
+ *       public."table_name"
+ *              "table_name"
+ */
+function sanitizeQuotedTable(word: string) {
+    return word.replace(/(^[a-zA-Z_]\w*\.)?"([a-zA-Z_]\w*)"$/, "$1$2")
+}
+
+/**
+ * sanitize dynamic partition table.
+ *     ex)
+ *       public."table_name_$$ || partition_key || $$"
+ *              "table_name_$$ || partition_key || $$"
+ */
+function sanitizeDynamicPartitionTable(word: string) {
+    return word
+        .replace(/"([a-zA-Z_]\w*)_\$\$$/, "$1")
+}
+
+/**
+ * sanitize number partition table.
+ *     ex)
+ *       public.table_name_1234
+ *              table_name_1234
+ *       public."table_name_1234"
+ *              "table_name_1234"
+ */
+function sanitizeNumberPartitionTable(word: string) {
+    return word.replace(/"?([a-zA-Z_]\w*)_[0-9]+"?$/, "$1")
+}
+
+/**
+ * sanitize uuid partition table.
+ *     ex)
+ *       public.table_name_12345678-1234-1234-1234-123456789012
+ *              table_name_12345678-1234-1234-1234-123456789012
+ *       public."table_name_12345678-1234-1234-1234-123456789012"
+ *              "table_name_12345678-1234-1234-1234-123456789012"
+ */
+function sanitizeUuidPartitionTable(word: string) {
+    return word.replace(/"([a-zA-Z_]\w*)_[0-9]{8}-[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{12}"$/, "$1")
 }
