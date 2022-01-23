@@ -5,7 +5,9 @@ import {
     DefinitionLink, DefinitionParams, LocationLink,
 } from "vscode-languageserver"
 
-import { findIndex, getRange, getWordRangeAtPosition } from "../helpers"
+import {
+    findIndexFromBuffer, getRangeFromBuffer, getWordRangeAtPosition,
+} from "../helpers"
 import { Statement } from "../postgres/statement"
 import { console } from "../server"
 import { Resource, Space } from "../space"
@@ -123,12 +125,12 @@ function getCreateStmts(
     const relname = createStmt.relation.relname
     const definitionLink = LocationLink.create(
         resource,
-        getRange(
+        getRangeFromBuffer(
             fileText,
             stmt.stmt_location,
             stmt.stmt_location + stmt.stmt_len,
         ),
-        getRange(
+        getRangeFromBuffer(
             fileText,
             createStmt.relation.location,
             createStmt.relation.location
@@ -165,12 +167,12 @@ function getCompositeTypeStmts(
         definition,
         definitionLink: LocationLink.create(
             resource,
-            getRange(
+            getRangeFromBuffer(
                 fileText,
                 stmt.stmt_location,
                 stmt.stmt_location + stmt.stmt_len,
             ),
-            getRange(
+            getRangeFromBuffer(
                 fileText,
                 compositTypeStmt.typevar.location,
                 compositTypeStmt.typevar.location + definition.length,
@@ -192,7 +194,7 @@ function getCreateFunctionStmts(
         if (definition === undefined) {
             return []
         }
-        const functionNameLocation = findIndex(
+        const functionNameLocation = findIndexFromBuffer(
             fileText, definition, stmt.stmt_location,
         )
 
@@ -200,12 +202,12 @@ function getCreateFunctionStmts(
             definition,
             definitionLink: LocationLink.create(
                 resource,
-                getRange(
+                getRangeFromBuffer(
                     fileText,
                     stmt.stmt_location,
                     stmt.stmt_location + stmt.stmt_len,
                 ),
-                getRange(
+                getRangeFromBuffer(
                     fileText,
                     functionNameLocation,
                     functionNameLocation + definition.length,

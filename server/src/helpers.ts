@@ -25,7 +25,7 @@ export function getWordRangeAtPosition(
         return Range.create(line, startChar, line, endChar)
 }
 
-export function findIndex(
+export function findIndexFromBuffer(
     fileText: string, searchWord: string, byteOffset?: uinteger,
 ) {
     return Buffer.from(fileText).indexOf(
@@ -33,7 +33,7 @@ export function findIndex(
     )
 }
 
-export function getPosition(fileText: string, index: uinteger) {
+export function getPositionFromBuffer(fileText: string, index: uinteger) {
     const textLines = Buffer.from(fileText)
         .slice(0, index)
         .toString()
@@ -45,16 +45,16 @@ export function getPosition(fileText: string, index: uinteger) {
     )
 }
 
-export function getRange(
+export function getRangeFromBuffer(
     fileText: string, startIndex: uinteger, endIndex: uinteger,
 ) {
     return Range.create(
-        getPosition(fileText, startIndex),
-        getPosition(fileText, endIndex),
+        getPositionFromBuffer(fileText, startIndex),
+        getPositionFromBuffer(fileText, endIndex),
     )
 }
 
-export function getLine(
+export function getLineRangeFromBuffer(
     fileText: string, index: uinteger, offsetLine: uinteger = 0,
 ) {
     const textLines = Buffer.from(fileText)
@@ -95,7 +95,7 @@ export function getLine(
     }
 }
 
-export function getTextAll(textDocument: TextDocument) {
+export function getTextAllRange(textDocument: TextDocument) {
     return Range.create(
         textDocument.positionAt(0),
         textDocument.positionAt(textDocument.getText().length - 1),

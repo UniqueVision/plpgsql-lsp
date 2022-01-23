@@ -1,8 +1,12 @@
 import { DatabaseError } from "pg"
-import { Diagnostic, DiagnosticSeverity, Position, Range, uinteger } from "vscode-languageserver"
+import {
+    Diagnostic, DiagnosticSeverity, Position, Range, uinteger,
+} from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { getLine, getNonSpaceCharacter, getTextAll } from "../helpers"
+import {
+    getLineRangeFromBuffer, getNonSpaceCharacter, getTextAllRange,
+} from "../helpers"
 import { Space } from "../space"
 import { getFunctionList } from "../workspace/getFunctionList"
 import { PostgresClient } from "./client"
@@ -46,7 +50,7 @@ export async function validateTextDocument(
             )
         }
         else {
-            errorRange = getTextAll(textDocument)
+            errorRange = getTextAllRange(textDocument)
         }
         const diagnosic: Diagnostic = {
             severity: DiagnosticSeverity.Error,
@@ -130,14 +134,14 @@ async function checkStaticAnalysis(
             for (const row of rows) {
                 let range: Range | undefined = undefined
                 if (location === undefined) {
-                    range = getTextAll(textDocument)
+                    range = getTextAllRange(textDocument)
                 }
                 else {
-                    range = getLine(
+                    range = getLineRangeFromBuffer(
                         fileText,
                         location,
                         row.lineno ? row.lineno - 1 : 0,
-                    ) || getTextAll(textDocument)
+                    ) || getTextAllRange(textDocument)
                 }
 
                 const diagnosic: Diagnostic = {
