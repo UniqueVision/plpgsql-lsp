@@ -101,7 +101,8 @@
       },
       "required": [
         "plpgsqlLanguageServer.host",
-        "plpgsqlLanguageServer.port"
+        "plpgsqlLanguageServer.port",
+        "plpgsqlLanguageServer.defaultSchema"
       ]
     }
   },
