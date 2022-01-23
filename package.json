@@ -107,7 +107,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "package": "vsce package --target win32-x64 && vsce package --target win32-ia32 && vsce package --target win32-arm64 && vsce package --target linux-x64 && vsce package --target linux-arm64 && vsce package --target linux-armhf && vsce package --target darwin-x64 && vsce package --target darwin-arm64",
+    "package": "vsce package && vsce package --target win32-x64 && vsce package --target linux-x64 && vsce package --target darwin-x64",
     "compile": "tsc -b",
     "watch": "tsc -b -w",
     "lint": "eslint ./client/src ./server/src --ext .ts,.tsx --fix",
