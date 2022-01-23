@@ -1,5 +1,5 @@
 import { DatabaseError } from "pg"
-import { Diagnostic, DiagnosticSeverity, Position, Range } from "vscode-languageserver"
+import { Diagnostic, DiagnosticSeverity, Position, Range, uinteger } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { getLine, getTextAll } from "../helpers"
@@ -58,7 +58,7 @@ export async function validateTextDocument(
                         uri: textDocument.uri,
                         range: Object.assign({}, diagnosic.range),
                     },
-                    message: "Syntax errors",
+                    message: "Syntax error",
                 },
             ]
         }
@@ -119,11 +119,12 @@ async function checkStaticAnalysis(
                         plpgsql_check_function_tb('${functionName}') AS pcf
                 `,
             )
+            const rows: StaticAnalysisItem[] = result.rows
 
-            if (result.rows.length === 0) {
+            if (rows.length === 0) {
                 continue
             }
-            for (const row of result.rows) {
+            for (const row of rows) {
                 let range: Range | undefined = undefined
                 if (location === undefined) {
                     range = getTextAll(textDocument)
@@ -153,7 +154,7 @@ async function checkStaticAnalysis(
                                 uri: textDocument.uri,
                                 range: Object.assign({}, diagnosic.range),
                             },
-                            message: "Static analysis error",
+                            message: `Static analysis ${row.level}`,
                         },
                     ]
                 }
@@ -168,4 +169,18 @@ async function checkStaticAnalysis(
     }
 
     return diagnostics
+}
+
+interface StaticAnalysisItem {
+    procedure: string
+    lineno: uinteger
+    statement: string
+    sqlstate: string
+    message: string
+    detail: string
+    hint: string
+    level: string
+    position: string
+    query: string
+    context: string
 }
