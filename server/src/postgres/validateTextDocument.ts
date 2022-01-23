@@ -2,7 +2,7 @@ import { DatabaseError } from "pg"
 import { Diagnostic, DiagnosticSeverity, Position, Range, uinteger } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { getLine, getTextAll } from "../helpers"
+import { getLine, getNonSpaceCharacter, getTextAll } from "../helpers"
 import { Space } from "../space"
 import { getFunctionList } from "../workspace/getFunctionList"
 import { PostgresClient } from "./client"
@@ -35,7 +35,10 @@ export async function validateTextDocument(
             const errorPosition = Number(error.position)
             const errorLines = fileText.slice(0, errorPosition).split("\n")
             errorRange = Range.create(
-                Position.create(errorLines.length - 1, 0),
+                Position.create(
+                    errorLines.length - 1,
+                    getNonSpaceCharacter(errorLines[errorLines.length - 1]),
+                ),
                 Position.create(
                     errorLines.length - 1,
                     errorLines[errorLines.length - 1].length,

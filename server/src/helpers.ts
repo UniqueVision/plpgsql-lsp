@@ -63,26 +63,36 @@ export function getLine(
         .split("\n")
 
     let line: uinteger | undefined = undefined
-    let character: uinteger | undefined = undefined
+    let startCharacter: uinteger | undefined = undefined
+    let endCharacter: uinteger | undefined = undefined
     if (offsetLine !== 0) {
         const allTextLines = Buffer.from(fileText)
             .toString()
             .split("\n")
         line = textLines.length - 1 + offsetLine
-        character = allTextLines[line]?.length
+        startCharacter = getNonSpaceCharacter(allTextLines[line])
+        endCharacter = Math.max(startCharacter, allTextLines[line]?.length)
     }
     else {
         line = textLines.length - 1
-        character = textLines[line]?.length
-    }
-    if (character === undefined) {
-        return undefined
+        startCharacter = getNonSpaceCharacter(textLines[line])
+        endCharacter = Math.max(startCharacter, textLines[line]?.length)
     }
 
-    return Range.create(
-        Position.create(line, 0),
-        Position.create(line, character),
-    )
+    if (
+        startCharacter !== undefined
+        && endCharacter !== undefined
+        && !isNaN(endCharacter)
+    ) {
+        return Range.create(
+            Position.create(line, startCharacter),
+            Position.create(line, endCharacter),
+        )
+
+    }
+    else {
+        return undefined
+    }
 }
 
 export function getTextAll(textDocument: TextDocument) {
@@ -90,4 +100,14 @@ export function getTextAll(textDocument: TextDocument) {
         textDocument.positionAt(0),
         textDocument.positionAt(textDocument.getText().length - 1),
     )
+}
+
+export function getNonSpaceCharacter(lineText: string) {
+    for (let index = 0; index < lineText.length; index++) {
+        if (lineText[index] !== " ") {
+            return index
+        }
+    }
+
+    return lineText.length
 }
