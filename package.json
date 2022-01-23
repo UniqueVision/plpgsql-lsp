@@ -3,7 +3,7 @@
   "displayName": "PL/pgSQL Language Server",
   "description": "VSCode PL/pgSQL Language Server.",
   "license": "MIT",
-  "version": "1.4.8",
+  "version": "1.4.9",
   "icon": "images/postgres.png",
   "repository": {
     "type": "git",
@@ -12,6 +12,8 @@
   "publisher": "uniquevision",
   "categories": [],
   "keywords": [
+    "Postgres",
+    "PostgreSQL",
     "plpgsql",
     "Language Server"
   ],
