@@ -8,8 +8,8 @@ import { makePool, PostgresPool } from "./postgres/client"
 import { DEFAULT_SETTINGS, LanguageServerSettings } from "./settings"
 import { DefinitionMap } from "./store/definitionMap"
 
-
-export type Resource = string;
+// Resource path (like "file:///home/your/project/file.sql" ).
+export type Resource = string
 
 /**
  * Global Space of Language Server.

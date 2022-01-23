@@ -53,3 +53,41 @@ export function getRange(
         getPosition(fileText, endIndex),
     )
 }
+
+export function getLine(
+    fileText: string, index: uinteger, offsetLine: uinteger = 0,
+) {
+    const textLines = Buffer.from(fileText)
+        .slice(0, index)
+        .toString()
+        .split("\n")
+
+    let line: uinteger | undefined = undefined
+    let character: uinteger | undefined = undefined
+    if (offsetLine !== 0) {
+        const allTextLines = Buffer.from(fileText)
+            .toString()
+            .split("\n")
+        line = textLines.length - 1 + offsetLine
+        character = allTextLines[line]?.length
+    }
+    else {
+        line = textLines.length - 1
+        character = textLines[line]?.length
+    }
+    if (character === undefined) {
+        return undefined
+    }
+
+    return Range.create(
+        Position.create(line, 0),
+        Position.create(line, character),
+    )
+}
+
+export function getTextAll(textDocument: TextDocument) {
+    return Range.create(
+        textDocument.positionAt(0),
+        textDocument.positionAt(textDocument.getText().length - 1),
+    )
+}

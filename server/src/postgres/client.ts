@@ -1,8 +1,9 @@
-import { Pool } from "pg"
+import { Pool, PoolClient } from "pg"
 
 import { LanguageServerSettings } from "../settings"
 
 export type PostgresPool = Pool
+export type PostgresClient = PoolClient
 
 export function makePool(settings: LanguageServerSettings): PostgresPool | undefined {
     if (

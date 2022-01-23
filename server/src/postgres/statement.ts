@@ -34,12 +34,43 @@ export interface CompositeTypeStmtTypevar {
 
 export interface CreateFunctionStmt {
   funcname: CreateFunctionStmtFuncName[]
+  returnType: CreateFunctionStmtReturnType
+  options: CreateFunctionStmtOption[]
 }
 
 export interface CreateFunctionStmtFuncName {
   String: CreateFunctionStmtFuncNameString
 }
 
+export interface CreateFunctionStmtReturnType {
+  location: uinteger
+}
 export interface CreateFunctionStmtFuncNameString {
+  str: string
+}
+
+export interface CreateFunctionStmtOption {
+  DefElem: CreateFunctionStmtOptionsDefElm
+}
+
+export interface CreateFunctionStmtOptionsDefElm {
+  defname: string
+  arg: CreateFunctionStmtOptionsDefElmArg
+  location: uinteger
+}
+
+export interface CreateFunctionStmtOptionsDefElmArg {
+  List: CreateFunctionStmtOptionsDefElmArgList
+}
+
+export interface CreateFunctionStmtOptionsDefElmArgList {
+  items: CreateFunctionStmtOptionsDefElmArgListItem[]
+}
+
+export interface CreateFunctionStmtOptionsDefElmArgListItem {
+  String: CreateFunctionStmtOptionsDefElmArgListItemString
+}
+
+export interface CreateFunctionStmtOptionsDefElmArgListItemString {
   str: string
 }

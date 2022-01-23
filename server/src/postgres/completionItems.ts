@@ -4,6 +4,22 @@ import { console } from "../server"
 import { LanguageServerSettings } from "../settings"
 import { Space } from "../space"
 
+
+export async function getCompletionItems(space: Space, textDocument: TextDocumentIdentifier) {
+    const settings = await space.getDocumentSettings(
+        textDocument.uri,
+    )
+
+    return (await getKeywordCompletionItems(space, settings))
+        .concat(await getTableCompletionItems(space, settings))
+        .concat(await getStoredProcedureCompletionItems(space, settings))
+        .map((item, index) => {
+            item.data = index
+
+            return item
+        })
+}
+
 async function getKeywordCompletionItems(
     space: Space, settings: LanguageServerSettings,
 ) {
@@ -160,19 +176,4 @@ async function getTableCompletionItems(
     }
 
     return completionItems
-}
-
-export async function getCompletionItems(space: Space, textDocument: TextDocumentIdentifier) {
-    const settings = await space.getDocumentSettings(
-        textDocument.uri,
-    )
-
-    return (await getKeywordCompletionItems(space, settings))
-        .concat(await getTableCompletionItems(space, settings))
-        .concat(await getStoredProcedureCompletionItems(space, settings))
-        .map((item, index) => {
-            item.data = index
-
-            return item
-        })
 }

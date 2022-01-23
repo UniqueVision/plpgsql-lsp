@@ -2,31 +2,38 @@ import { DatabaseError } from "pg"
 import { Diagnostic, DiagnosticSeverity, Position, Range } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
+import { getLine, getTextAll } from "../helpers"
 import { Space } from "../space"
+import { getFunctionList } from "../workspace/getFunctionList"
+import { PostgresClient } from "./client"
 
 export async function validateTextDocument(
     space: Space,
     textDocument: TextDocument,
 ): Promise<void> {
-    const diagnostics: Diagnostic[] = []
     const pgClient = await space.getPgClient(
         await space.getDocumentSettings(textDocument.uri),
     )
+
     if (pgClient === undefined) {
         return
     }
 
-    const text = textDocument.getText()
+    let diagnostics: Diagnostic[] = []
+    const fileText = textDocument.getText()
 
     try {
         await pgClient.query("BEGIN")
-        await pgClient.query(text)
+        // check syntax
+        await checkSyntax(pgClient, fileText)
+
+        diagnostics = await checkStaticAnalysis(pgClient, textDocument, space)
     }
     catch (error: unknown) {
         let errorRange: Range | undefined = undefined
         if (error instanceof DatabaseError && error.position !== undefined) {
             const errorPosition = Number(error.position)
-            const errorLines = text.slice(0, errorPosition).split("\n")
+            const errorLines = fileText.slice(0, errorPosition).split("\n")
             errorRange = Range.create(
                 Position.create(errorLines.length - 1, 0),
                 Position.create(
@@ -36,10 +43,7 @@ export async function validateTextDocument(
             )
         }
         else {
-            errorRange = Range.create(
-                textDocument.positionAt(0),
-                textDocument.positionAt(text.length - 1),
-            )
+            errorRange = getTextAll(textDocument)
         }
         const diagnosic: Diagnostic = {
             severity: DiagnosticSeverity.Error,
@@ -58,7 +62,7 @@ export async function validateTextDocument(
                 },
             ]
         }
-        diagnostics.push(diagnosic)
+        diagnostics = [diagnosic]
     }
     finally {
         await pgClient.query("ROLLBACK")
@@ -67,4 +71,101 @@ export async function validateTextDocument(
 
     // Send the computed diagnostics to VSCode.
     space.connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
+}
+
+async function checkSyntax(pgClient: PostgresClient, fileText: string) {
+    await pgClient.query(fileText)
+}
+
+async function checkStaticAnalysis(
+    pgClient: PostgresClient,
+    textDocument: TextDocument,
+    space: Space,
+) {
+    const diagnostics: Diagnostic[] = []
+    const fileText = textDocument.getText()
+
+    try {
+        const extensionCheck = await pgClient.query(`
+            SELECT
+                extname
+            FROM
+                pg_extension
+            WHERE
+                extname = 'plpgsql_check'
+        `)
+
+        if (extensionCheck.rowCount === 0) {
+            return []
+        }
+
+        const functionList = await getFunctionList(space, textDocument.uri)
+
+        for (const { functionName, location } of functionList) {
+            const result = await pgClient.query(`
+                    SELECT
+                        (pcf).functionid::regprocedure AS procedure,
+                        (pcf).lineno AS lineno,
+                        (pcf).statement AS statement,
+                        (pcf).sqlstate AS sqlstate,
+                        (pcf).message AS message,
+                        (pcf).detail AS detail,
+                        (pcf).hint AS hint,
+                        (pcf).level AS level,
+                        (pcf)."position" AS position,
+                        (pcf).query AS query,
+                        (pcf).context AS context
+                    FROM
+                        plpgsql_check_function_tb('${functionName}') AS pcf
+                `,
+            )
+
+            if (result.rows.length === 0) {
+                continue
+            }
+            for (const row of result.rows) {
+                let range: Range | undefined = undefined
+                if (location === undefined) {
+                    range = getTextAll(textDocument)
+                }
+                else {
+                    range = getLine(
+                        fileText,
+                        location,
+                        row.lineno ? row.lineno - 1 : 0,
+                    ) || getTextAll(textDocument)
+                }
+
+                const diagnosic: Diagnostic = {
+                    severity: (
+                        row.level === "warning"
+                            ? DiagnosticSeverity.Warning
+                            : DiagnosticSeverity.Error
+                    ),
+                    range,
+                    message: row.message,
+                }
+
+                if (space.hasDiagnosticRelatedInformationCapability) {
+                    diagnosic.relatedInformation = [
+                        {
+                            location: {
+                                uri: textDocument.uri,
+                                range: Object.assign({}, diagnosic.range),
+                            },
+                            message: "Static analysis error",
+                        },
+                    ]
+                }
+                diagnostics.push(diagnosic)
+            }
+
+        }
+    }
+    catch (error: unknown) {
+        console.log(`StaticAnalysisError: ${JSON.stringify(error)}`)
+        throw error
+    }
+
+    return diagnostics
 }
