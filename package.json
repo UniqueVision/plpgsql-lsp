@@ -16,7 +16,7 @@
     "Language Server"
   ],
   "engines": {
-    "vscode": "^1.52.0"
+    "vscode": "^1.61.0"
   },
   "activationEvents": [
     "onLanguage:postgres"
@@ -105,7 +105,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "package": "vsce package",
+    "package": "vsce package --target win32-x64 --target win32-ia32 --target win32-arm64 --target linux-x64 --target linux-arm64 --target linux-armhf --target alpine-x64 --target alpine-arm64 --target darwin-x64 --target darwin-arm64",
     "compile": "tsc -b",
     "watch": "tsc -b -w",
     "lint": "eslint ./client/src ./server/src --ext .ts,.tsx --fix",
