@@ -108,7 +108,8 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "package": "vsce package --target win32-x64 && vsce package --target linux-x64 && vsce package --target darwin-x64",
+    "package": "vsce package --target win32-x64 && vsce package --target linux-x64",
+    "package:mac": "vsce package --target darwin-x64",
     "compile": "tsc -b",
     "watch": "tsc -b -w",
     "lint": "eslint ./client/src ./server/src --ext .ts,.tsx --fix",
