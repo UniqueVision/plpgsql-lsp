@@ -104,10 +104,12 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "package": "vsce package --target win32-x64 --target win32-ia32 --target win32-arm64 --target linux-x64 --target linux-arm64 --target linux-armhf --target alpine-x64 --target alpine-arm64 --target darwin-x64 --target darwin-arm64",
-    "compile": "tsc -b",
-    "watch": "tsc -b -w",
+    "vscode:prepublish": "npm run server:esbuild -- --minify && npm run client:esbuild -- --minify",
+    "package": "vsce package --target win32-x64 && vsce package --target win32-ia32 && vsce package --target win32-arm64 && vsce package --target linux-x64 && vsce package --target linux-arm64 && vsce package --target linux-armhf && vsce package --target alpine-x64 && vsce package --target alpine-arm64 && vsce package --target darwin-x64 && vsce package --target darwin-arm64",
+    "client:esbuild": "esbuild ./client/src/extension.ts --bundle --outfile=./client/out/extension.js --external:vscode --format=cjs --platform=node",
+    "server:esbuild": "esbuild ./server/src/server.ts --bundle --outfile=./server/out/server.js --external:vscode --external:pg-native --external:./build/Release/queryparser --format=cjs --platform=node",
+    "esbuild": "npm run client:esbuild -- --sourcemap && npm run server:esbuild -- --sourcemap",
+    "watch": "npm run server:esbuild -- --sourcemap && npm run client:esbuild -- --sourcemap --watch",
     "lint": "eslint ./client/src ./server/src --ext .ts,.tsx --fix",
     "postinstall": "cd client && npm install && cd ../server && npm install && cd .."
   },
@@ -116,6 +118,7 @@
     "@types/node": "^17.0.4",
     "@typescript-eslint/eslint-plugin": "^5.8.0",
     "@typescript-eslint/parser": "^5.8.0",
+    "esbuild": "^0.14.13",
     "eslint": "^8.5.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-config-standard": "^16.0.3",
