@@ -1,5 +1,6 @@
 import minimatch from "minimatch"
 import path from "path"
+import { PoolClient } from "pg"
 import { ClientCapabilities, Connection, TextDocuments } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
@@ -8,8 +9,10 @@ import { makePool, PostgresPool } from "./postgres/client"
 import { DEFAULT_SETTINGS, LanguageServerSettings } from "./settings"
 import { DefinitionMap } from "./store/definitionMap"
 
+export type PgClient = PoolClient
 
-export type Resource = string;
+// Resource path (like "file:///home/your/project/file.sql" ).
+export type Resource = string
 
 /**
  * Global Space of Language Server.
