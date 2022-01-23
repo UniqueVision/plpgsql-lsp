@@ -7,7 +7,7 @@
 - [x] stored procedure/function args completion.
 - [x] go to the type/table/function definition.
 - [x] syntax check.
-- [x] static analysis check (when use [plpgsql_check](https://github.com/okbob/plpgsql_check)) .
+- [x] static analysis check (when [plpgsql_check](https://github.com/okbob/plpgsql_check) use) .
 - [x] Multi-root Workspaces support.
 
 ## Usage
