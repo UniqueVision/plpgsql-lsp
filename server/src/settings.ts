@@ -6,6 +6,7 @@ export interface LanguageServerSettings {
     user?: string;
     password?: string;
     definitionFiles?: string[];
+    defaultSchema: string;
 }
 
 export const DEFAULT_SETTINGS: LanguageServerSettings = {
@@ -15,4 +16,5 @@ export const DEFAULT_SETTINGS: LanguageServerSettings = {
     user: undefined,
     password: undefined,
     definitionFiles: undefined,
+    defaultSchema: "public",
 }

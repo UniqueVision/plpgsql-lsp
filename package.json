@@ -51,31 +51,31 @@
           "scope": "resource",
           "type": "string",
           "default": "localhost",
-          "description": "The default host."
+          "description": "your database host."
         },
         "plpgsqlLanguageServer.port": {
           "scope": "resource",
           "type": "number",
           "default": 5432,
-          "description": "The default port."
+          "description": "your database port."
         },
         "plpgsqlLanguageServer.database": {
           "scope": "resource",
           "type": "string",
           "nullable": true,
-          "description": "The default database."
+          "description": "your database name."
         },
         "plpgsqlLanguageServer.user": {
           "scope": "resource",
           "type": "string",
           "nullable": true,
-          "description": "The default user."
+          "description": "your database user."
         },
         "plpgsqlLanguageServer.password": {
           "scope": "resource",
           "type": "string",
           "nullable": true,
-          "description": "The default password."
+          "description": "your database password."
         },
         "plpgsqlLanguageServer.definitionFiles": {
           "scope": "resource",
@@ -89,6 +89,12 @@
           "items": {
             "type": "string"
           }
+        },
+        "plpgsqlLanguageServer.defaultSchema": {
+          "scope": "resource",
+          "type": "string",
+          "default": "public",
+          "description": "default schema name."
         }
       },
       "required": [

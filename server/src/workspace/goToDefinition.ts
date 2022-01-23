@@ -31,7 +31,7 @@ export async function loadDefinitionFilesInWorkspace(
         for (const file of files) {
             resource = `${workspace.uri}/${file}`
             try {
-                await updateFileDefinition(space, resource)
+                await updateFileDefinition(space, resource, settings.defaultSchema)
             }
             catch (error: unknown) {
                 console.error(`${resource} cannot load the definitions. ${error}`)
@@ -42,7 +42,11 @@ export async function loadDefinitionFilesInWorkspace(
     }
 }
 
-export async function updateFileDefinition(space: Space, resource: Resource) {
+export async function updateFileDefinition(
+    space: Space, resource: Resource, defaultSchema?: string,
+) {
+    const _defaultSchema = await getDefaultSchema(space, resource, defaultSchema)
+
     const fileText = readFileSync(resource.replace(/^file:\/\//, "")).toString()
     const query = await parseQuery(fileText)
 
@@ -52,7 +56,7 @@ export async function updateFileDefinition(space: Space, resource: Resource) {
     }
     const candidates = stmts.flatMap(stmt => {
         if (stmt?.stmt?.CreateStmt !== undefined) {
-            return getCreateStmts(fileText, stmt, resource)
+            return getCreateStmts(fileText, stmt, resource, _defaultSchema)
         }
         else if (stmt?.stmt?.CompositeTypeStmt !== undefined) {
             return getCompositeTypeStmts(fileText, stmt, resource)
@@ -71,7 +75,7 @@ export async function updateFileDefinition(space: Space, resource: Resource) {
 }
 
 function getCreateStmts(
-    fileText: string, stmt: Statement, resource: Resource,
+    fileText: string, stmt: Statement, resource: Resource, defaultSchema: string,
 ): Candidate[] {
     const createStmt = stmt?.stmt?.CreateStmt
     if (createStmt === undefined) {
@@ -96,12 +100,12 @@ function getCreateStmts(
         ),
     )
     const candidates = [{
-        definition: (schemaname || "public") + "." + relname,
+        definition: (schemaname || defaultSchema) + "." + relname,
         definitionLink,
     }]
 
     // When default schema, add raw relname candidate.
-    if (schemaname === undefined || schemaname === "public") {
+    if (schemaname === undefined || schemaname === defaultSchema) {
         candidates.push({
             definition: relname,
             definitionLink,
@@ -233,6 +237,18 @@ export function getDefinitionLinks(
     return space.definitionMap.getDefinitionLinks(sanitizedWord2)
 }
 
+async function getDefaultSchema(
+    space: Space, resource: Resource, defaultSchema?: string,
+) {
+    if (defaultSchema === undefined) {
+        const settings = await space.getDocumentSettings(resource)
+
+        return settings.defaultSchema
+    }
+    else {
+        return defaultSchema
+    }
+}
 
 function logSanitizedWord(sanitizingWords: string[]) {
     console.log(
