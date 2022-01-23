@@ -12,6 +12,8 @@
   "publisher": "uniquevision",
   "categories": [],
   "keywords": [
+    "Postgres",
+    "PostgreSQL",
     "plpgsql",
     "Language Server"
   ],
