@@ -144,12 +144,19 @@ async function checkStaticAnalysis(
                     ) || getTextAllRange(textDocument)
                 }
 
+                let severity: DiagnosticSeverity | undefined = undefined
+                if (row.level === "warning") {
+                    severity = DiagnosticSeverity.Warning
+                }
+                else if (row.level === "warning extra") {
+                    severity = DiagnosticSeverity.Warning
+                }
+                else {
+                    severity = DiagnosticSeverity.Error
+                }
+
                 const diagnosic: Diagnostic = {
-                    severity: (
-                        row.level === "warning"
-                            ? DiagnosticSeverity.Warning
-                            : DiagnosticSeverity.Error
-                    ),
+                    severity,
                     range,
                     message: row.message,
                 }
