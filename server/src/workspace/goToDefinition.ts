@@ -6,13 +6,20 @@ import {
 } from "vscode-languageserver"
 
 import {
-    findIndexFromBuffer, getRangeFromBuffer, getWordRangeAtPosition,
+    findIndexFromBuffer,
+    getRangeFromBuffer,
+    getWordRangeAtPosition,
 } from "../helpers"
 import { Statement } from "../postgres/statement"
 import { console } from "../server"
 import { Resource, Space } from "../space"
 import { Candidate } from "../store/definitionMap"
-import { sanitizeDynamicPartitionTable, sanitizeNumberPartitionTable, sanitizeQuotedTable, sanitizeUuidPartitionTable } from "./sanitizeWord"
+import {
+    sanitizeDynamicPartitionTable,
+    sanitizeNumberPartitionTable,
+    sanitizeQuotedTable,
+    sanitizeUuidPartitionTable,
+} from "./sanitizeWord"
 
 export function getDefinitionLinks(
     space: Space,
@@ -39,9 +46,13 @@ export function getDefinitionLinks(
     ]
 
     for (const { index, wordCandidate } of sanitizedWordCandidates.map(
-        (wordCandidate, index) => { return { index, wordCandidate } })
+        (wordCandidate, index) => { return { index, wordCandidate } },
+    )
     ) {
-        const definitionLinks = space.definitionMap.getDefinitionLinks(wordCandidate)
+        const definitionLinks = space
+            .definitionMap
+            .getDefinitionLinks(wordCandidate)
+
         if (definitionLinks !== undefined) {
             logSanitizedWord(word, sanitizedWordCandidates.slice(0, index))
 
@@ -64,17 +75,23 @@ export async function loadDefinitionFilesInWorkspace(
     if (settings.definitionFiles) {
         console.log("Definition files loading...")
 
-        const files = [...new Set(settings.definitionFiles.flatMap(
-            filePattern => { return glob(filePattern) },
-        ))]
+        const files = [
+            ...new Set(settings.definitionFiles.flatMap(
+                filePattern => { return glob(filePattern) },
+            )),
+        ]
 
         for (const file of files) {
             resource = `${workspace.uri}/${file}`
             try {
-                await updateFileDefinition(space, resource, settings.defaultSchema)
+                await updateFileDefinition(
+                    space, resource, settings.defaultSchema,
+                )
             }
             catch (error: unknown) {
-                console.error(`${resource} cannot load the definitions. ${error}`)
+                console.error(
+                    `${resource} cannot load the definitions. ${error}`,
+                )
             }
         }
 
@@ -85,7 +102,9 @@ export async function loadDefinitionFilesInWorkspace(
 export async function updateFileDefinition(
     space: Space, resource: Resource, defaultSchema?: string,
 ) {
-    const _defaultSchema = await getDefaultSchema(space, resource, defaultSchema)
+    const _defaultSchema = await getDefaultSchema(
+        space, resource, defaultSchema,
+    )
 
     const fileText = readFileSync(resource.replace(/^file:\/\//, "")).toString()
     const query = await parseQuery(fileText)
@@ -115,7 +134,10 @@ export async function updateFileDefinition(
 }
 
 function getCreateStmts(
-    fileText: string, stmt: Statement, resource: Resource, defaultSchema: string,
+    fileText: string,
+    stmt: Statement,
+    resource: Resource,
+    defaultSchema: string,
 ): Candidate[] {
     const createStmt = stmt?.stmt?.CreateStmt
     if (createStmt === undefined) {
@@ -139,10 +161,12 @@ function getCreateStmts(
             + relname.length,
         ),
     )
-    const candidates = [{
-        definition: (schemaname || defaultSchema) + "." + relname,
-        definitionLink,
-    }]
+    const candidates = [
+        {
+            definition: (schemaname || defaultSchema) + "." + relname,
+            definitionLink,
+        },
+    ]
 
     // When default schema, add raw relname candidate.
     if (schemaname === undefined || schemaname === defaultSchema) {
@@ -164,22 +188,24 @@ function getCompositeTypeStmts(
     }
     const definition = compositTypeStmt.typevar.relname
 
-    return [{
-        definition,
-        definitionLink: LocationLink.create(
-            resource,
-            getRangeFromBuffer(
-                fileText,
-                stmt.stmt_location,
-                stmt.stmt_location + stmt.stmt_len,
+    return [
+        {
+            definition,
+            definitionLink: LocationLink.create(
+                resource,
+                getRangeFromBuffer(
+                    fileText,
+                    stmt.stmt_location,
+                    stmt.stmt_location + stmt.stmt_len,
+                ),
+                getRangeFromBuffer(
+                    fileText,
+                    compositTypeStmt.typevar.location,
+                    compositTypeStmt.typevar.location + definition.length,
+                ),
             ),
-            getRangeFromBuffer(
-                fileText,
-                compositTypeStmt.typevar.location,
-                compositTypeStmt.typevar.location + definition.length,
-            ),
-        ),
-    }]
+        },
+    ]
 }
 
 function getCreateFunctionStmts(
@@ -199,22 +225,24 @@ function getCreateFunctionStmts(
             fileText, definition, stmt.stmt_location,
         )
 
-        return [{
-            definition,
-            definitionLink: LocationLink.create(
-                resource,
-                getRangeFromBuffer(
-                    fileText,
-                    stmt.stmt_location,
-                    stmt.stmt_location + stmt.stmt_len,
+        return [
+            {
+                definition,
+                definitionLink: LocationLink.create(
+                    resource,
+                    getRangeFromBuffer(
+                        fileText,
+                        stmt.stmt_location,
+                        stmt.stmt_location + stmt.stmt_len,
+                    ),
+                    getRangeFromBuffer(
+                        fileText,
+                        functionNameLocation,
+                        functionNameLocation + definition.length,
+                    ),
                 ),
-                getRangeFromBuffer(
-                    fileText,
-                    functionNameLocation,
-                    functionNameLocation + definition.length,
-                ),
-            ),
-        }]
+            },
+        ]
     })
 }
 

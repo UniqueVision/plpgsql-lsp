@@ -40,5 +40,8 @@ export function sanitizeNumberPartitionTable(word: string) {
  *              "table_name_12345678-1234-1234-1234-123456789012"
  */
 export function sanitizeUuidPartitionTable(word: string) {
-    return word.replace(/"?([a-zA-Z_]\w*)_[0-9]{8}-[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{12}"?$/, "$1")
+    return word.replace(
+        /"?([a-zA-Z_]\w*)_[0-9]{8}-[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{12}"?$/,
+        "$1",
+    )
 }

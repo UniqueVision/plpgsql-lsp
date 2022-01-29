@@ -1,11 +1,15 @@
-import { CompletionItem, CompletionItemKind, TextDocumentIdentifier } from "vscode-languageserver"
+import {
+    CompletionItem, CompletionItemKind, TextDocumentIdentifier,
+} from "vscode-languageserver"
 
 import { console } from "../server"
 import { LanguageServerSettings } from "../settings"
 import { Space } from "../space"
 
 
-export async function getCompletionItems(space: Space, textDocument: TextDocumentIdentifier) {
+export async function getCompletionItems(
+    space: Space, textDocument: TextDocumentIdentifier,
+) {
     const settings = await space.getDocumentSettings(
         textDocument.uri,
     )
@@ -100,8 +104,15 @@ async function getStoredProcedureCompletionItems(
             let paramsCustomize = "("
             funcParamItems.forEach((item, index) => {
                 paramsCustomize += "\n\t"
-                const paramName = item.replace("(", "").replace(/\s/g, "").replace(",", "")
-                paramsCustomize += `${index === 0 ? "" : ","}${paramName} := ${paramName}`
+
+                const paramName = item
+                    .replace("(", "")
+                    .replace(/\s/g, "")
+                    .replace(",", "")
+
+                paramsCustomize += (
+                    `${index === 0 ? "" : ","}${paramName} := ${paramName}`
+                )
             })
             paramsCustomize += `${funcParamItems.length > 0 ? "\n" : ""})`
 

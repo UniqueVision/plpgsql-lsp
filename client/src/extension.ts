@@ -1,8 +1,3 @@
-/* --------------------------------------------------------------------------------------------
- * Copyright (c) Microsoft Corporation. All rights reserved.
- * Licensed under the MIT License. See License.txt in the project root for license information.
- * ------------------------------------------------------------------------------------------ */
-
 import * as path from "path"
 import {
     ExtensionContext,
@@ -25,9 +20,15 @@ const clients: Map<string, LanguageClient> = new Map()
 
 const PLPGSQL_LANGUAGE_SERVER_SECTION = "plpgsqlLanguageServer"
 
-function createLanguageClient(serverOptions: ServerOptions, clientOptions: LanguageClientOptions) {
+function createLanguageClient(
+    serverOptions: ServerOptions, clientOptions: LanguageClientOptions,
+) {
     return new LanguageClient(
-        PLPGSQL_LANGUAGE_SERVER_SECTION, "PL/pgSQL Language Server", serverOptions, clientOptions)
+        PLPGSQL_LANGUAGE_SERVER_SECTION,
+        "PL/pgSQL Language Server",
+        serverOptions,
+        clientOptions,
+    )
 
 }
 
@@ -42,7 +43,13 @@ export function activate(context: ExtensionContext) {
 
     function didOpenTextDocument(document: TextDocument): void {
         // We are only interested in language mode text
-        if (document.languageId !== "postgres" || (document.uri.scheme !== "file" && document.uri.scheme !== "untitled")) {
+        if (
+            document.languageId !== "postgres"
+            || (
+                document.uri.scheme !== "file"
+                && document.uri.scheme !== "untitled"
+            )
+        ) {
             return
         }
 
@@ -59,11 +66,15 @@ export function activate(context: ExtensionContext) {
                 },
             }
             const clientOptions: LanguageClientOptions = {
-                // Register the server for plain text documents
-                documentSelector: [{ scheme: "untitled", language: "postgres" }],
+                documentSelector: [
+                    {
+                        scheme: "untitled",
+                        language: "postgres",
+                    },
+                ],
                 synchronize: {
-                    // Notify the server about file changes to '.clientrc files contained in the workspace
-                    fileEvents: Workspace.createFileSystemWatcher("**/.clientrc"),
+                    fileEvents: Workspace
+                        .createFileSystemWatcher("**/.clientrc"),
                 },
                 diagnosticCollectionName: PLPGSQL_LANGUAGE_SERVER_SECTION,
                 outputChannel,
@@ -74,25 +85,34 @@ export function activate(context: ExtensionContext) {
             return
         }
         const folder = Workspace.getWorkspaceFolder(uri)
-        // Files outside a folder can't be handled. This might depend on the language.
-        // Single file languages like JSON might handle files outside the workspace folders.
         if (!folder) {
             return
         }
 
         if (!clients.has(folder.uri.toString())) {
 
-            const debugOptions = { execArgv: ["--nolazy", `--inspect=${6171 + clients.size}`] }
+            const debugOptions = {
+                execArgv: ["--nolazy", `--inspect=${6171 + clients.size}`],
+            }
             const serverOptions = {
                 run: { module, transport: TransportKind.ipc },
-                debug: { module, transport: TransportKind.ipc, options: debugOptions },
+                debug: {
+                    module, transport: TransportKind.ipc, options: debugOptions,
+                },
             }
             const clientOptions: LanguageClientOptions = {
                 // Register the server for plain text documents
-                documentSelector: [{ scheme: "file", language: "postgres", pattern: `${folder.uri.fsPath}/**/*` }],
+                documentSelector: [
+                    {
+                        scheme: "file",
+                        language: "postgres",
+                        pattern: `${folder.uri.fsPath}/**/*`,
+                    },
+                ],
                 synchronize: {
-                    // Notify the server about file changes to '.clientrc files contained in the workspace
-                    fileEvents: Workspace.createFileSystemWatcher("**/.clientrc"),
+                    fileEvents: Workspace.createFileSystemWatcher(
+                        "**/.clientrc",
+                    ),
                 },
                 diagnosticCollectionName: PLPGSQL_LANGUAGE_SERVER_SECTION,
                 workspaceFolder: folder,
@@ -133,7 +153,12 @@ export function deactivate(): Thenable<void> | undefined {
 Languages.registerDocumentFormattingEditProvider("postgres", {
     provideDocumentFormattingEdits(_document: TextDocument): TextEdit[] {
         return []
-        // const firstLine = document.lineAt(0);
-        // return [TextEdit.insert(firstLine.range.start, '-- Formatting...\n')];
+        // const firstLine = document.lineAt(0)
+
+        // return [
+        //     TextEdit.insert(
+        //         firstLine.range.start, "-- Formatting...\n",
+        //     ),
+        // ]
     },
 })

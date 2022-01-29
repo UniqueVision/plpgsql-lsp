@@ -85,6 +85,33 @@
         "SwitchCase": 1
       }
     ],
+    "max-len": [
+      "error",
+      {
+        "code": 80,
+        "tabWidth": 4
+      }
+    ],
+    "array-bracket-newline": [
+      "error",
+      {
+        "multiline": true
+      }
+    ],
+    "array-bracket-spacing": [
+      "error",
+      "never"
+    ],
+    "object-curly-newline": [
+      "error",
+      {
+        "consistent": true
+      }
+    ],
+    "function-paren-newline": [
+      "error",
+      "consistent"
+    ],
     "@typescript-eslint/explicit-module-boundary-types": "off"
   }
 }

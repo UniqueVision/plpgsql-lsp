@@ -46,9 +46,11 @@ function getCreateFunctionList(
                 return option.DefElem.location
             })
 
-        return [{
-            functionName,
-            location: locationCandidates?.[0] || undefined,
-        }]
+        return [
+            {
+                functionName,
+                location: locationCandidates?.[0] || undefined,
+            },
+        ]
     })
 }

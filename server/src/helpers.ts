@@ -17,7 +17,9 @@ export function getWordRangeAtPosition(
     while (startChar > 0 && !separator.test(lineText.charAt(startChar - 1)))
         --startChar
     let endChar = character
-    while (endChar < lineText.length && !separator.test(lineText.charAt(endChar)))
+    while (
+        endChar < lineText.length && !separator.test(lineText.charAt(endChar))
+    )
         ++endChar
     if (startChar === endChar)
         return undefined
