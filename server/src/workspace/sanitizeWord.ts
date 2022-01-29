@@ -1,4 +1,13 @@
 /**
+ * sanitize table row type.
+ *     ex)
+ *       public.table_name%ROWTYPE
+ */
+export function sanitizeTableRowType(word: string) {
+    return word.replace(/"?([a-zA-Z_]\w*)"?%(ROWTYPE|rowtype)$/, "$1")
+}
+
+/**
  * sanitize quoted table.
  *     ex)
  *       public."table_name"
