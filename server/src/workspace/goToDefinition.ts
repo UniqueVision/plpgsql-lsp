@@ -12,6 +12,7 @@ import { Statement } from "../postgres/statement"
 import { console } from "../server"
 import { Resource, Space } from "../space"
 import { Candidate } from "../store/definitionMap"
+import { sanitizeDynamicPartitionTable, sanitizeNumberPartitionTable, sanitizeQuotedTable, sanitizeUuidPartitionTable } from "./sanitizeWord"
 
 export function getDefinitionLinks(
     space: Space,
@@ -237,49 +238,4 @@ function logSanitizedWord(word: string, sanitizingWords: string[]) {
             return JSON.stringify(word)
         }).join(" => "),
     )
-}
-
-/**
- * sanitize quoted table.
- *     ex)
- *       public."table_name"
- *              "table_name"
- */
-function sanitizeQuotedTable(word: string) {
-    return word.replace(/(^[a-zA-Z_]\w*\.)?"([a-zA-Z_]\w*)"$/, "$1$2")
-}
-
-/**
- * sanitize dynamic partition table.
- *     ex)
- *       public."table_name_$$ || partition_key || $$"
- *              "table_name_$$ || partition_key || $$"
- */
-function sanitizeDynamicPartitionTable(word: string) {
-    return word
-        .replace(/"([a-zA-Z_]\w*)_\$\$$/, "$1")
-}
-
-/**
- * sanitize number partition table.
- *     ex)
- *       public.table_name_1234
- *              table_name_1234
- *       public."table_name_1234"
- *              "table_name_1234"
- */
-function sanitizeNumberPartitionTable(word: string) {
-    return word.replace(/"?([a-zA-Z_]\w*)_[0-9]+"?$/, "$1")
-}
-
-/**
- * sanitize uuid partition table.
- *     ex)
- *       public.table_name_12345678-1234-1234-1234-123456789012
- *              table_name_12345678-1234-1234-1234-123456789012
- *       public."table_name_12345678-1234-1234-1234-123456789012"
- *              "table_name_12345678-1234-1234-1234-123456789012"
- */
-function sanitizeUuidPartitionTable(word: string) {
-    return word.replace(/"([a-zA-Z_]\w*)_[0-9]{8}-[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{12}"$/, "$1")
 }
