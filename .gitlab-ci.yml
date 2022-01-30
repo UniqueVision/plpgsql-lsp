@@ -6,10 +6,12 @@ lint:
   stage: lint
   image: node:14-bullseye-slim
   script:
+    - npm install
     - npm run lint
 
 test:
   stage: test
   image: node:14-bullseye-slim
   script:
+    - npm install
     - npm run test
