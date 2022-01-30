@@ -8,6 +8,7 @@ export interface Statement {
 
 export interface StatementItem {
   CreateStmt?: CreateStmt
+  ViewStmt?: ViewStmt
   CompositeTypeStmt?: CompositeTypeStmt
   CreateFunctionStmt?: CreateFunctionStmt
 }
@@ -17,6 +18,16 @@ export interface CreateStmt {
 }
 
 export interface CreateStmtRelation {
+  schemaname?: string
+  relname: string
+  location: uinteger
+}
+
+export interface ViewStmt {
+  view: ViewStmtRelation
+}
+
+export interface ViewStmtRelation {
   schemaname?: string
   relname: string
   location: uinteger
