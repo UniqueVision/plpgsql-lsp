@@ -33,6 +33,8 @@ export interface CompositeTypeStmtTypevar {
 }
 
 export interface CreateFunctionStmt {
+  is_procedure: boolean
+  replace: boolean
   funcname: CreateFunctionStmtFuncName[]
   returnType: CreateFunctionStmtReturnType
   options: CreateFunctionStmtOption[]
