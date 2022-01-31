@@ -7,8 +7,6 @@ cache:
     - .npm/
 
 before_script:
-  - apt-get update
-  - apt-get install -y build-essential git
   - npm ci --cache .npm --prefer-offline
   - npm install
 
@@ -21,6 +19,9 @@ lint:
 test:
   stage: test
   image: node:14-bullseye-slim
+  before_script:
+    - apt-get update
+    - apt-get install -y build-essential python git
   script:
     - cd server
     - npm install
