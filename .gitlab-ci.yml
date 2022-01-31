@@ -18,6 +18,6 @@ lint:
 
 test:
   stage: test
-  image: node:14-bullseye-slim
+  image: node:14
   script:
     - npm run test
