@@ -20,4 +20,4 @@ lint:
 test:
   stage: test
   script:
-    - npm run test --ci
+    - npm run test:ci

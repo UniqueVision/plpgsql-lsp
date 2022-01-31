@@ -114,7 +114,8 @@
     "watch": "tsc -b -w",
     "lint": "eslint ./client/src ./server/src --ext .ts,.tsx --fix",
     "postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
-    "test": "cd server; npm run test"
+    "test": "cd server; npm run test",
+    "test:ci": "cd server; npm run test --ci"
   },
   "devDependencies": {
     "@types/node": "^17.0.4",
