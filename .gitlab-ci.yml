@@ -7,6 +7,7 @@ cache:
     - .npm/
 
 before_script:
+  - apt-get install make
   - npm ci --cache .npm --prefer-offline
   - npm install
 
