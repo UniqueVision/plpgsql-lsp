@@ -8,7 +8,7 @@ cache:
 
 before_script:
   - apt-get update
-  - apt-get install build-essential
+  - apt-get install build-essential -y
   - npm ci --cache .npm --prefer-offline
   - npm install
 
