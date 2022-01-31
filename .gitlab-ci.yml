@@ -1,5 +1,3 @@
-image: node:14-bullseye-slim
-
 stages:
   - test
 
@@ -14,10 +12,12 @@ before_script:
 
 lint:
   stage: test
+  image: node:14-bullseye-slim
   script:
     - npm run lint
 
 test:
   stage: test
+  image: node:14-bullseye-slim
   script:
     - npm run test:ci
