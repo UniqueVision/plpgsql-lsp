@@ -19,7 +19,5 @@ lint:
 test:
   stage: test
   image: node:14
-  before_script:
-    - apt-get install chromium-browser
   script:
     - npm run test
