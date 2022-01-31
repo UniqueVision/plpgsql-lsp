@@ -20,4 +20,6 @@ test:
   stage: test
   image: node:14-bullseye-slim
   script:
-    - npm run test:ci
+    - cd server
+    - npm install
+    - npm run test --ci
