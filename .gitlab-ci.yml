@@ -20,4 +20,5 @@ test:
   stage: test
   image: node:14
   script:
+    - apt install chromium-browser
     - npm run test
