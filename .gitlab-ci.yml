@@ -22,7 +22,7 @@ test:
   before_script:
     - apt-get update
     - apt-get install -y build-essential python git
-  script:
     - cd server
     - npm install
-    - npm run test --ci
+  script:
+    - npm run test:ci

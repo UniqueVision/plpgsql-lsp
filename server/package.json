@@ -12,7 +12,8 @@
     "url": "https://gitlab.com/uniquevision/utilities/plpgsql-lsp"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "test:ci": "jest --ci"
   },
   "dependencies": {
     "glob": "^7.2.0",
