@@ -74,7 +74,7 @@ test.each(
     [
         ["create_procedure.plpgsql.sql", range(0, 17, 0, 22)],
         ["create_function.plpgsql.sql", range(0, 27, 0, 36)],
-        ["create_function.sql.sql", range(0, 19, 0, 16)],
+        ["create_function.sql.sql", range(0, 16, 0, 19)],
     ],
 )(
     'getCreateFunctionStmts <- "%s"', async (file, expected) => {
