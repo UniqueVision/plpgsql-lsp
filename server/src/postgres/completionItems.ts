@@ -151,7 +151,7 @@ async function getTableCompletionItems(
                 pg_class
             WHERE
                 relkind = 'p' OR (relkind = 'r' AND NOT relispartition)
-                AND relnamespace::regnamespace::TEXT = 'public'
+                AND relnamespace::regnamespace::TEXT = '${settings.defaultSchema}'
             ORDER BY
                 table_name
         `)
