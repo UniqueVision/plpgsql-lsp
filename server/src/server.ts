@@ -1,7 +1,3 @@
-/* --------------------------------------------------------------------------------------------
- * Copyright (c) Microsoft Corporation. All rights reserved.
- * Licensed under the MIT License. See License.txt in the project root for license information.
- * ------------------------------------------------------------------------------------------ */
 import {
     CompletionItem,
     createConnection,
@@ -13,12 +9,12 @@ import {
     TextDocuments,
     TextDocumentSyncKind,
 } from "vscode-languageserver/node"
-import {
-    TextDocument,
-} from "vscode-languageserver-textdocument"
+import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { getCompletionItems } from "./postgres/completionItems"
-import { validateTextDocument as _validateTextDocument } from "./postgres/validateTextDocument"
+import {
+    validateTextDocument as _validateTextDocument,
+} from "./postgres/validateTextDocument"
 import { DEFAULT_SETTINGS, LanguageServerSettings } from "./settings"
 import { Space } from "./space"
 import {
@@ -49,18 +45,14 @@ connection.onInitialize((params: InitializeParams) => {
         capabilities: {
             textDocumentSync: TextDocumentSyncKind.Incremental,
             // Tell the client that this server supports code completion.
-            completionProvider: {
-                resolveProvider: true,
-            },
+            completionProvider: { resolveProvider: true },
             // Tell the client that this server supports go to definition.
             definitionProvider: true,
         },
     }
     if (globalSpace.hasWorkspaceFolderCapability) {
         result.capabilities.workspace = {
-            workspaceFolders: {
-                supported: true,
-            },
+            workspaceFolders: { supported: true },
         }
     }
 
@@ -70,7 +62,9 @@ connection.onInitialize((params: InitializeParams) => {
 connection.onInitialized(async () => {
     if (globalSpace.hasConfigurationCapability) {
         // Register for all configuration changes.
-        connection.client.register(DidChangeConfigurationNotification.type, undefined)
+        connection.client.register(
+            DidChangeConfigurationNotification.type, undefined,
+        )
     }
     if (globalSpace.hasWorkspaceFolderCapability) {
         connection.workspace.onDidChangeWorkspaceFolders(_event => {
@@ -115,7 +109,9 @@ documents.onDidSave(async (params) => {
     ) {
         console.log("Definition updationg...")
 
-        const candidates = await updateFileDefinition(globalSpace, params.document.uri)
+        const candidates = await updateFileDefinition(
+            globalSpace, params.document.uri,
+        )
 
         if (candidates !== undefined) {
             const definitions = candidates.map(
@@ -129,7 +125,9 @@ documents.onDidSave(async (params) => {
 // This handler provides the initial list of the completion items.
 connection.onCompletion(
     async (textDocumentPosition) => {
-        return getCompletionItems(globalSpace, textDocumentPosition.textDocument)
+        return getCompletionItems(
+            globalSpace, textDocumentPosition.textDocument,
+        )
     },
 )
 
@@ -148,7 +146,12 @@ connection.onDefinition((params: DefinitionParams) => {
         const startRange = definitionLink.targetSelectionRange.start
         console.log(
             "Jump to the definition!! 🚀 "
-            + `${definitionLink.targetUri}:${startRange.line + 1}:${startRange.character + 1}`)
+            + [
+                definitionLink.targetUri,
+                startRange.line + 1,
+                startRange.character + 1,
+            ].join(":"),
+        )
     }
 
     return definitionLinks

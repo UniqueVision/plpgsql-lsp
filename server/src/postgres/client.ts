@@ -5,7 +5,9 @@ import { LanguageServerSettings } from "../settings"
 export type PostgresPool = Pool
 export type PostgresClient = PoolClient
 
-export function makePool(settings: LanguageServerSettings): PostgresPool | undefined {
+export function makePool(
+    settings: LanguageServerSettings,
+): PostgresPool | undefined {
     if (
         settings.database === undefined
         || settings.user === undefined

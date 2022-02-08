@@ -9,6 +9,8 @@ export interface LanguageServerSettings {
     defaultSchema: string;
 }
 
+export const DEFAULT_SCHEMA = "public"
+
 export const DEFAULT_SETTINGS: LanguageServerSettings = {
     host: "localhost",
     port: 5432,
@@ -16,5 +18,5 @@ export const DEFAULT_SETTINGS: LanguageServerSettings = {
     user: undefined,
     password: undefined,
     definitionFiles: undefined,
-    defaultSchema: "public",
+    defaultSchema: DEFAULT_SCHEMA,
 }

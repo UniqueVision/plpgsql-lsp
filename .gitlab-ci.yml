@@ -1,0 +1,28 @@
+stages:
+  - test
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .npm/
+
+before_script:
+  - npm ci --cache .npm --prefer-offline
+  - npm install
+
+lint:
+  stage: test
+  image: node:14-bullseye-slim
+  script:
+    - npm run lint
+
+test:
+  stage: test
+  image: node:14-bullseye-slim
+  before_script:
+    - apt-get update
+    - apt-get install -y build-essential python git
+    - cd server
+    - npm install
+  script:
+    - npm run test:ci

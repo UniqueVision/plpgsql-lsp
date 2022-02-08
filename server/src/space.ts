@@ -1,6 +1,8 @@
 import minimatch from "minimatch"
 import path from "path"
-import { ClientCapabilities, Connection, TextDocuments } from "vscode-languageserver"
+import {
+    ClientCapabilities, Connection, TextDocuments,
+} from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { PLPGSQL_LANGUAGE_SERVER_SECTION } from "./helpers"
@@ -36,7 +38,11 @@ export class Space {
 
     definitionMap: DefinitionMap
 
-    constructor(connection: Connection, documents: TextDocuments<TextDocument>, capabilities: ClientCapabilities) {
+    constructor(
+        connection: Connection,
+        documents: TextDocuments<TextDocument>,
+        capabilities: ClientCapabilities,
+    ) {
         this.globalSettings = DEFAULT_SETTINGS
         this.documentSettings = new Map()
 
@@ -101,12 +107,16 @@ export class Space {
             return undefined
         }
 
-        return workspaceCandidates.sort((a, b) => b.uri.length - a.uri.length)[0]
+        return workspaceCandidates.sort(
+            (a, b) => b.uri.length - a.uri.length,
+        )[0]
     }
 
     async isDefinitionMapTarget(resource: Resource) {
         const settings = await this.getDocumentSettings(resource)
-        const workSpaceUri = (await this.getWorkSpaceFolder(resource))?.uri || ""
+        const workSpaceUri = (
+            await this.getWorkSpaceFolder(resource)
+        )?.uri || ""
 
         if (settings.definitionFiles === undefined) {
             return false

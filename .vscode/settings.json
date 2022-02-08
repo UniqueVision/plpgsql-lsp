@@ -1,5 +1,8 @@
 {
   "editor.tabSize": 4,
+  "editor.rulers": [
+    80
+  ],
   "eslint.enable": true,
   "files.trimFinalNewlines": true,
   "editor.formatOnSave": true,

@@ -124,8 +124,7 @@ async function checkStaticAnalysis(
                         (pcf).context AS context
                     FROM
                         plpgsql_check_function_tb('${functionName}') AS pcf
-                `,
-            )
+                `)
             const rows: StaticAnalysisItem[] = result.rows
 
             if (rows.length === 0) {

@@ -1,7 +1,22 @@
 import { Position, Range, uinteger } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
+import { Resource, Space } from "./space"
+
 export const PLPGSQL_LANGUAGE_SERVER_SECTION = "plpgsqlLanguageServer"
+
+export async function getDefaultSchema(
+    space: Space, resource: Resource, defaultSchema?: string,
+) {
+    if (defaultSchema === undefined) {
+        const settings = await space.getDocumentSettings(resource)
+
+        return settings.defaultSchema
+    }
+    else {
+        return defaultSchema
+    }
+}
 
 export function getWordRangeAtPosition(
     document: TextDocument, position: Position,
@@ -17,7 +32,9 @@ export function getWordRangeAtPosition(
     while (startChar > 0 && !separator.test(lineText.charAt(startChar - 1)))
         --startChar
     let endChar = character
-    while (endChar < lineText.length && !separator.test(lineText.charAt(endChar)))
+    while (
+        endChar < lineText.length && !separator.test(lineText.charAt(endChar))
+    )
         ++endChar
     if (startChar === endChar)
         return undefined
