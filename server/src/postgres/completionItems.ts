@@ -25,6 +25,57 @@ export async function getCompletionItems(
         })
 }
 
+async function getTableCompletionItems(
+    space: Space, settings: LanguageServerSettings,
+) {
+    const pgClient = await space.getPgClient(settings)
+    if (pgClient === undefined) {
+        return []
+    }
+
+    let completionItems: CompletionItem[] = []
+    try {
+        const results = await pgClient.query(`
+            SELECT
+                relnamespace::regnamespace::TEXT || '.' || relname AS table_name
+            FROM
+                pg_class
+            WHERE
+                relkind = 'p' OR (relkind = 'r' AND NOT relispartition)
+            UNION
+            SELECT
+                relname AS table_name
+            FROM
+                pg_class
+            WHERE
+                relkind = 'p' OR (relkind = 'r' AND NOT relispartition)
+                AND relnamespace::regnamespace::TEXT = '${settings.defaultSchema}'
+            ORDER BY
+                table_name
+        `)
+        const formattedResults = results.rows.map((row, index) => {
+            const tableName = `${row["table_name"]}`
+
+            return {
+                label: tableName,
+                kind: CompletionItemKind.Struct,
+                data: index,
+                detail: tableName,
+                document: tableName,
+            }
+        })
+        completionItems = completionItems.concat(formattedResults)
+    }
+    catch (error: unknown) {
+        console.error(`${error}`)
+    }
+    finally {
+        pgClient.release()
+    }
+
+    return completionItems
+}
+
 async function getStoredFunctionCompletionItems(
     space: Space, settings: LanguageServerSettings,
 ) {
@@ -85,57 +136,6 @@ async function getStoredFunctionCompletionItems(
                 detail: definition,
                 document: proname,
                 insertText: proname + paramsCustomize,
-            }
-        })
-        completionItems = completionItems.concat(formattedResults)
-    }
-    catch (error: unknown) {
-        console.error(`${error}`)
-    }
-    finally {
-        pgClient.release()
-    }
-
-    return completionItems
-}
-
-async function getTableCompletionItems(
-    space: Space, settings: LanguageServerSettings,
-) {
-    const pgClient = await space.getPgClient(settings)
-    if (pgClient === undefined) {
-        return []
-    }
-
-    let completionItems: CompletionItem[] = []
-    try {
-        const results = await pgClient.query(`
-            SELECT
-                relnamespace::regnamespace::TEXT || '.' || relname AS table_name
-            FROM
-                pg_class
-            WHERE
-                relkind = 'p' OR (relkind = 'r' AND NOT relispartition)
-            UNION
-            SELECT
-                relname AS table_name
-            FROM
-                pg_class
-            WHERE
-                relkind = 'p' OR (relkind = 'r' AND NOT relispartition)
-                AND relnamespace::regnamespace::TEXT = '${settings.defaultSchema}'
-            ORDER BY
-                table_name
-        `)
-        const formattedResults = results.rows.map((row, index) => {
-            const tableName = `${row["table_name"]}`
-
-            return {
-                label: tableName,
-                kind: CompletionItemKind.Struct,
-                data: index,
-                detail: tableName,
-                document: tableName,
             }
         })
         completionItems = completionItems.concat(formattedResults)
