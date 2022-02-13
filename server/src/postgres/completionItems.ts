@@ -161,60 +161,46 @@ async function getTypeCompletionItems(
     let completionItems: CompletionItem[] = []
     try {
         const results = await pgClient.query(`
-            SELECT
-                n.nspname || '.' || t.typname as type_name
-            FROM
-                pg_type t
-                LEFT JOIN pg_catalog.pg_namespace n ON
-                    n.oid = t.typnamespace
-            WHERE
-                (t.typrelid = 0 OR (
-                        SELECT
-                            c.relkind = 'c'
-                        FROM
-                            pg_catalog.pg_class c
-                        WHERE
-                            c.oid = t.typrelid
+            WITH types AS (
+                SELECT
+                    n.nspname as schema_name,
+                    t.typname as type_name
+                FROM
+                    pg_type t
+                    LEFT JOIN pg_catalog.pg_namespace n ON
+                        n.oid = t.typnamespace
+                WHERE
+                    (t.typrelid = 0 OR (
+                            SELECT
+                                c.relkind = 'c'
+                            FROM
+                                pg_catalog.pg_class c
+                            WHERE
+                                c.oid = t.typrelid
+                        )
                     )
-                )
-                AND NOT EXISTS(
-                    SELECT
-                        1
-                    FROM
-                        pg_catalog.pg_type el
-                    WHERE
-                        el.oid = t.typelem
-                        AND el.typarray = t.oid
-                )
-                AND n.nspname NOT IN ('pg_catalog', 'information_schema')
+                    AND NOT EXISTS(
+                        SELECT
+                            1
+                        FROM
+                            pg_catalog.pg_type el
+                        WHERE
+                            el.oid = t.typelem
+                            AND el.typarray = t.oid
+                    )
+                    AND n.nspname NOT IN ('pg_catalog', 'information_schema')
+            )
+            SELECT
+                schema_name || '.' || type_name as type_name
+            FROM
+                types
             UNION
             SELECT
-                t.typname as type_name
+                type_name
             FROM
-                pg_type t
-                LEFT JOIN pg_catalog.pg_namespace n ON
-                    n.oid = t.typnamespace
+                types
             WHERE
-                (t.typrelid = 0 OR (
-                        SELECT
-                            c.relkind = 'c'
-                        FROM
-                            pg_catalog.pg_class c
-                        WHERE
-                            c.oid = t.typrelid
-                    )
-                )
-                AND NOT EXISTS(
-                    SELECT
-                        1
-                    FROM
-                        pg_catalog.pg_type el
-                    WHERE
-                        el.oid = t.typelem
-                        AND el.typarray = t.oid
-                )
-                AND n.nspname NOT IN ('pg_catalog', 'information_schema')
-                AND n.nspname = 'public'
+                schema_name = '${settings.defaultSchema}'
             ORDER BY
                 type_name
         `)
