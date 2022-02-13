@@ -14,8 +14,10 @@ export async function getCompletionItems(
         textDocument.uri,
     )
 
-    return (await getTableCompletionItems(space, settings))
+    return ([] as CompletionItem[])
+        .concat(await getTableCompletionItems(space, settings))
         .concat(await getStoredProcedureCompletionItems(space, settings))
+        .concat(await getTypeCompletionItems(space, settings))
         .map((item, index) => {
             item.data = index
 
@@ -134,6 +136,97 @@ async function getTableCompletionItems(
                 data: index,
                 detail: tableName,
                 document: tableName,
+            }
+        })
+        completionItems = completionItems.concat(formattedResults)
+    }
+    catch (error: unknown) {
+        console.error(`${error}`)
+    }
+    finally {
+        pgClient.release()
+    }
+
+    return completionItems
+}
+
+async function getTypeCompletionItems(
+    space: Space, settings: LanguageServerSettings,
+) {
+    const pgClient = await space.getPgClient(settings)
+    if (pgClient === undefined) {
+        return []
+    }
+
+    let completionItems: CompletionItem[] = []
+    try {
+        const results = await pgClient.query(`
+            SELECT
+                n.nspname || '.' || t.typname as type_name
+            FROM
+                pg_type t
+                LEFT JOIN pg_catalog.pg_namespace n ON
+                    n.oid = t.typnamespace
+            WHERE
+                (t.typrelid = 0 OR (
+                        SELECT
+                            c.relkind = 'c'
+                        FROM
+                            pg_catalog.pg_class c
+                        WHERE
+                            c.oid = t.typrelid
+                    )
+                )
+                AND NOT EXISTS(
+                    SELECT
+                        1
+                    FROM
+                        pg_catalog.pg_type el
+                    WHERE
+                        el.oid = t.typelem
+                        AND el.typarray = t.oid
+                )
+                AND n.nspname NOT IN ('pg_catalog', 'information_schema')
+            UNION
+            SELECT
+                t.typname as type_name
+            FROM
+                pg_type t
+                LEFT JOIN pg_catalog.pg_namespace n ON
+                    n.oid = t.typnamespace
+            WHERE
+                (t.typrelid = 0 OR (
+                        SELECT
+                            c.relkind = 'c'
+                        FROM
+                            pg_catalog.pg_class c
+                        WHERE
+                            c.oid = t.typrelid
+                    )
+                )
+                AND NOT EXISTS(
+                    SELECT
+                        1
+                    FROM
+                        pg_catalog.pg_type el
+                    WHERE
+                        el.oid = t.typelem
+                        AND el.typarray = t.oid
+                )
+                AND n.nspname NOT IN ('pg_catalog', 'information_schema')
+                AND n.nspname = 'public'
+            ORDER BY
+                type_name
+        `)
+        const formattedResults = results.rows.map((row, index) => {
+            const typeName = `${row["type_name"]}`
+
+            return {
+                label: typeName,
+                kind: CompletionItemKind.Value,
+                data: index,
+                detail: typeName,
+                document: typeName,
             }
         })
         completionItems = completionItems.concat(formattedResults)
