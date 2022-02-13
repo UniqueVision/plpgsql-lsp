@@ -16,7 +16,7 @@ export async function getCompletionItems(
 
     return ([] as CompletionItem[])
         .concat(await getTableCompletionItems(space, settings))
-        .concat(await getStoredProcedureCompletionItems(space, settings))
+        .concat(await getStoredFunctionCompletionItems(space, settings))
         .concat(await getTypeCompletionItems(space, settings))
         .map((item, index) => {
             item.data = index
@@ -25,7 +25,7 @@ export async function getCompletionItems(
         })
 }
 
-async function getStoredProcedureCompletionItems(
+async function getStoredFunctionCompletionItems(
     space: Space, settings: LanguageServerSettings,
 ) {
     const pgClient = await space.getPgClient(settings)
