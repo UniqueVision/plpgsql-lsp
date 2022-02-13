@@ -2,13 +2,11 @@
 
 ## Features
 
-- [x] table name completion.
-- [x] stored procedure/function name completion.
-- [x] stored procedure/function args completion.
-- [x] go to the type/table/function definition.
-- [x] syntax check.
-- [x] static analysis check (when [plpgsql_check](https://github.com/okbob/plpgsql_check) use) .
-- [x] Multi-root Workspaces support.
+- type/table/view/function/procedure name completion.
+- go to the type/table/view/function/procedure definition.
+- syntax check.
+- static analysis check (when [plpgsql_check](https://github.com/okbob/plpgsql_check) use) .
+- Multi-root Workspaces support.
 
 ## Usage
 
