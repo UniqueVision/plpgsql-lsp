@@ -14,54 +14,13 @@ export async function getCompletionItems(
         textDocument.uri,
     )
 
-    return (await getKeywordCompletionItems(space, settings))
-        .concat(await getTableCompletionItems(space, settings))
+    return (await getTableCompletionItems(space, settings))
         .concat(await getStoredProcedureCompletionItems(space, settings))
         .map((item, index) => {
             item.data = index
 
             return item
         })
-}
-
-async function getKeywordCompletionItems(
-    space: Space, settings: LanguageServerSettings,
-) {
-    const pgClient = await space.getPgClient(settings)
-    if (pgClient === undefined) {
-        return []
-    }
-
-    let completionItems: CompletionItem[] = []
-    try {
-        // https://dataedo.com/kb/query/postgresql/list-stored-procedures
-        const results = await pgClient.query(`
-            SELECT
-                word
-            FROM
-                pg_get_keywords()
-            WHERE
-                catdesc = 'reserved'
-        `)
-
-        completionItems = results.rows.map((row, index) => {
-            const keyword = row["word"].toUpperCase()
-
-            return {
-                label: keyword,
-                kind: CompletionItemKind.Keyword,
-                data: index,
-            }
-        })
-    }
-    catch (error: unknown) {
-        console.error(`${error}`)
-    }
-    finally {
-        pgClient.release()
-    }
-
-    return completionItems
 }
 
 async function getStoredProcedureCompletionItems(
