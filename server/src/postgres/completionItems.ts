@@ -15,6 +15,7 @@ export async function getCompletionItems(
     )
 
     return ([] as CompletionItem[])
+        .concat(await getSchemaCompletionItems(space, settings))
         .concat(await getTableCompletionItems(space, settings))
         .concat(await getStoredFunctionCompletionItems(space, settings))
         .concat(await getTypeCompletionItems(space, settings))
@@ -23,6 +24,45 @@ export async function getCompletionItems(
 
             return item
         })
+}
+
+async function getSchemaCompletionItems(
+    space: Space, settings: LanguageServerSettings,
+) {
+    const pgClient = await space.getPgClient(settings)
+    if (pgClient === undefined) {
+        return []
+    }
+
+    let completionItems: CompletionItem[] = []
+    try {
+        const results = await pgClient.query(`
+            SELECT
+                schema_name
+            FROM
+                information_schema.schemata
+        `)
+        const formattedResults = results.rows.map((row, index) => {
+            const schemaName = `${row["schema_name"]}`
+
+            return {
+                label: schemaName,
+                kind: CompletionItemKind.Module,
+                data: index,
+                detail: schemaName,
+                document: schemaName,
+            }
+        })
+        completionItems = completionItems.concat(formattedResults)
+    }
+    catch (error: unknown) {
+        console.error(`${error}`)
+    }
+    finally {
+        pgClient.release()
+    }
+
+    return completionItems
 }
 
 async function getTableCompletionItems(
@@ -37,31 +77,25 @@ async function getTableCompletionItems(
     try {
         const results = await pgClient.query(`
             SELECT
-                relnamespace::regnamespace::TEXT || '.' || relname AS table_name
+                relname AS table_name,
+                relnamespace::regnamespace::TEXT AS schema_name
             FROM
                 pg_class
             WHERE
                 relkind = 'p' OR (relkind = 'r' AND NOT relispartition)
-            UNION
-            SELECT
-                relname AS table_name
-            FROM
-                pg_class
-            WHERE
-                relkind = 'p' OR (relkind = 'r' AND NOT relispartition)
-                AND relnamespace::regnamespace::TEXT = '${settings.defaultSchema}'
             ORDER BY
                 table_name
         `)
         const formattedResults = results.rows.map((row, index) => {
             const tableName = `${row["table_name"]}`
+            const schemaName = `${row["schema_name"]}`
 
             return {
                 label: tableName,
                 kind: CompletionItemKind.Struct,
                 data: index,
-                detail: tableName,
-                document: tableName,
+                detail: schemaName || "." || tableName,
+                document: schemaName || "." || tableName,
             }
         })
         completionItems = completionItems.concat(formattedResults)
@@ -101,6 +135,8 @@ async function getStoredFunctionCompletionItems(
             LEFT JOIN pg_language AS t_pg_language ON (
                 t_pg_proc.prolang = t_pg_language.oid
             )
+            ORDER BY
+                proname
         `)
 
         const formattedResults = results.rows.map((row, index) => {
@@ -161,58 +197,47 @@ async function getTypeCompletionItems(
     let completionItems: CompletionItem[] = []
     try {
         const results = await pgClient.query(`
-            WITH types AS (
-                SELECT
-                    n.nspname as schema_name,
-                    t.typname as type_name
-                FROM
-                    pg_type t
-                    LEFT JOIN pg_catalog.pg_namespace n ON
-                        n.oid = t.typnamespace
-                WHERE
-                    (t.typrelid = 0 OR (
-                            SELECT
-                                c.relkind = 'c'
-                            FROM
-                                pg_catalog.pg_class c
-                            WHERE
-                                c.oid = t.typrelid
-                        )
-                    )
-                    AND NOT EXISTS(
-                        SELECT
-                            1
-                        FROM
-                            pg_catalog.pg_type el
-                        WHERE
-                            el.oid = t.typelem
-                            AND el.typarray = t.oid
-                    )
-                    AND n.nspname NOT IN ('pg_catalog', 'information_schema')
-            )
             SELECT
-                schema_name || '.' || type_name as type_name
+                n.nspname as schema_name,
+                t.typname as type_name
             FROM
-                types
-            UNION
-            SELECT
-                type_name
-            FROM
-                types
+                pg_type t
+                LEFT JOIN pg_catalog.pg_namespace n ON
+                    n.oid = t.typnamespace
             WHERE
-                schema_name = '${settings.defaultSchema}'
+                (
+                    t.typrelid = 0 OR (
+                        SELECT
+                            c.relkind = 'c'
+                        FROM
+                            pg_catalog.pg_class c
+                        WHERE
+                            c.oid = t.typrelid
+                    )
+                )
+                AND NOT EXISTS(
+                    SELECT
+                        1
+                    FROM
+                        pg_catalog.pg_type el
+                    WHERE
+                        el.oid = t.typelem
+                        AND el.typarray = t.oid
+                )
+                AND n.nspname NOT IN ('pg_catalog', 'information_schema')
             ORDER BY
                 type_name
         `)
         const formattedResults = results.rows.map((row, index) => {
             const typeName = `${row["type_name"]}`
+            const schemaName = `${row["schema_name"]}`
 
             return {
                 label: typeName,
                 kind: CompletionItemKind.Value,
                 data: index,
-                detail: typeName,
-                document: typeName,
+                detail: schemaName || "." || typeName,
+                document: schemaName || "." || typeName,
             }
         })
         completionItems = completionItems.concat(formattedResults)
