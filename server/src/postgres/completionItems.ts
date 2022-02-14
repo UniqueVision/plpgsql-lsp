@@ -1,29 +1,63 @@
 import {
-    CompletionItem, CompletionItemKind, TextDocumentIdentifier,
+    CompletionItem, CompletionItemKind, CompletionParams,
 } from "vscode-languageserver"
 
+import { getWordRangeAtPosition } from "../helpers"
 import { console } from "../server"
 import { LanguageServerSettings } from "../settings"
 import { Space } from "../space"
 
 
 export async function getCompletionItems(
-    space: Space, textDocument: TextDocumentIdentifier,
+    space: Space, params: CompletionParams,
 ) {
+
     const settings = await space.getDocumentSettings(
-        textDocument.uri,
+        params.textDocument.uri,
     )
 
-    return ([] as CompletionItem[])
-        .concat(await getSchemaCompletionItems(space, settings))
-        .concat(await getTableCompletionItems(space, settings))
-        .concat(await getStoredFunctionCompletionItems(space, settings))
-        .concat(await getTypeCompletionItems(space, settings))
+    const textDocument = space.documents.get(
+        params.textDocument.uri,
+    )
+    if (textDocument === undefined) {
+        return undefined
+    }
+
+    const wordRange = getWordRangeAtPosition(textDocument, params.position)
+    if (wordRange === undefined) {
+        return undefined
+    }
+
+    const schmaCompletionItems = await getSchemaCompletionItems(space, settings)
+
+    const schema = getSchema(
+        textDocument.getText(wordRange),
+        schmaCompletionItems.map(item => {
+            return item.label
+        }),
+        settings,
+    )
+
+    return schmaCompletionItems
+        .concat(await getTableCompletionItems(space, schema, settings))
+        .concat(await getStoredFunctionCompletionItems(space, schema, settings))
+        .concat(await getTypeCompletionItems(space, schema, settings))
         .map((item, index) => {
             item.data = index
 
             return item
         })
+}
+
+function getSchema(word: string, schemas: string[], settings: LanguageServerSettings) {
+    const schemaMatch = word.match(`^(${schemas.join("|")})."?`)
+
+    if (schemaMatch === null) {
+        return settings.defaultSchema
+    }
+    else {
+        return schemaMatch[1]
+    }
 }
 
 async function getSchemaCompletionItems(
@@ -38,9 +72,11 @@ async function getSchemaCompletionItems(
     try {
         const results = await pgClient.query(`
             SELECT
-                schema_name
+                DISTINCT schema_name
             FROM
                 information_schema.schemata
+            ORDER BY
+                schema_name
         `)
         const formattedResults = results.rows.map((row, index) => {
             const schemaName = `${row["schema_name"]}`
@@ -66,7 +102,7 @@ async function getSchemaCompletionItems(
 }
 
 async function getTableCompletionItems(
-    space: Space, settings: LanguageServerSettings,
+    space: Space, schema: string, settings: LanguageServerSettings,
 ) {
     const pgClient = await space.getPgClient(settings)
     if (pgClient === undefined) {
@@ -77,25 +113,24 @@ async function getTableCompletionItems(
     try {
         const results = await pgClient.query(`
             SELECT
-                relname AS table_name,
-                relnamespace::regnamespace::TEXT AS schema_name
+                DISTINCT relname AS table_name
             FROM
                 pg_class
             WHERE
                 relkind = 'p' OR (relkind = 'r' AND NOT relispartition)
+                AND relnamespace::regnamespace::TEXT = '${schema}'
             ORDER BY
                 table_name
         `)
         const formattedResults = results.rows.map((row, index) => {
             const tableName = `${row["table_name"]}`
-            const schemaName = `${row["schema_name"]}`
 
             return {
                 label: tableName,
                 kind: CompletionItemKind.Struct,
                 data: index,
-                detail: schemaName || "." || tableName,
-                document: schemaName || "." || tableName,
+                detail: `${schema}.${tableName}`,
+                document: `${schema}.${tableName}`,
             }
         })
         completionItems = completionItems.concat(formattedResults)
@@ -111,7 +146,7 @@ async function getTableCompletionItems(
 }
 
 async function getStoredFunctionCompletionItems(
-    space: Space, settings: LanguageServerSettings,
+    space: Space, schema: string, settings: LanguageServerSettings,
 ) {
     const pgClient = await space.getPgClient(settings)
     if (pgClient === undefined) {
@@ -123,8 +158,8 @@ async function getStoredFunctionCompletionItems(
         // https://dataedo.com/kb/query/postgresql/list-stored-procedures
         const results = await pgClient.query(`
             SELECT
-                t_pg_proc.proname
-                ,CASE
+                DISTINCT t_pg_proc.proname,
+                CASE
                 WHEN t_pg_language.lanname = 'internal' THEN
                     t_pg_proc.prosrc
                 ELSE
@@ -135,6 +170,8 @@ async function getStoredFunctionCompletionItems(
             LEFT JOIN pg_language AS t_pg_language ON (
                 t_pg_proc.prolang = t_pg_language.oid
             )
+            WHERE
+                t_pg_proc.pronamespace::regnamespace::TEXT = '${schema}'
             ORDER BY
                 proname
         `)
@@ -170,7 +207,7 @@ async function getStoredFunctionCompletionItems(
                 kind: CompletionItemKind.Function,
                 data: index,
                 detail: definition,
-                document: proname,
+                document: `${schema}.${proname}`,
                 insertText: proname + paramsCustomize,
             }
         })
@@ -187,7 +224,7 @@ async function getStoredFunctionCompletionItems(
 }
 
 async function getTypeCompletionItems(
-    space: Space, settings: LanguageServerSettings,
+    space: Space, schema: string, settings: LanguageServerSettings,
 ) {
     const pgClient = await space.getPgClient(settings)
     if (pgClient === undefined) {
@@ -198,8 +235,7 @@ async function getTypeCompletionItems(
     try {
         const results = await pgClient.query(`
             SELECT
-                n.nspname as schema_name,
-                t.typname as type_name
+                DISTINCT t.typname as type_name
             FROM
                 pg_type t
                 LEFT JOIN pg_catalog.pg_namespace n ON
@@ -224,20 +260,19 @@ async function getTypeCompletionItems(
                         el.oid = t.typelem
                         AND el.typarray = t.oid
                 )
-                AND n.nspname NOT IN ('pg_catalog', 'information_schema')
+                AND n.nspname = '${schema}'
             ORDER BY
                 type_name
         `)
         const formattedResults = results.rows.map((row, index) => {
             const typeName = `${row["type_name"]}`
-            const schemaName = `${row["schema_name"]}`
 
             return {
                 label: typeName,
                 kind: CompletionItemKind.Value,
                 data: index,
-                detail: schemaName || "." || typeName,
-                document: schemaName || "." || typeName,
+                detail: `${schema}.${typeName}`,
+                document: `${schema}.${typeName}`,
             }
         })
         completionItems = completionItems.concat(formattedResults)

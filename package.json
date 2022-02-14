@@ -113,7 +113,7 @@
     "compile": "tsc -b",
     "compile:client": "tsc -b ./client/tsconfig.json",
     "compile:server": "tsc -b ./server/tsconfig.json",
-    "watch": "tsc -b -w",
+    "watch": "npm run webpack && tsc -b -w",
     "package": "vsce package --target win32-x64 && vsce package --target linux-x64",
     "package:mac": "vsce package --target darwin-x64",
     "lint": "eslint ./client/src ./server/src --ext .ts,.tsx --fix",
