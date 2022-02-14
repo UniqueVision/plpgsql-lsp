@@ -85,7 +85,7 @@ async function getSchemaCompletionItems(
                 label: schemaName,
                 kind: CompletionItemKind.Module,
                 data: index,
-                detail: schemaName,
+                detail: `SCHEMA ${schemaName}`,
                 document: schemaName,
             }
         })
@@ -113,23 +113,35 @@ async function getTableCompletionItems(
     try {
         const results = await pgClient.query(`
             SELECT
-                DISTINCT relname AS table_name
+                table_name,
+                json_agg(
+                    json_build_object(
+                        'column_name', column_name,
+                        'data_type', data_type
+                    )
+                    ORDER BY
+                        ordinal_position
+                ) AS fields
             FROM
-                pg_class
+                information_schema.columns
             WHERE
-                relkind = 'p' OR (relkind = 'r' AND NOT relispartition)
-                AND relnamespace::regnamespace::TEXT = '${schema}'
-            ORDER BY
+                table_schema = '${schema}'
+            GROUP BY
                 table_name
         `)
         const formattedResults = results.rows.map((row, index) => {
             const tableName = `${row["table_name"]}`
+            const fields = (
+                row["fields"] as { column_name: string, data_type: string }[]
+            ).map(field => {
+                return `${field["column_name"]} ${field["data_type"].toUpperCase()}`
+            })
 
             return {
                 label: tableName,
                 kind: CompletionItemKind.Struct,
                 data: index,
-                detail: `${schema}.${tableName}`,
+                detail: `TABLE ${schema}.${tableName}(\n  ${fields.join(",\n  ")}\n)`,
                 document: `${schema}.${tableName}`,
             }
         })
