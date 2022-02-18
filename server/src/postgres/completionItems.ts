@@ -10,7 +10,7 @@ import { Space } from "../space"
 
 export async function getCompletionItems(
     space: Space, params: CompletionParams,
-) {
+): Promise<CompletionItem[] | undefined> {
 
     const settings = await space.getDocumentSettings(
         params.textDocument.uri,
@@ -38,10 +38,15 @@ export async function getCompletionItems(
         settings,
     )
 
-    return schmaCompletionItems
+    const completionItems = schmaCompletionItems
         .concat(await getTableCompletionItems(space, schema, settings))
         .concat(await getStoredFunctionCompletionItems(space, schema, settings))
         .concat(await getTypeCompletionItems(space, schema, settings))
+
+    return completionItems
+        .concat(await getKeywordCompletionItems(
+            textDocument.getText(), completionItems,
+        ))
         .map((item, index) => {
             item.data = index
 
@@ -49,7 +54,9 @@ export async function getCompletionItems(
         })
 }
 
-function getSchema(word: string, schemas: string[], settings: LanguageServerSettings) {
+function getSchema(
+    word: string, schemas: string[], settings: LanguageServerSettings,
+): string {
     const schemaMatch = word.match(`^(${schemas.join("|")})."?`)
 
     if (schemaMatch === null) {
@@ -62,7 +69,7 @@ function getSchema(word: string, schemas: string[], settings: LanguageServerSett
 
 async function getSchemaCompletionItems(
     space: Space, settings: LanguageServerSettings,
-) {
+): Promise<CompletionItem[]> {
     const pgClient = await space.getPgClient(settings)
     if (pgClient === undefined) {
         return []
@@ -86,7 +93,6 @@ async function getSchemaCompletionItems(
                 kind: CompletionItemKind.Module,
                 data: index,
                 detail: `SCHEMA ${schemaName}`,
-                document: schemaName,
             }
         })
         completionItems = completionItems.concat(formattedResults)
@@ -103,7 +109,7 @@ async function getSchemaCompletionItems(
 
 async function getTableCompletionItems(
     space: Space, schema: string, settings: LanguageServerSettings,
-) {
+): Promise<CompletionItem[]> {
     const pgClient = await space.getPgClient(settings)
     if (pgClient === undefined) {
         return []
@@ -142,7 +148,6 @@ async function getTableCompletionItems(
                 kind: CompletionItemKind.Struct,
                 data: index,
                 detail: `TABLE ${schema}.${tableName}(\n  ${fields.join(",\n  ")}\n)`,
-                document: `${schema}.${tableName}`,
             }
         })
         completionItems = completionItems.concat(formattedResults)
@@ -159,7 +164,7 @@ async function getTableCompletionItems(
 
 async function getStoredFunctionCompletionItems(
     space: Space, schema: string, settings: LanguageServerSettings,
-) {
+): Promise<CompletionItem[]> {
     const pgClient = await space.getPgClient(settings)
     if (pgClient === undefined) {
         return []
@@ -219,7 +224,6 @@ async function getStoredFunctionCompletionItems(
                 kind: CompletionItemKind.Function,
                 data: index,
                 detail: definition,
-                document: `${schema}.${proname}`,
                 insertText: proname + paramsCustomize,
             }
         })
@@ -237,7 +241,7 @@ async function getStoredFunctionCompletionItems(
 
 async function getTypeCompletionItems(
     space: Space, schema: string, settings: LanguageServerSettings,
-) {
+): Promise<CompletionItem[]> {
     const pgClient = await space.getPgClient(settings)
     if (pgClient === undefined) {
         return []
@@ -284,7 +288,6 @@ async function getTypeCompletionItems(
                 kind: CompletionItemKind.Value,
                 data: index,
                 detail: `${schema}.${typeName}`,
-                document: `${schema}.${typeName}`,
             }
         })
         completionItems = completionItems.concat(formattedResults)
@@ -297,4 +300,28 @@ async function getTypeCompletionItems(
     }
 
     return completionItems
+}
+
+async function getKeywordCompletionItems(
+    text: string, completionItems: CompletionItem[],
+): Promise<CompletionItem[]> {
+    const completionNames = new Set(completionItems.map(item => {
+        return item.label
+    }))
+
+    const keywordSet = new Set(
+        text
+            .split(/[\s,.():="']+/)
+            .filter(x => { return x.length >= 4 && !completionNames.has(x) }),
+    )
+
+    return Array.from(keywordSet)
+        .sort()
+        .map((keyword, index) => {
+            return {
+                label: keyword,
+                kind: CompletionItemKind.Keyword,
+                data: index,
+            }
+        })
 }
