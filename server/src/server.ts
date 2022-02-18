@@ -126,7 +126,7 @@ documents.onDidSave(async (params) => {
 connection.onCompletion(
     async (textDocumentPosition) => {
         return getCompletionItems(
-            globalSpace, textDocumentPosition.textDocument,
+            globalSpace, textDocumentPosition,
         )
     },
 )
