@@ -309,13 +309,11 @@ async function getKeywordCompletionItems(
         return item.label
     }))
 
-    const keywordSet = new Set(
-        text
-            .split(/[\s,.():="']+/)
-            .filter(x => { return x.length >= 4 && !completionNames.has(x) }),
-    )
+    const keywords = text
+        .split(/[\s,.():="']+/)
+        .filter(x => { return x.length >= 4 && !completionNames.has(x) })
 
-    return Array.from(keywordSet)
+    return Array.from(new Set(keywords))
         .sort()
         .map((keyword, index) => {
             return {
