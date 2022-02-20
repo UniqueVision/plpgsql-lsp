@@ -56,6 +56,7 @@ export async function getFunctionDefinitions(
                 ${schemaCondition}
                 ${functionNameCondition}
             ORDER BY
+                ns.nspname,
                 p.proname
         `)
         definitions = results.rows.map(row => {
