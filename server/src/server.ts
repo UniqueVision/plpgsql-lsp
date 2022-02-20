@@ -16,7 +16,7 @@ import { getCompletionItems } from "./services/completionItems"
 import {
     getDefinitionLinks, loadDefinitionFilesInWorkspace, updateFileDefinition,
 } from "./services/definition"
-import { getHover } from "./services/Hover"
+import { getHover } from "./services/hover"
 import {
     validateTextDocument as _validateTextDocument,
 } from "./services/validateTextDocument"
