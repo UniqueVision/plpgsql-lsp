@@ -4,6 +4,7 @@
 
 - type/table/view/function/procedure name completion.
 - go to the type/table/view/function/procedure definition.
+- hover type/table/view/function/procedure definition.
 - syntax check.
 - static analysis check (when [plpgsql_check](https://github.com/okbob/plpgsql_check) use) .
 - Multi-root Workspaces support.

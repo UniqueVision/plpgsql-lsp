@@ -20,7 +20,7 @@ test.each(
     'getCreateStmts <- "%s"', async (file, expected) => {
         const fileText = getFileText(file)
         const stmts = getCreateStmts(
-            fileText, await getStmt(fileText), `file://${file}`,
+            fileText, await getStmt(fileText), `file://${file}`, "public",
         )
 
         expect(stmts.length).toBe(expected.length)
@@ -44,7 +44,7 @@ test.each(
     'getViewStmts <- "%s"', async (file, expected) => {
         const fileText = getFileText(file)
         const stmts = getViewStmts(
-            fileText, await getStmt(fileText), `file://${file}`,
+            fileText, await getStmt(fileText), `file://${file}`, "public",
         )
 
         expect(stmts.length).toBe(expected.length)
@@ -56,17 +56,19 @@ test.each(
 )
 
 test.each(
-    [["create_type.sql", range(0, 12, 0, 21)]],
+    [["create_type.sql", Array(2).fill(range(0, 12, 0, 21))]],
 )(
     'getCompositeTypeStmts <- "%s"', async (file, expected) => {
         const fileText = getFileText(file)
         const stmts = getCompositeTypeStmts(
-            fileText, await getStmt(fileText), `file://${file}`,
+            fileText, await getStmt(fileText), `file://${file}`, "public",
         )
 
-        expect(stmts.length).toBe(1)
-        expect(stmts[0].definitionLink.targetSelectionRange)
-            .toStrictEqual(expected)
+        expect(stmts.length).toBe(expected.length)
+        for (let i = 0; i < stmts.length; i++) {
+            expect(stmts[i].definitionLink.targetSelectionRange)
+                .toStrictEqual(expected[i])
+        }
     },
 )
 

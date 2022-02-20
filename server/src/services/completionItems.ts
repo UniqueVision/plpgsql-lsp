@@ -3,6 +3,8 @@ import {
 } from "vscode-languageserver"
 
 import { getWordRangeAtPosition } from "../helpers"
+import { getTableDefinitions } from "../postgres/queries/getTableDefinitions"
+import { getTypeDefinitions } from "../postgres/queries/getTypeDefinitions"
 import { console } from "../server"
 import { LanguageServerSettings } from "../settings"
 import { Space } from "../space"
@@ -40,7 +42,7 @@ export async function getCompletionItems(
 
     const completionItems = schmaCompletionItems
         .concat(await getTableCompletionItems(space, schema, settings))
-        .concat(await getStoredFunctionCompletionItems(space, schema, settings))
+        .concat(await getFunctionCompletionItems(space, schema, settings))
         .concat(await getTypeCompletionItems(space, schema, settings))
 
     return completionItems
@@ -115,54 +117,25 @@ async function getTableCompletionItems(
         return []
     }
 
-    let completionItems: CompletionItem[] = []
-    try {
-        const results = await pgClient.query(`
-            SELECT
-                table_name,
-                json_agg(
-                    json_build_object(
-                        'column_name', column_name,
-                        'data_type', data_type
-                    )
-                    ORDER BY
-                        ordinal_position
-                ) AS fields
-            FROM
-                information_schema.columns
-            WHERE
-                table_schema = '${schema}'
-            GROUP BY
-                table_name
-        `)
-        const formattedResults = results.rows.map((row, index) => {
-            const tableName = `${row["table_name"]}`
-            const fields = (
-                row["fields"] as { column_name: string, data_type: string }[]
-            ).map(field => {
-                return `${field["column_name"]} ${field["data_type"].toUpperCase()}`
-            })
+    return (await getTableDefinitions(pgClient, schema, settings.defaultSchema))
+        .map(({ tableName, fields }, index) => {
+            let fieldsString = ""
+            if (fields.length > 0) {
+                fieldsString = "\n  " + fields.map(({ columnName, dataType }) => {
+                    return `${columnName} ${dataType}`
+                }).join(",\n  ") + "\n"
+            }
 
             return {
                 label: tableName,
                 kind: CompletionItemKind.Struct,
                 data: index,
-                detail: `TABLE ${schema}.${tableName}(\n  ${fields.join(",\n  ")}\n)`,
+                detail: `TABLE ${schema}.${tableName}(${fieldsString})`,
             }
         })
-        completionItems = completionItems.concat(formattedResults)
-    }
-    catch (error: unknown) {
-        console.error(`${error}`)
-    }
-    finally {
-        pgClient.release()
-    }
-
-    return completionItems
 }
 
-async function getStoredFunctionCompletionItems(
+async function getFunctionCompletionItems(
     space: Space, schema: string, settings: LanguageServerSettings,
 ): Promise<CompletionItem[]> {
     const pgClient = await space.getPgClient(settings)
@@ -247,59 +220,22 @@ async function getTypeCompletionItems(
         return []
     }
 
-    let completionItems: CompletionItem[] = []
-    try {
-        const results = await pgClient.query(`
-            SELECT
-                DISTINCT t.typname as type_name
-            FROM
-                pg_type t
-                LEFT JOIN pg_catalog.pg_namespace n ON
-                    n.oid = t.typnamespace
-            WHERE
-                (
-                    t.typrelid = 0 OR (
-                        SELECT
-                            c.relkind = 'c'
-                        FROM
-                            pg_catalog.pg_class c
-                        WHERE
-                            c.oid = t.typrelid
-                    )
-                )
-                AND NOT EXISTS(
-                    SELECT
-                        1
-                    FROM
-                        pg_catalog.pg_type el
-                    WHERE
-                        el.oid = t.typelem
-                        AND el.typarray = t.oid
-                )
-                AND n.nspname = '${schema}'
-            ORDER BY
-                type_name
-        `)
-        const formattedResults = results.rows.map((row, index) => {
-            const typeName = `${row["type_name"]}`
+    return (await getTypeDefinitions(pgClient, schema, settings.defaultSchema))
+        .map(({ typeName, fields }, index) => {
+            let fieldsString = ""
+            if (fields.length > 0) {
+                fieldsString = "\n  " + fields.map(({ columnName, dataType }) => {
+                    return `${columnName} ${dataType}`
+                }).join(",\n  ") + "\n"
+            }
 
             return {
                 label: typeName,
                 kind: CompletionItemKind.Value,
                 data: index,
-                detail: `${schema}.${typeName}`,
+                detail: `TYPE ${schema}.${typeName}(${fieldsString})`,
             }
         })
-        completionItems = completionItems.concat(formattedResults)
-    }
-    catch (error: unknown) {
-        console.error(`${error}`)
-    }
-    finally {
-        pgClient.release()
-    }
-
-    return completionItems
 }
 
 async function getKeywordCompletionItems(
@@ -310,7 +246,7 @@ async function getKeywordCompletionItems(
     }))
 
     const keywords = text
-        .split(/[\s,.():="']+/)
+        .split(/[\s,.():="'-]+/)
         .filter(x => { return x.length >= 4 && !completionNames.has(x) })
 
     return Array.from(new Set(keywords))

@@ -7,9 +7,9 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 import {
     getLineRangeFromBuffer, getNonSpaceCharacter, getTextAllRange,
 } from "../helpers"
+import { PostgresClient } from "../postgres/client"
 import { Space } from "../space"
-import { getFunctionList } from "../workspace/getFunctionList"
-import { PostgresClient } from "./client"
+import { getFunctionList } from "./_getFunctionList"
 
 export async function validateTextDocument(
     space: Space,

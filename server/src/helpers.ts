@@ -18,15 +18,35 @@ export async function getDefaultSchema(
     }
 }
 
+export function getSchemaCandidate(
+    candidate: string,
+): { schema?: string, candidate: string } | undefined {
+    const separated = candidate.split(".")
+
+    if (separated.length === 1) {
+        return {
+            schema: undefined,
+            candidate: separated[0],
+        }
+    }
+    else if (separated.length === 2) {
+        return {
+            schema: separated[0],
+            candidate: separated[1],
+        }
+    }
+    else {
+        return undefined
+    }
+}
+
 export function getWordRangeAtPosition(
     document: TextDocument, position: Position,
 ): Range | undefined {
     const lines = document.getText().split("\n")
-    const line = Math.min(lines.length - 1, Math.max(0, position.line))
+    const line = Math.max(0, Math.min(lines.length - 1, position.line))
     const lineText = lines[line]
-    const character = Math.min(
-        lineText.length - 1, Math.max(0, position.character),
-    )
+    const character = Math.max(0, Math.min(lineText.length - 1, position.character))
     const separator = /[\s,()':=;]/
     let startChar = character
     while (startChar > 0 && !separator.test(lineText.charAt(startChar - 1)))
