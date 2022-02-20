@@ -7,6 +7,8 @@ interface FunctionDifinition {
     functionIdentityArgs: string[]
     isSetOf: boolean
     returnType: string
+    volatile?: string
+    parallel?: string
 }
 
 export async function getFunctionDefinitions(
@@ -45,7 +47,27 @@ export async function getFunctionDefinitions(
                     ', '
                 ) as identity_arguments,
                 p.proretset AS is_setof,
-                t.typname AS return_type
+                t.typname AS return_type,
+                CASE p.provolatile
+                WHEN 'i' THEN
+                    'IMMUTABLE'
+                WHEN 's' THEN
+                    'STABLE'
+                WHEN 'v' THEN
+                    'VOLATILE'
+                ELSE
+                    NULL
+                END AS volatile,
+                CASE p.proparallel
+                WHEN 's' THEN
+                    'PARALLEL SAFE'
+                WHEN 'r' THEN
+                    'PARALLEL RESTRICTED'
+                WHEN 'u' THEN
+                    'PARALLEL UNSAFE'
+                ELSE
+                    NULL
+                END AS parallel
             FROM
                 pg_proc p
                 INNER JOIN pg_namespace ns ON
@@ -67,6 +89,8 @@ export async function getFunctionDefinitions(
                 functionIdentityArgs: row.identity_arguments as string[],
                 isSetOf: row.is_setof,
                 returnType: row.return_type,
+                volatile: row.volatile,
+                parallel: row.parallel,
             }
         })
     }

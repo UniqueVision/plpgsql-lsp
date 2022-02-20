@@ -160,6 +160,8 @@ async function getFunctionCompletionItems(
             functionIdentityArgs,
             returnType,
             isSetOf,
+            volatile,
+            parallel,
         }, index) => {
             let argsString = ""
             if (functionArgs.length > 0) {
@@ -185,14 +187,27 @@ async function getFunctionCompletionItems(
             if (isSetOf) {
                 returnString = `SETOF ${returnType}`
             }
+            let detail = (
+                `FUNCTION ${schema}.${functionName}(${argsString})\n`
+                + `RETURNS ${returnString}`
+            )
+
+            const functionInfos = []
+            if (volatile !== undefined) {
+                functionInfos.push(volatile)
+            }
+            if (parallel !== undefined) {
+                functionInfos.push(parallel)
+            }
+            if (functionInfos.length !== 0) {
+                detail += `\n${functionInfos.join(" ")}`
+            }
 
             return {
                 label: functionName,
                 kind: CompletionItemKind.Value,
                 data: index,
-                detail: (
-                    `FUNCTION ${schema}.${functionName}(${argsString})`
-                    + ` RETURNS ${returnString}`),
+                detail,
                 insertText: `${schemaString}${functionName}(${callArgsString})`,
             }
         })

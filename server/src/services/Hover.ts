@@ -130,7 +130,7 @@ async function getFunctionHover(
 
     const values = []
     for (const {
-        schema, functionName, functionArgs, returnType, isSetOf,
+        schema, functionName, functionArgs, returnType, isSetOf, volatile, parallel,
     } of definitions) {
         let argsString = ""
         if (functionArgs.length > 0) {
@@ -142,9 +142,21 @@ async function getFunctionHover(
             returnString = `SETOF ${returnType}`
         }
 
-        values.push(
-            `FUNCTION ${schema}.${functionName}(${argsString}) RETURNS ${returnString}`,
-        )
+        let value =
+            `FUNCTION ${schema}.${functionName}(${argsString})\nRETURNS ${returnString}`
+
+        const functionInfos = []
+        if (volatile !== undefined) {
+            functionInfos.push(volatile)
+        }
+        if (parallel !== undefined) {
+            functionInfos.push(parallel)
+        }
+        if (functionInfos.length !== 0) {
+            value += `\n${functionInfos.join(" ")}`
+        }
+
+        values.push(value)
     }
 
     return {
