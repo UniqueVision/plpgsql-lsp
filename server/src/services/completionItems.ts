@@ -3,6 +3,7 @@ import {
 } from "vscode-languageserver"
 
 import { getWordRangeAtPosition } from "../helpers"
+import { getFunctionDefinitions } from "../postgres/queries/getFunctionDefinitions"
 import { getTableDefinitions } from "../postgres/queries/getTableDefinitions"
 import { getTypeDefinitions } from "../postgres/queries/getTypeDefinitions"
 import { console } from "../server"
@@ -29,15 +30,15 @@ export async function getCompletionItems(
     if (wordRange === undefined) {
         return undefined
     }
+    const word = textDocument.getText(wordRange)
 
     const schmaCompletionItems = await getSchemaCompletionItems(space, settings)
 
-    const schema = getSchema(
-        textDocument.getText(wordRange),
+    const schema = findSchema(
+        word,
         schmaCompletionItems.map(item => {
             return item.label
         }),
-        settings,
     )
 
     const completionItems = schmaCompletionItems
@@ -47,7 +48,7 @@ export async function getCompletionItems(
 
     return completionItems
         .concat(await getKeywordCompletionItems(
-            textDocument.getText(), completionItems,
+            word, textDocument.getText(), completionItems,
         ))
         .map((item, index) => {
             item.data = index
@@ -56,13 +57,13 @@ export async function getCompletionItems(
         })
 }
 
-function getSchema(
-    word: string, schemas: string[], settings: LanguageServerSettings,
-): string {
+function findSchema(
+    word: string, schemas: string[],
+): string | undefined {
     const schemaMatch = word.match(`^(${schemas.join("|")})."?`)
 
     if (schemaMatch === null) {
-        return settings.defaultSchema
+        return undefined
     }
     else {
         return schemaMatch[1]
@@ -110,7 +111,9 @@ async function getSchemaCompletionItems(
 }
 
 async function getTableCompletionItems(
-    space: Space, schema: string, settings: LanguageServerSettings,
+    space: Space,
+    schema: string | undefined,
+    settings: LanguageServerSettings,
 ): Promise<CompletionItem[]> {
     const pgClient = await space.getPgClient(settings)
     if (pgClient === undefined) {
@@ -136,84 +139,67 @@ async function getTableCompletionItems(
 }
 
 async function getFunctionCompletionItems(
-    space: Space, schema: string, settings: LanguageServerSettings,
+    space: Space,
+    schema: string | undefined,
+    settings: LanguageServerSettings,
 ): Promise<CompletionItem[]> {
     const pgClient = await space.getPgClient(settings)
     if (pgClient === undefined) {
         return []
     }
+    let schemaString = ""
+    if (schema !== undefined) {
+        schemaString = `${schema}.`
+    }
 
-    let completionItems: CompletionItem[] = []
-    try {
-        // https://dataedo.com/kb/query/postgresql/list-stored-procedures
-        const results = await pgClient.query(`
-            SELECT
-                DISTINCT t_pg_proc.proname,
-                CASE
-                WHEN t_pg_language.lanname = 'internal' THEN
-                    t_pg_proc.prosrc
-                ELSE
-                    pg_get_functiondef(t_pg_proc.oid)
-                END AS definition
-            FROM
-                pg_proc AS t_pg_proc
-            LEFT JOIN pg_language AS t_pg_language ON (
-                t_pg_proc.prolang = t_pg_language.oid
-            )
-            WHERE
-                t_pg_proc.pronamespace::regnamespace::TEXT = '${schema}'
-            ORDER BY
-                proname
-        `)
+    return (await getFunctionDefinitions(pgClient, schema, settings.defaultSchema))
+        .map(({
+            schema,
+            functionName,
+            functionArgs,
+            functionIdentityArgs,
+            returnType,
+            isSetOf,
+        }, index) => {
+            let argsString = ""
+            if (functionArgs.length > 0) {
+                argsString = "\n  " + functionArgs.join(",\n  ") + "\n"
+            }
 
-        const formattedResults = results.rows.map((row, index) => {
-            const proname = `${row["proname"]}`
-            const definition = `${row["definition"]}`
+            let callArgsString = ""
+            if (functionIdentityArgs.length > 0) {
+                callArgsString = "\n  " + functionIdentityArgs.map(arg => {
+                    const splitted = arg.split(" ")
+                    if (splitted.length === 1 || splitted[1] === '"any"') {
+                        // argument
+                        return splitted[0]
+                    }
+                    else {
+                        // keyword argument
+                        return `${splitted[0]} := ${splitted[0]}`
+                    }
+                }).join(",\n  ") + "\n"
+            }
 
-            // definitionから引数リストをとります
-            const funcParams = definition.match(/\(.*\)/g)
-            const funcParam = funcParams ? funcParams[0] : ""
-            const funcParamItems = funcParam.match(/\(\w*\s|,\s\w*\s/g) || []
+            let returnString = returnType
+            if (isSetOf) {
+                returnString = `SETOF ${returnType}`
+            }
 
-            // 引数リストからクエリーを生成します
-            let paramsCustomize = "("
-            funcParamItems.forEach((item, index) => {
-                paramsCustomize += "\n\t"
-
-                const paramName = item
-                    .replace("(", "")
-                    .replace(/\s/g, "")
-                    .replace(",", "")
-
-                paramsCustomize += (
-                    `${index === 0 ? "" : ","}${paramName} := ${paramName}`
-                )
-            })
-            paramsCustomize += `${funcParamItems.length > 0 ? "\n" : ""})`
-
-            // CompletionItem返します
             return {
-                label: proname,
-                kind: CompletionItemKind.Function,
+                label: functionName,
+                kind: CompletionItemKind.Value,
                 data: index,
-                detail: definition,
-                insertText: proname + paramsCustomize,
+                detail: (
+                    `FUNCTION ${schema}.${functionName}(${argsString})`
+                    + ` RETURNS ${returnString}`),
+                insertText: `${schemaString}${functionName}(${callArgsString})`,
             }
         })
-        completionItems = completionItems.concat(formattedResults)
-    }
-    catch (error: unknown) {
-        console.error(`${error}`)
-    }
-    finally {
-        pgClient.release()
-    }
-
-    return completionItems
 }
 
 async function getTypeCompletionItems(
-    space: Space, schema: string, settings: LanguageServerSettings,
+    space: Space, schema: string | undefined, settings: LanguageServerSettings,
 ): Promise<CompletionItem[]> {
     const pgClient = await space.getPgClient(settings)
     if (pgClient === undefined) {
@@ -221,7 +207,7 @@ async function getTypeCompletionItems(
     }
 
     return (await getTypeDefinitions(pgClient, schema, settings.defaultSchema))
-        .map(({ typeName, fields }, index) => {
+        .map(({ schema, typeName, fields }, index) => {
             let fieldsString = ""
             if (fields.length > 0) {
                 fieldsString = "\n  " + fields.map(({ columnName, dataType }) => {
@@ -239,15 +225,15 @@ async function getTypeCompletionItems(
 }
 
 async function getKeywordCompletionItems(
-    text: string, completionItems: CompletionItem[],
+    word: string, documentText: string, completionItems: CompletionItem[],
 ): Promise<CompletionItem[]> {
     const completionNames = new Set(completionItems.map(item => {
         return item.label
     }))
 
-    const keywords = text
+    const keywords = documentText
         .split(/[\s,.():="'-]+/)
-        .filter(x => { return x.length >= 4 && !completionNames.has(x) })
+        .filter(x => { return x.length >= 4 && !completionNames.has(x) && x !== word })
 
     return Array.from(new Set(keywords))
         .sort()

@@ -130,11 +130,11 @@ async function getFunctionHover(
 
     const values = []
     for (const {
-        schema, functionName, fnctionArgs, returnType, isSetOf,
+        schema, functionName, functionArgs, returnType, isSetOf,
     } of definitions) {
         let argsString = ""
-        if (fnctionArgs.length > 0) {
-            argsString = "\n  " + fnctionArgs.join(",\n  ") + "\n"
+        if (functionArgs.length > 0) {
+            argsString = "\n  " + functionArgs.join(",\n  ") + "\n"
         }
 
         let returnString = returnType

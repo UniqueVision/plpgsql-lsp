@@ -3,7 +3,8 @@ import { PostgresClient } from "../client"
 interface FunctionDifinition {
     schema: string
     functionName: string
-    fnctionArgs: string[]
+    functionArgs: string[]
+    functionIdentityArgs: string[]
     isSetOf: boolean
     returnType: string
 }
@@ -39,6 +40,10 @@ export async function getFunctionDefinitions(
                     pg_get_function_arguments(p.oid),
                     ', '
                 ) as arguments,
+                string_to_array(
+                    pg_get_function_identity_arguments(p.oid),
+                    ', '
+                ) as identity_arguments,
                 p.proretset AS is_setof,
                 t.typname AS return_type
             FROM
@@ -57,7 +62,8 @@ export async function getFunctionDefinitions(
             return {
                 schema: row.schema,
                 functionName: row.function_name,
-                fnctionArgs: row.arguments as string[],
+                functionArgs: row.arguments as string[],
+                functionIdentityArgs: row.identity_arguments as string[],
                 isSetOf: row.is_setof,
                 returnType: row.return_type,
             }
