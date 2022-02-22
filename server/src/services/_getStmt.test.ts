@@ -82,7 +82,7 @@ test.each(
     'getCreateFunctionStmts <- "%s"', async (file, expected) => {
         const fileText = getFileText(file)
         const stmts = getCreateFunctionStmts(
-            fileText, await getStmt(fileText), `file://${file}`,
+            fileText, await getStmt(fileText), `file://${file}`, "public",
         )
 
         expect(stmts.length).toBe(1)

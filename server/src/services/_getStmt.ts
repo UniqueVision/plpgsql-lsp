@@ -144,39 +144,65 @@ export function getCompositeTypeStmts(
 }
 
 export function getCreateFunctionStmts(
-    fileText: string, stmt: Statement, resource: Resource,
+    fileText: string,
+    stmt: Statement,
+    resource: Resource,
+    defaultSchema: string,
 ): Candidate[] {
     const createFunctionStmt = stmt?.stmt?.CreateFunctionStmt
     if (createFunctionStmt === undefined) {
         return []
     }
+    const nameList = createFunctionStmt.funcname
+        .filter(name => "String" in name)
+        .map(name => name.String.str)
 
-    return createFunctionStmt.funcname.flatMap(funcname => {
-        const definition = funcname.String.str
-        if (definition === undefined) {
-            return []
-        }
-        const functionNameLocation = findIndexFromBuffer(
-            fileText, definition, stmt.stmt_location,
-        )
+    let schemaname = undefined
+    let functionName = undefined
+    if (nameList.length === 0) {
+        return []
+    }
+    else if (nameList.length === 1) {
+        functionName = nameList[0]
+    }
+    else if (nameList.length === 2) {
+        schemaname = nameList[0]
+        functionName = nameList[1]
+    }
+    else {
+        return []
+    }
+    const definition = nameList.join(".")
 
-        return [
-            {
-                definition,
-                definitionLink: LocationLink.create(
-                    resource,
-                    getRangeFromBuffer(
-                        fileText,
-                        stmt.stmt_location,
-                        stmt.stmt_location + stmt.stmt_len,
-                    ),
-                    getRangeFromBuffer(
-                        fileText,
-                        functionNameLocation,
-                        functionNameLocation + definition.length,
-                    ),
-                ),
-            },
-        ]
-    })
+    const functionNameLocation = findIndexFromBuffer(
+        fileText, definition, stmt.stmt_location,
+    )
+    const definitionLink = LocationLink.create(
+        resource,
+        getRangeFromBuffer(
+            fileText,
+            stmt.stmt_location,
+            stmt.stmt_location + stmt.stmt_len,
+        ),
+        getRangeFromBuffer(
+            fileText,
+            functionNameLocation,
+            functionNameLocation + definition.length,
+        ),
+    )
+
+    const candidates = [
+        {
+            definition: (schemaname || defaultSchema) + "." + functionName,
+            definitionLink,
+        },
+    ]
+    if (schemaname === undefined || schemaname === defaultSchema) {
+        candidates.push({
+            definition: functionName,
+            definitionLink,
+        })
+    }
+
+    return candidates
 }

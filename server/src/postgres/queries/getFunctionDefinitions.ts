@@ -7,6 +7,7 @@ interface FunctionDefinition {
     functionIdentityArgs: string[]
     isSetOf: boolean
     returnType: string
+    languageName: string
     volatile?: string
     parallel?: string
 }
@@ -48,6 +49,7 @@ export async function getFunctionDefinitions(
                 ) as identity_arguments,
                 p.proretset AS is_setof,
                 t.typname AS return_type,
+                l.lanname AS language_name,
                 CASE p.provolatile
                 WHEN 'i' THEN
                     'IMMUTABLE'
@@ -74,6 +76,8 @@ export async function getFunctionDefinitions(
                     p.pronamespace = ns.oid
                 INNER JOIN pg_type t ON
                     p.prorettype = t.oid
+                INNER JOIN pg_language l ON
+                    p.prolang = l.oid
             WHERE
                 ${schemaCondition}
                 ${functionNameCondition}
@@ -89,6 +93,7 @@ export async function getFunctionDefinitions(
                 functionIdentityArgs: row.identity_arguments as string[],
                 isSetOf: row.is_setof,
                 returnType: row.return_type,
+                languageName: row.language_name,
                 volatile: row.volatile,
                 parallel: row.parallel,
             }
@@ -111,6 +116,7 @@ export function makeFunctionDefinitionText(definition: FunctionDefinition): stri
         functionArgs,
         returnType,
         isSetOf,
+        languageName,
         volatile,
         parallel,
     } = definition
@@ -125,10 +131,11 @@ export function makeFunctionDefinitionText(definition: FunctionDefinition): stri
         returnString = `SETOF ${returnType}`
     }
 
-    let definitionText = (
-        `FUNCTION ${schema}.${functionName}(${argsString})\n`
-                + `RETURNS ${returnString}`
-    )
+    let definitionText = [
+        `FUNCTION ${schema}.${functionName}(${argsString})`,
+        `  RETURNS ${returnString}`,
+        `  LANGUAGE ${languageName}`,
+    ].join("\n")
 
     const functionInfos = []
     if (volatile !== undefined) {
@@ -138,7 +145,7 @@ export function makeFunctionDefinitionText(definition: FunctionDefinition): stri
         functionInfos.push(parallel)
     }
     if (functionInfos.length !== 0) {
-        definitionText += `\n${functionInfos.join(" ")}`
+        definitionText += `\n  ${functionInfos.join(" ")}`
     }
 
     return definitionText

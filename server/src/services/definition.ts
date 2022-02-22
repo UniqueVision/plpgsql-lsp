@@ -127,7 +127,7 @@ export async function updateFileDefinition(
             return getCompositeTypeStmts(fileText, stmt, resource, _defaultSchema)
         }
         else if (stmt?.stmt?.CreateFunctionStmt !== undefined) {
-            return getCreateFunctionStmts(fileText, stmt, resource)
+            return getCreateFunctionStmts(fileText, stmt, resource, _defaultSchema)
         }
         else {
             return []
