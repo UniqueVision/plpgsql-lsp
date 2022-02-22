@@ -7,7 +7,6 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 import {
     getLineRangeFromBuffer, getNonSpaceCharacter, getTextAllRange,
 } from "../helpers"
-import { PostgresClient } from "../postgres/client"
 import { Space } from "../space"
 import { getFunctionList } from "./_getFunctionList"
 
@@ -15,25 +14,37 @@ export async function validateTextDocument(
     space: Space,
     textDocument: TextDocument,
 ): Promise<void> {
+    let diagnostics = await checkSyntax(space, textDocument)
+
+    if (diagnostics === undefined) {
+        diagnostics = await checkStaticAnalysis(space, textDocument)
+    }
+
+    // Send the computed diagnostics to VSCode.
+    space.connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
+}
+
+async function checkSyntax(
+    space: Space,
+    textDocument: TextDocument,
+): Promise<Diagnostic[] | undefined> {
     const pgClient = await space.getPgClient(
         await space.getDocumentSettings(textDocument.uri),
     )
 
     if (pgClient === undefined) {
-        return
+        return undefined
     }
 
-    let diagnostics: Diagnostic[] = []
     const fileText = textDocument.getText()
 
     try {
         await pgClient.query("BEGIN")
-        // check syntax
-        await checkSyntax(pgClient, fileText)
-
-        diagnostics = await checkStaticAnalysis(pgClient, textDocument, space)
+        await pgClient.query(fileText)
     }
     catch (error: unknown) {
+        console.log(`SyntaxError: ${JSON.stringify(error)}`)
+
         let errorRange: Range | undefined = undefined
         if (error instanceof DatabaseError && error.position !== undefined) {
             const errorPosition = Number(error.position)
@@ -69,30 +80,35 @@ export async function validateTextDocument(
                 },
             ]
         }
-        diagnostics = [diagnosic]
+
+        return [diagnosic]
     }
     finally {
         await pgClient.query("ROLLBACK")
         pgClient.release()
     }
 
-    // Send the computed diagnostics to VSCode.
-    space.connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
-}
-
-async function checkSyntax(pgClient: PostgresClient, fileText: string) {
-    await pgClient.query(fileText)
+    return undefined
 }
 
 async function checkStaticAnalysis(
-    pgClient: PostgresClient,
-    textDocument: TextDocument,
     space: Space,
-) {
+    textDocument: TextDocument,
+) : Promise<Diagnostic[]> {
     const diagnostics: Diagnostic[] = []
     const fileText = textDocument.getText()
 
+    const pgClient = await space.getPgClient(
+        await space.getDocumentSettings(textDocument.uri),
+    )
+
+    if (pgClient === undefined) {
+        return []
+    }
+
     try {
+        await pgClient.query("BEGIN")
+        await pgClient.query(fileText)
         const extensionCheck = await pgClient.query(`
             SELECT
                 extname
@@ -178,7 +194,10 @@ async function checkStaticAnalysis(
     }
     catch (error: unknown) {
         console.log(`StaticAnalysisError: ${JSON.stringify(error)}`)
-        throw error
+    }
+    finally {
+        await pgClient.query("ROLLBACK")
+        pgClient.release()
     }
 
     return diagnostics
