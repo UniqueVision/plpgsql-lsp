@@ -3,9 +3,15 @@ import {
 } from "vscode-languageserver"
 
 import { getWordRangeAtPosition } from "../helpers"
-import { getFunctionDefinitions } from "../postgres/queries/getFunctionDefinitions"
-import { getTableDefinitions } from "../postgres/queries/getTableDefinitions"
-import { getTypeDefinitions } from "../postgres/queries/getTypeDefinitions"
+import {
+    getFunctionDefinitions, makeFunctionDefinitionText, makeInsertFunctionText,
+} from "../postgres/queries/getFunctionDefinitions"
+import {
+    getTableDefinitions, makeTableDefinitionText,
+} from "../postgres/queries/getTableDefinitions"
+import {
+    getTypeDefinitions, makeTypeDefinitionText,
+} from "../postgres/queries/getTypeDefinitions"
 import { console } from "../server"
 import { LanguageServerSettings } from "../settings"
 import { Space } from "../space"
@@ -121,19 +127,12 @@ async function getTableCompletionItems(
     }
 
     return (await getTableDefinitions(pgClient, schema, settings.defaultSchema))
-        .map(({ tableName, fields }, index) => {
-            let fieldsString = ""
-            if (fields.length > 0) {
-                fieldsString = "\n  " + fields.map(({ columnName, dataType }) => {
-                    return `${columnName} ${dataType}`
-                }).join(",\n  ") + "\n"
-            }
-
+        .map((definition, index) => {
             return {
-                label: tableName,
+                label: definition.tableName,
                 kind: CompletionItemKind.Struct,
                 data: index,
-                detail: `TABLE ${schema}.${tableName}(${fieldsString})`,
+                detail: makeTableDefinitionText(definition),
             }
         })
 }
@@ -147,68 +146,15 @@ async function getFunctionCompletionItems(
     if (pgClient === undefined) {
         return []
     }
-    let schemaString = ""
-    if (schema !== undefined) {
-        schemaString = `${schema}.`
-    }
 
     return (await getFunctionDefinitions(pgClient, schema, settings.defaultSchema))
-        .map(({
-            schema,
-            functionName,
-            functionArgs,
-            functionIdentityArgs,
-            returnType,
-            isSetOf,
-            volatile,
-            parallel,
-        }, index) => {
-            let argsString = ""
-            if (functionArgs.length > 0) {
-                argsString = "\n  " + functionArgs.join(",\n  ") + "\n"
-            }
-
-            let callArgsString = ""
-            if (functionIdentityArgs.length > 0) {
-                callArgsString = "\n  " + functionIdentityArgs.map(arg => {
-                    const splitted = arg.split(" ")
-                    if (splitted.length === 1 || splitted[1] === '"any"') {
-                        // argument
-                        return splitted[0]
-                    }
-                    else {
-                        // keyword argument
-                        return `${splitted[0]} := ${splitted[0]}`
-                    }
-                }).join(",\n  ") + "\n"
-            }
-
-            let returnString = returnType
-            if (isSetOf) {
-                returnString = `SETOF ${returnType}`
-            }
-            let detail = (
-                `FUNCTION ${schema}.${functionName}(${argsString})\n`
-                + `RETURNS ${returnString}`
-            )
-
-            const functionInfos = []
-            if (volatile !== undefined) {
-                functionInfos.push(volatile)
-            }
-            if (parallel !== undefined) {
-                functionInfos.push(parallel)
-            }
-            if (functionInfos.length !== 0) {
-                detail += `\n${functionInfos.join(" ")}`
-            }
-
+        .map((definition, index) => {
             return {
-                label: functionName,
+                label: definition.functionName,
                 kind: CompletionItemKind.Value,
                 data: index,
-                detail,
-                insertText: `${schemaString}${functionName}(${callArgsString})`,
+                detail: makeFunctionDefinitionText(definition),
+                insertText: makeInsertFunctionText(definition),
             }
         })
 }
@@ -222,19 +168,12 @@ async function getTypeCompletionItems(
     }
 
     return (await getTypeDefinitions(pgClient, schema, settings.defaultSchema))
-        .map(({ schema, typeName, fields }, index) => {
-            let fieldsString = ""
-            if (fields.length > 0) {
-                fieldsString = "\n  " + fields.map(({ columnName, dataType }) => {
-                    return `${columnName} ${dataType}`
-                }).join(",\n  ") + "\n"
-            }
-
+        .map((definition, index) => {
             return {
-                label: typeName,
+                label: definition.typeName,
                 kind: CompletionItemKind.Value,
                 data: index,
-                detail: `TYPE ${schema}.${typeName}(${fieldsString})`,
+                detail: makeTypeDefinitionText(definition),
             }
         })
 }

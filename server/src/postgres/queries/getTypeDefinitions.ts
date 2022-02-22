@@ -1,6 +1,6 @@
 import { PostgresClient } from "../client"
 
-interface TypeDifinition {
+interface TypeDefinition {
     schema: string
     typeName: string
     fields: {
@@ -14,8 +14,8 @@ export async function getTypeDefinitions(
     schema: string | undefined,
     defaultSchema: string,
     typeName?: string,
-): Promise<TypeDifinition[]> {
-    let definitions: TypeDifinition[] = []
+): Promise<TypeDefinition[]> {
+    let definitions: TypeDefinition[] = []
 
     let schemaCondition = ""
     if (schema === undefined) {
@@ -138,4 +138,20 @@ export async function getTypeDefinitions(
     }
 
     return definitions
+}
+
+
+export function makeTypeDefinitionText(definition: TypeDefinition): string {
+    const {
+        schema, typeName, fields,
+    } = definition
+
+    let fieldsString = ""
+    if (fields.length > 0) {
+        fieldsString = "\n" + fields.map(({ columnName, dataType }) => {
+            return `  ${columnName} ${dataType}`
+        }).join(",\n") + "\n"
+    }
+
+    return `TYPE ${schema}.${typeName}(${fieldsString})`
 }

@@ -1,9 +1,15 @@
 import { Hover, HoverParams } from "vscode-languageserver"
 
 import { getSchemaCandidate, getWordRangeAtPosition } from "../helpers"
-import { getFunctionDefinitions } from "../postgres/queries/getFunctionDefinitions"
-import { getTableDefinitions } from "../postgres/queries/getTableDefinitions"
-import { getTypeDefinitions } from "../postgres/queries/getTypeDefinitions"
+import {
+    getFunctionDefinitions, makeFunctionDefinitionText,
+} from "../postgres/queries/getFunctionDefinitions"
+import {
+    getTableDefinitions, makeTableDefinitionText,
+} from "../postgres/queries/getTableDefinitions"
+import {
+    getTypeDefinitions, makeTypeDefinitionText,
+} from "../postgres/queries/getTypeDefinitions"
 import { LanguageServerSettings } from "../settings"
 import { Space } from "../space"
 import {
@@ -87,21 +93,11 @@ async function getTableHover(
     )
     )
     if (definitions.length !== 0) {
-        const { schema, tableName, fields } = definitions[0]
-
-        let fieldsString = ""
-        if (fields.length > 0) {
-            fieldsString = "\n  " + fields.map(({ columnName, dataType }) => {
-                return `${columnName} ${dataType}`
-            }).join(",\n  ") + "\n"
-        }
-
         return {
             contents: {
                 language: "postgres",
-                value: `TABLE ${schema}.${tableName}(${fieldsString})`,
+                value: makeTableDefinitionText(definitions[0]),
             },
-
         }
     }
     else {
@@ -128,41 +124,12 @@ async function getFunctionHover(
         return undefined
     }
 
-    const values = []
-    for (const {
-        schema, functionName, functionArgs, returnType, isSetOf, volatile, parallel,
-    } of definitions) {
-        let argsString = ""
-        if (functionArgs.length > 0) {
-            argsString = "\n  " + functionArgs.join(",\n  ") + "\n"
-        }
-
-        let returnString = returnType
-        if (isSetOf) {
-            returnString = `SETOF ${returnType}`
-        }
-
-        let value =
-            `FUNCTION ${schema}.${functionName}(${argsString})\nRETURNS ${returnString}`
-
-        const functionInfos = []
-        if (volatile !== undefined) {
-            functionInfos.push(volatile)
-        }
-        if (parallel !== undefined) {
-            functionInfos.push(parallel)
-        }
-        if (functionInfos.length !== 0) {
-            value += `\n${functionInfos.join(" ")}`
-        }
-
-        values.push(value)
-    }
-
     return {
         contents: {
             language: "postgres",
-            value: values.join("\n\n"),
+            value: definitions.map(
+                definition => makeFunctionDefinitionText(definition),
+            ).join("\n\n"),
         },
     }
 }
@@ -182,26 +149,16 @@ async function getTypeHover(
         pgClient, schema, settings.defaultSchema, typeName,
     )
 
-    if (definitions.length !== 0) {
-        const { schema, typeName, fields } = definitions[0]
-
-        let fieldsString = ""
-        if (fields.length > 0) {
-            fieldsString = "\n  " + fields.map(({ columnName, dataType }) => {
-                return `${columnName} ${dataType}`
-            }).join(",\n  ") + "\n"
-        }
-
-        return {
-            contents: {
-                language: "postgres",
-                value: `TYPE ${schema}.${typeName}(${fieldsString})`
-                ,
-            },
-
-        }
-    }
-    else {
+    if (definitions.length === 0) {
         return undefined
+
+    }
+
+    return {
+        contents: {
+            language: "postgres",
+            value: makeTypeDefinitionText(definitions[0])
+            ,
+        },
     }
 }

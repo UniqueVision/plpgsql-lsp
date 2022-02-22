@@ -1,6 +1,6 @@
 import { PostgresClient } from "../client"
 
-interface FunctionDifinition {
+interface FunctionDefinition {
     schema: string
     functionName: string
     functionArgs: string[]
@@ -16,8 +16,8 @@ export async function getFunctionDefinitions(
     schema: string | undefined,
     defaultSchema: string,
     functionName?: string,
-): Promise<FunctionDifinition[]> {
-    let definitions: FunctionDifinition[] = []
+): Promise<FunctionDefinition[]> {
+    let definitions: FunctionDefinition[] = []
 
     let schemaCondition = ""
     if (schema === undefined) {
@@ -102,4 +102,70 @@ export async function getFunctionDefinitions(
     }
 
     return definitions
+}
+
+export function makeFunctionDefinitionText(definition: FunctionDefinition): string {
+    const {
+        schema,
+        functionName,
+        functionArgs,
+        returnType,
+        isSetOf,
+        volatile,
+        parallel,
+    } = definition
+
+    let argsString = ""
+    if (functionArgs.length > 0) {
+        argsString = "\n  " + functionArgs.join(",\n  ") + "\n"
+    }
+
+    let returnString = returnType
+    if (isSetOf) {
+        returnString = `SETOF ${returnType}`
+    }
+
+    let definitionText = (
+        `FUNCTION ${schema}.${functionName}(${argsString})\n`
+                + `RETURNS ${returnString}`
+    )
+
+    const functionInfos = []
+    if (volatile !== undefined) {
+        functionInfos.push(volatile)
+    }
+    if (parallel !== undefined) {
+        functionInfos.push(parallel)
+    }
+    if (functionInfos.length !== 0) {
+        definitionText += `\n${functionInfos.join(" ")}`
+    }
+
+    return definitionText
+}
+
+export function makeInsertFunctionText(
+    definition: FunctionDefinition,
+): string {
+    const {
+        functionName,
+        functionIdentityArgs,
+    } = definition
+
+    let callArgsString = ""
+    if (functionIdentityArgs.length > 0) {
+        callArgsString = "\n" + functionIdentityArgs.map(arg => {
+            const splitted = arg.split(" ")
+            if (splitted.length === 1 || splitted[1] === '"any"') {
+                // argument
+                return splitted[0]
+            }
+            else {
+                // keyword argument
+                return `  ${splitted[0]} := ${splitted[0]}`
+            }
+        }).join(",\n") + "\n"
+    }
+
+    return `${functionName}(${callArgsString})`
 }

@@ -1,6 +1,6 @@
 import { PostgresClient } from "../client"
 
-interface TableDifinition {
+interface TableDefinition {
     schema: string
     tableName: string
     fields: {
@@ -14,8 +14,8 @@ export async function getTableDefinitions(
     schema: string | undefined,
     defaultSchema: string,
     tableName?: string,
-): Promise<TableDifinition[]> {
-    let definitions: TableDifinition[] = []
+): Promise<TableDefinition[]> {
+    let definitions: TableDefinition[] = []
 
     let schemaCondition = ""
     if (schema === undefined) {
@@ -71,4 +71,20 @@ export async function getTableDefinitions(
     }
 
     return definitions
+}
+
+
+export function makeTableDefinitionText(definition: TableDefinition): string {
+    const {
+        schema, tableName, fields,
+    } = definition
+
+    let fieldsString = ""
+    if (fields.length > 0) {
+        fieldsString = "\n" + fields.map(({ columnName, dataType }) => {
+            return `  ${columnName} ${dataType}`
+        }).join(",\n") + "\n"
+    }
+
+    return `TABLE ${schema}.${tableName}(${fieldsString})`
 }
