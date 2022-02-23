@@ -41,9 +41,10 @@ export function getDefinitionLinks(
         sanitizeUuidPartitionTable(sanitizeNumberPartitionTable(word)),
     ]
 
-    for (const { index, wordCandidate } of sanitizedWordCandidates.map(
-        (wordCandidate, index) => { return { index, wordCandidate } },
-    )
+    for (const { index, wordCandidate } of
+        sanitizedWordCandidates.map(
+            (wordCandidate, index) => { return { index, wordCandidate } },
+        )
     ) {
         const definitionLinks = space
             .definitionMap
@@ -123,10 +124,10 @@ export async function updateFileDefinition(
             return getViewStmts(fileText, stmt, resource, _defaultSchema)
         }
         else if (stmt?.stmt?.CompositeTypeStmt !== undefined) {
-            return getCompositeTypeStmts(fileText, stmt, resource)
+            return getCompositeTypeStmts(fileText, stmt, resource, _defaultSchema)
         }
         else if (stmt?.stmt?.CreateFunctionStmt !== undefined) {
-            return getCreateFunctionStmts(fileText, stmt, resource)
+            return getCreateFunctionStmts(fileText, stmt, resource, _defaultSchema)
         }
         else {
             return []

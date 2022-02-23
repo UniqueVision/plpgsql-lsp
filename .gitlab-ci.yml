@@ -7,22 +7,20 @@ cache:
     - .npm/
 
 before_script:
+  - apt-get update
+  - apt-get install -y build-essential git python3 libpq-dev
+  - python3 -V
+  - npm install -g npm
   - npm ci --cache .npm --prefer-offline
-  - npm install
 
 lint:
   stage: test
-  image: node:14-bullseye-slim
+  image: node:17-bullseye-slim
   script:
     - npm run lint
 
 test:
   stage: test
-  image: node:14-bullseye-slim
-  before_script:
-    - apt-get update
-    - apt-get install -y build-essential python git
-    - cd server
-    - npm install
+  image: node:17-bullseye-slim
   script:
     - npm run test:ci

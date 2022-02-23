@@ -3,6 +3,7 @@ import {
     createConnection,
     DefinitionParams,
     DidChangeConfigurationNotification,
+    HoverParams,
     InitializeParams,
     InitializeResult,
     ProposedFeatures,
@@ -11,15 +12,16 @@ import {
 } from "vscode-languageserver/node"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { getCompletionItems } from "./postgres/completionItems"
-import {
-    validateTextDocument as _validateTextDocument,
-} from "./postgres/validateTextDocument"
-import { DEFAULT_SETTINGS, LanguageServerSettings } from "./settings"
-import { Space } from "./space"
+import { getCompletionItems } from "./services/completionItems"
 import {
     getDefinitionLinks, loadDefinitionFilesInWorkspace, updateFileDefinition,
-} from "./workspace/goToDefinition"
+} from "./services/definition"
+import { getHover } from "./services/hover"
+import {
+    validateTextDocument as _validateTextDocument,
+} from "./services/validateTextDocument"
+import { DEFAULT_SETTINGS, LanguageServerSettings } from "./settings"
+import { Space } from "./space"
 
 let globalSpace: Space
 
@@ -48,6 +50,8 @@ connection.onInitialize((params: InitializeParams) => {
             completionProvider: { resolveProvider: true },
             // Tell the client that this server supports go to definition.
             definitionProvider: true,
+            // Tell the client that this server supports hover.
+            hoverProvider: true,
         },
     }
     if (globalSpace.hasWorkspaceFolderCapability) {
@@ -155,6 +159,10 @@ connection.onDefinition((params: DefinitionParams) => {
     }
 
     return definitionLinks
+})
+
+connection.onHover((params: HoverParams) => {
+    return getHover(globalSpace, params)
 })
 
 // Make the text document manager listen on the connection

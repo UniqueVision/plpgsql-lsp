@@ -38,6 +38,7 @@ export interface CompositeTypeStmt {
 }
 
 export interface CompositeTypeStmtTypevar {
+  schemaname?: string
   relname: string
   relpersistence: string
   location: uinteger
