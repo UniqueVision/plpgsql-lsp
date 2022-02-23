@@ -85,7 +85,7 @@ test.each(
             fileText, await getStmt(fileText), `file://${file}`, "public",
         )
 
-        expect(stmts.length).toBe(1)
+        expect(stmts.length).toBe(2)
         expect(stmts[0].definitionLink.targetSelectionRange)
             .toStrictEqual(expected)
     },
