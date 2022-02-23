@@ -165,7 +165,7 @@ export function makeInsertFunctionText(
             const splitted = arg.split(" ")
             if (splitted.length === 1 || splitted[1] === '"any"') {
                 // argument
-                return splitted[0]
+                return `  ${splitted[0]}`
             }
             else {
                 // keyword argument
