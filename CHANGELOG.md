@@ -1,5 +1,8 @@
 # Change Log
 
+## v1.7.1 - 2022/02/24
+- Bug fix.
+
 ## v1.7.0 - 2022/02/24
 - Support Hover.
 - Support `pg_catalog` schema completion.
