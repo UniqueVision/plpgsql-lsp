@@ -7,7 +7,7 @@
 - hover type/table/view/function/procedure definition.
 - syntax check.
 - static analysis check (when [plpgsql_check](https://github.com/okbob/plpgsql_check) use) .
-- Multi-root Workspaces support.
+- [Multi-root Workspace](https://code.visualstudio.com/docs/editor/multi-root-workspaces) support.
 
 ## Usage
 
