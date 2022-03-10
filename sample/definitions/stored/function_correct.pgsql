@@ -1,0 +1,13 @@
+DROP FUNCTION IF EXISTS function_correct;
+
+CREATE FUNCTION function_correct(
+  p_id uuid
+)
+RETURNS SETOF uuid AS $FUNCTION$
+DECLARE
+BEGIN
+  RETURN QUERY
+  SELECT
+    p_id;
+END;
+$FUNCTION$ LANGUAGE plpgsql;

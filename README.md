@@ -34,3 +34,32 @@
   }
 }
 ```
+
+## Disable Specific file
+
+If you want to disable the extension for a specific file, just add this comment your file top.
+
+```sql
+/* plpgsql-language-server:disable */
+```
+
+Or, if you want to disable only the validation feature, try this
+
+```sql
+/* plpgsql-language-server:disable validation */
+```
+
+## Development
+
+### Test
+
+```sh
+cd $THIS_REPOSITORY_ROOT
+
+# Prepare database.
+docker-compose up -d
+./sample/prepare.sh
+
+# Run test.
+npm run test
+```

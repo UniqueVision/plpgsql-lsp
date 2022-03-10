@@ -1,0 +1,63 @@
+{
+  "folders": [
+    {
+      "name": "root",
+      "path": "."
+    },
+    {
+      "name": "sample",
+      "path": "sample"
+    },
+    {
+      "name": "client",
+      "path": "client"
+    },
+    {
+      "name": "server",
+      "path": "server"
+    }
+  ],
+  "settings": {
+    "files.trimFinalNewlines": true,
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "editor.tabSize": 4,
+    "editor.formatOnSave": true,
+    "editor.insertSpaces": true,
+    "editor.comments.insertSpace": true,
+    "editor.trimAutoWhitespace": true,
+    "editor.useTabStops": true,
+    "shellformat.flag": "-ln=posix -bn -ci -sr",
+    "eslint.format.enable": true,
+    "eslint.validate": [
+      "javascript",
+      "typescript"
+    ],
+    "[markdown]": {
+      "files.trimTrailingWhitespace": false,
+    },
+    "[typescript]": {
+      "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+      },
+      "editor.tabSize": 2,
+      "editor.rulers": [
+        88
+      ]
+    },
+    "[javascript]": {
+      "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+      },
+      "editor.tabSize": 2,
+      "editor.rulers": [
+        88
+      ]
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "dbaeumer.vscode-eslint"
+    ]
+  }
+}
