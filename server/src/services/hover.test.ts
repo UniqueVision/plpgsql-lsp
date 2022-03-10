@@ -30,11 +30,11 @@ describe("Hover Tests", () => {
 
     (server.documents as TextDocumentTestManager).set(textDocument)
 
-    if (server.languageHandler === undefined) {
-      throw new Error("languageHandler is undefined")
+    if (server.handlers === undefined) {
+      throw new Error("handlers is undefined")
     }
 
-    return server.languageHandler.onHover({
+    return server.handlers.onHover({
       position,
       textDocument,
     })

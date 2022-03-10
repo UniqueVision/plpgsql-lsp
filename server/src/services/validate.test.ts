@@ -14,8 +14,8 @@ import { SettingsBuilder } from "@/settings"
 
 
 describe("Validate Tests", () => {
-  let server: Server
 
+  let server: Server
 
   beforeEach(() => {
     const settings = new SettingsBuilder().build()
@@ -32,6 +32,7 @@ describe("Validate Tests", () => {
     file: string,
     options: { ignoreDesableFlag: boolean } = { ignoreDesableFlag: false },
   ): Promise<Diagnostic[] | undefined> {
+
     let context = getDefinitionFileText(file)
 
     if (options.ignoreDesableFlag) {
@@ -47,16 +48,17 @@ describe("Validate Tests", () => {
 
     (server.documents as TextDocumentTestManager).set(textDocument)
 
-    if (server.documentHandler === undefined) {
-      throw new Error("documentHandler is undefined")
+    if (server.handlers === undefined) {
+      throw new Error("handlers is undefined")
     }
 
-    return server.documentHandler.validate(textDocument)
+    return server.handlers.validate(textDocument)
   }
 
   async function validateQuery(
     file: string,
   ): Promise<Diagnostic[] | undefined> {
+
     const textDocument = TextDocument.create(
       getQueryFileResource(file),
       "postgres",
@@ -66,16 +68,18 @@ describe("Validate Tests", () => {
 
     (server.documents as TextDocumentTestManager).set(textDocument)
 
-    if (server.documentHandler === undefined) {
-      throw new Error("documentHandler is undefined")
+    if (server.handlers === undefined) {
+      throw new Error("handlers is undefined")
     }
 
-    return server.documentHandler.validate(textDocument)
+    return server.handlers.validate(textDocument)
   }
 
   function validateDiagnostics(
-    diagnostics: Diagnostic[] | undefined, expectedDiagnostics: Diagnostic[],
+    diagnostics: Diagnostic[] | undefined,
+    expectedDiagnostics: Diagnostic[],
   ) {
+
     expect(diagnostics).toBeDefined()
     if (diagnostics === undefined) return
 
@@ -86,6 +90,7 @@ describe("Validate Tests", () => {
   }
 
   describe("Validate", function () {
+
     it("Correct function", async () => {
       const diagnostics = await validateDefinition(
         "stored/function_correct.pgsql",

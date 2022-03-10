@@ -15,6 +15,7 @@ export async function validateTextDocument(
   hasDiagnosticRelatedInformationCapability = false,
   isComplete = false,
 ): Promise<Diagnostic[] | undefined> {
+
   let diagnostics = await checkSyntax(
     pgPool,
     textDocument,
@@ -34,7 +35,6 @@ export async function validateTextDocument(
   }
 
   return diagnostics
-
 }
 
 async function checkSyntax(

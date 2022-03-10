@@ -41,11 +41,11 @@ describe("Definition Tests", () => {
       (await server.settings.get(textDocument.uri)).defaultSchema,
     )
 
-    if (server.languageHandler === undefined) {
-      throw new Error("languageHandler is undefined")
+    if (server.handlers === undefined) {
+      throw new Error("handlers is undefined")
     }
 
-    return server.languageHandler.onDefinition({
+    return server.handlers.onDefinition({
       position,
       textDocument,
     })

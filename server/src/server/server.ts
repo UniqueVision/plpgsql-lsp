@@ -12,23 +12,18 @@ import {
 import { createConnection } from "vscode-languageserver/node"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { DocumentHandler } from "@/handlers/documentHandler"
-import { LanguageHandlers } from "@/handlers/languageHandler"
-import { SettingsHandler } from "@/handlers/settingsHandlers"
 import { PostgresPoolManager } from "@/postgres/pool"
 
 import { DEFAULT_SETTINGS, Settings } from "../settings"
 import { Logger } from "../utilities/logger"
 import { workspaceFoldersChanged } from "../utilities/workspaceFoldersChanged"
 import { DefinitionMap } from "./definitionMap"
+import { Handlers } from "./handlers"
 import { SettingsManager } from "./settingsManager"
 import { TextDocumentsManager, TextDocumentTestManager } from "./textDocumentManager"
 
 export class Server {
-  settingsHandler?: SettingsHandler
-  languageHandler?: LanguageHandlers
-  documentHandler?: DocumentHandler
-
+  handlers?: Handlers
   pgPools: PostgresPoolManager = new Map()
   // Create a simple text document manager. The text document manager
   // supports full document sync only
@@ -147,44 +142,13 @@ export class Server {
 
   private registerHandlers(): void {
     // Register all features that the language server has
-    this.documentHandler = this.createDocumentHandler()
-    this.settingsHandler = this.createSettingsHangler()
-    this.languageHandler = this.createLanguageHandlers()
-  }
-
-  private createDocumentHandler(): DocumentHandler {
-    return new DocumentHandler(
+    this.handlers = new Handlers(
       this.connection,
       this.pgPools,
       this.documents,
       this.settings,
       this.definitionMap,
       this.hasDiagnosticRelatedInformationCapability,
-      this.logger,
-    )
-  }
-
-  private createSettingsHangler(): SettingsHandler {
-    if (this.documentHandler === undefined) {
-      throw new Error("documentHandler is undefined.")
-    }
-
-    return new SettingsHandler(
-      this.connection,
-      this.documents,
-      this.settings,
-      this.documentHandler,
-      this.logger,
-    )
-  }
-
-  private createLanguageHandlers(): LanguageHandlers {
-    return new LanguageHandlers(
-      this.connection,
-      this.pgPools,
-      this.documents,
-      this.settings,
-      this.definitionMap,
       this.logger,
     )
   }

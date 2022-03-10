@@ -28,11 +28,11 @@ describe("Completion Tests", () => {
 
     (server.documents as TextDocumentTestManager).set(textDocument)
 
-    if (server.languageHandler === undefined) {
-      throw new Error("languageHandler is undefined")
+    if (server.handlers === undefined) {
+      throw new Error("handlers is undefined")
     }
 
-    return server.languageHandler.onCompletion({
+    return server.handlers.onCompletion({
       position,
       textDocument,
     })
