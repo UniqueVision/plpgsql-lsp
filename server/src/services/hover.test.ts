@@ -23,9 +23,7 @@ describe("Hover Tests", () => {
     }
   })
 
-  async function onHover(
-    content: string, position: Position,
-  ): Promise<Hover | undefined> {
+  async function onHover(content: string): Promise<Hover | undefined> {
     const textDocument = TextDocument.create("test.pgsql", "postgres", 0, content);
 
     (server.documents as TextDocumentTestManager).set(textDocument)
@@ -35,8 +33,8 @@ describe("Hover Tests", () => {
     }
 
     return server.handlers.onHover({
-      position,
       textDocument,
+      position: Position.create(1, 1),
     })
   }
 
@@ -56,9 +54,8 @@ describe("Hover Tests", () => {
 
   describe("Hover", function () {
     it("Hover on table", async () => {
-      const hover = await onHover(
-        "companies", Position.create(1, 23),
-      )
+      const hover = await onHover("companies")
+
       validatePostgresCodeMarkdown(hover, dedent`
         TABLE public.companies(
           id integer,
@@ -68,9 +65,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on table with default schema", async () => {
-      const hover = await onHover(
-        "public.users", Position.create(1, 23),
-      )
+      const hover = await onHover("public.users")
+
       validatePostgresCodeMarkdown(hover, dedent`
         TABLE public.users(
           id integer,
@@ -81,9 +77,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on table with non-default schema", async () => {
-      const hover = await onHover(
-        "campaign.participants", Position.create(1, 23),
-      )
+      const hover = await onHover("campaign.participants")
+
       validatePostgresCodeMarkdown(hover, dedent`
         TABLE campaign.participants(
           id integer,
@@ -94,36 +89,32 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on view", async () => {
-      const hover = await onHover(
-        "deleted_users", Position.create(1, 23),
-      )
+      const hover = await onHover("deleted_users")
+
       validatePostgresCodeMarkdown(hover, dedent`
         VIEW public.deleted_users
       `)
     })
 
     it("Hover on view with default schema", async () => {
-      const hover = await onHover(
-        "public.deleted_users", Position.create(1, 23),
-      )
+      const hover = await onHover("public.deleted_users")
+
       validatePostgresCodeMarkdown(hover, dedent`
         VIEW public.deleted_users
       `)
     })
 
     it("Hover on view with non-default schema", async () => {
-      const hover = await onHover(
-        "campaign.deleted_participants", Position.create(1, 23),
-      )
+      const hover = await onHover("campaign.deleted_participants")
+
       validatePostgresCodeMarkdown(hover, dedent`
         VIEW campaign.deleted_participants
       `)
     })
 
     it("Hover on positional argument function", async () => {
-      const hover = await onHover(
-        "function_positional_argument", Position.create(1, 1),
-      )
+      const hover = await onHover("function_positional_argument")
+
       validatePostgresCodeMarkdown(hover, dedent`
         FUNCTION public.function_positional_argument(
           integer,
@@ -136,9 +127,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on positional argument function with default schema", async () => {
-      const hover = await onHover(
-        "public.function_positional_argument", Position.create(1, 1),
-      )
+      const hover = await onHover("public.function_positional_argument")
+
       validatePostgresCodeMarkdown(hover, dedent`
         FUNCTION public.function_positional_argument(
           integer,
@@ -151,9 +141,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on keyword argument function", async () => {
-      const hover = await onHover(
-        "function_keyword_argument", Position.create(1, 1),
-      )
+      const hover = await onHover("function_keyword_argument")
+
       validatePostgresCodeMarkdown(hover, dedent`
         FUNCTION public.function_keyword_argument(
           i integer
@@ -165,9 +154,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on built-in function", async () => {
-      const hover = await onHover(
-        "jsonb_build_object", Position.create(1, 1),
-      )
+      const hover = await onHover("jsonb_build_object")
+
       validatePostgresCodeMarkdown(hover, dedent`
         FUNCTION pg_catalog.jsonb_build_object()
           RETURNS jsonb
@@ -184,9 +172,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on proceduren", async () => {
-      const hover = await onHover(
-        "procedure_correct", Position.create(1, 1),
-      )
+      const hover = await onHover("procedure_correct")
+
       validatePostgresCodeMarkdown(hover, dedent`
         FUNCTION public.procedure_correct(
           INOUT p1 text
@@ -198,9 +185,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on type", async () => {
-      const hover = await onHover(
-        "type_user", Position.create(1, 1),
-      )
+      const hover = await onHover("type_user")
+
       validatePostgresCodeMarkdown(hover, dedent`
         TYPE public.type_user(
           id uuid
@@ -209,9 +195,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on type with default schema", async () => {
-      const hover = await onHover(
-        "public.type_user", Position.create(1, 1),
-      )
+      const hover = await onHover("public.type_user")
+
       validatePostgresCodeMarkdown(hover, dedent`
         TYPE public.type_user(
           id uuid
