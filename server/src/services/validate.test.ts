@@ -14,7 +14,6 @@ import { SettingsBuilder } from "@/settings"
 
 
 describe("Validate Tests", () => {
-
   let server: Server
 
   beforeEach(() => {
@@ -32,7 +31,6 @@ describe("Validate Tests", () => {
     file: string,
     options: { ignoreDesableFlag: boolean } = { ignoreDesableFlag: false },
   ): Promise<Diagnostic[] | undefined> {
-
     let context = getDefinitionFileText(file)
 
     if (options.ignoreDesableFlag) {
@@ -58,7 +56,6 @@ describe("Validate Tests", () => {
   async function validateQuery(
     file: string,
   ): Promise<Diagnostic[] | undefined> {
-
     const textDocument = TextDocument.create(
       getQueryFileResource(file),
       "postgres",
@@ -79,7 +76,6 @@ describe("Validate Tests", () => {
     diagnostics: Diagnostic[] | undefined,
     expectedDiagnostics: Diagnostic[],
   ) {
-
     expect(diagnostics).toBeDefined()
     if (diagnostics === undefined) return
 
@@ -90,7 +86,6 @@ describe("Validate Tests", () => {
   }
 
   describe("Validate", function () {
-
     it("Correct function", async () => {
       const diagnostics = await validateDefinition(
         "stored/function_correct.pgsql",
@@ -131,6 +126,5 @@ describe("Validate Tests", () => {
       )
       validateDiagnostics(diagnostics, [])
     })
-
   })
 })

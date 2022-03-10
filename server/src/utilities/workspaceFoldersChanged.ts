@@ -4,7 +4,6 @@ export const workspaceFoldersChanged = (
   workspaceFolders: WorkspaceFolder[],
   changedFolders: WorkspaceFoldersChangeEvent,
 ): WorkspaceFolder[] => {
-
   workspaceFolders = workspaceFolders
     .filter((workspaceFolder) => {
       return !changedFolders.removed.some((changedFolder) => {

@@ -73,11 +73,9 @@ export async function getTableDefinitions(
   }
   catch (error: unknown) {
     logger.error(`${(error as Error).toString()}`)
-
   }
   finally {
     pgClient.release()
-
   }
 
   return definitions

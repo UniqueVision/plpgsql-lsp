@@ -45,6 +45,5 @@ describe("Completion Tests", () => {
       )
       assert.ok(completions && completions.length > 1)
     })
-
   })
 })

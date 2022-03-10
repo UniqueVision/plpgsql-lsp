@@ -133,15 +133,12 @@ export async function getTypeDefinitions(
         }[],
       }),
     )
-
   }
   catch (error: unknown) {
     logger.error(`${(error as Error).toString()}`)
-
   }
   finally {
     pgClient.release()
-
   }
 
   return definitions

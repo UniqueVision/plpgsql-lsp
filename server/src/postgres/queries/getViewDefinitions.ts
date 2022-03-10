@@ -51,14 +51,12 @@ export async function getViewDefinitions(
         viewName: row.table_name,
       }),
     )
-
   }
   catch (error: unknown) {
     logger.error(`${(error as Error).toString()}`)
   }
   finally {
     pgClient.release()
-
   }
 
   return definitions

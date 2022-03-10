@@ -103,12 +103,10 @@ export async function analyzeFileFunctions(
     }
 
     return undefined
-
   }
   finally {
     await pgClient.query("ROLLBACK")
     pgClient.release()
-
   }
 
   return analysisInfos

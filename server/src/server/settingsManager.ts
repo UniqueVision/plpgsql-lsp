@@ -46,11 +46,9 @@ export class SettingsManager {
     }
     else if (this.settings.hasConfigurationCapability !== undefined) {
       return this.settings.globalSettings
-
     }
     else {
       return DEFAULT_SETTINGS
-
     }
   }
 

@@ -15,7 +15,6 @@ export async function validateTextDocument(
   hasDiagnosticRelatedInformationCapability = false,
   isComplete = false,
 ): Promise<Diagnostic[] | undefined> {
-
   let diagnostics = await checkSyntax(
     pgPool,
     textDocument,
@@ -44,7 +43,6 @@ async function checkSyntax(
   hasDiagnosticRelatedInformationCapability = false,
   isComplete = false,
 ): Promise<Diagnostic[] | undefined> {
-
   const errors = await analyzeFileSyntax(
     pgPool,
     textDocument,
@@ -86,7 +84,6 @@ async function checkStaticAnalysis(
   hasDiagnosticRelatedInformationCapability = false,
   isComplete = false,
 ): Promise<Diagnostic[] | undefined> {
-
   const errors = await analyzeFileFunctions(
     pgPool,
     textDocument,

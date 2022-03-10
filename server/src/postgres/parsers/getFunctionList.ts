@@ -38,7 +38,6 @@ async function getCreateFunctionList(
   stmt: Statement,
 ): Promise<FunctionInfo[]> {
   const createFunctionStmt = stmt?.stmt?.CreateFunctionStmt
-
   if (createFunctionStmt === undefined) {
     return []
   }

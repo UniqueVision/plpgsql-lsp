@@ -41,11 +41,9 @@ export async function analyzeFileSyntax(
         errorLines.length - 1,
         errorLines[errorLines.length - 1].length,
       )
-
     }
     else {
       range = getTextAllRange(textDocument)
-
     }
 
     return [
@@ -54,12 +52,10 @@ export async function analyzeFileSyntax(
         message,
       },
     ]
-
   }
   finally {
     await pgClient.query("ROLLBACK")
     pgClient.release()
-
   }
 
   return undefined

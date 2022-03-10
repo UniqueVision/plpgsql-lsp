@@ -142,7 +142,6 @@ export class Handlers {
       settings.defaultSchema,
       this.logger,
     )
-
   }
 
   async onDefinition(
@@ -225,7 +224,6 @@ export class Handlers {
 
     if (!useValidation(textDocument)) {
       diagnostics = []
-
     }
     else {
       const settings = await this.settings.get(textDocument.uri)
@@ -233,7 +231,6 @@ export class Handlers {
       const pgPool = getPool(this.pgPools, settings, this.logger)
       if (pgPool === undefined) {
         diagnostics = []
-
       }
       else {
         diagnostics = await validateTextDocument(
@@ -257,5 +254,4 @@ export class Handlers {
 
     return diagnostics
   }
-
 }

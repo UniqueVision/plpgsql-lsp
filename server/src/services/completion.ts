@@ -23,7 +23,6 @@ export async function getCompletionItems(
   defaultSchema: string,
   logger: Logger,
 ): Promise<CompletionItem[] | undefined> {
-
   const wordRange = getWordRangeAtPosition(textDocument, params.position)
   if (wordRange === undefined) {
     return undefined
@@ -114,7 +113,6 @@ async function getTableCompletionItems(
   defaultSchema: string,
   logger: Logger,
 ): Promise<CompletionItem[]> {
-
   const definitions = await getTableDefinitions(
     pgPool, schema, defaultSchema, logger,
   )
@@ -136,7 +134,6 @@ async function getFunctionCompletionItems(
   defaultSchema: string,
   logger: Logger,
 ): Promise<CompletionItem[]> {
-
   const definitions = await getFunctionDefinitions(
     pgPool, schema, defaultSchema, logger,
   )
@@ -159,7 +156,6 @@ async function getTypeCompletionItems(
   defaultSchema: string,
   logger: Logger,
 ): Promise<CompletionItem[]> {
-
   const definition = await getTypeDefinitions(
     pgPool, schema, defaultSchema, logger,
   )

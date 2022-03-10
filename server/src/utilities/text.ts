@@ -4,7 +4,6 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 export function getWordRangeAtPosition(
   textDocument: TextDocument, position: Position,
 ): Range | undefined {
-
   const lines = textDocument.getText().split("\n")
   const line = Math.max(0, Math.min(lines.length - 1, position.line))
   const lineText = lines[line]

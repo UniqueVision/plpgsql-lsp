@@ -167,11 +167,9 @@ export class Server {
       })
     }
   }
-
 }
 
 export function setupTestServer(settings: Settings): Server {
-
   process.argv.push("--node-ipc")
 
   const connection = createConnection()

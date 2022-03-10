@@ -32,6 +32,7 @@ export function getTableDefinitions(
       + relname.length,
     ),
   )
+
   const candidates = [
     {
       definition: (schemaname || defaultSchema) + "." + relname,
@@ -78,6 +79,7 @@ export function getViewDefinitions(
       + relname.length,
     ),
   )
+
   const candidates = [
     {
       definition: (schemaname || defaultSchema) + "." + relname,
@@ -139,7 +141,6 @@ export function getTypeDefinitions(
   }
 
   return candidates
-
 }
 
 export function getFunctionDefinitions(
@@ -152,12 +153,13 @@ export function getFunctionDefinitions(
   if (createFunctionStmt === undefined) {
     return []
   }
+
+  let schemaname = undefined
+  let functionName = undefined
   const nameList = createFunctionStmt.funcname
     .filter((name) => "String" in name)
     .map((name) => name.String.str)
 
-  let schemaname = undefined
-  let functionName = undefined
   if (nameList.length === 0) {
     return []
   }
@@ -171,11 +173,13 @@ export function getFunctionDefinitions(
   else {
     return []
   }
+
   const definition = nameList.join(".")
 
   const functionNameLocation = findIndexFromBuffer(
     fileText, definition, stmt.stmt_location,
   )
+
   const definitionLink = LocationLink.create(
     resource,
     getRangeFromBuffer(
@@ -196,6 +200,7 @@ export function getFunctionDefinitions(
       definitionLink,
     },
   ]
+
   if (schemaname === undefined || schemaname === defaultSchema) {
     candidates.push({
       definition: functionName,
