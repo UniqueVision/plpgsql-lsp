@@ -37,7 +37,7 @@ export class Handlers {
     private readonly documents: TextDocumentsManager,
     private readonly settings: SettingsManager,
     private readonly definitionMap: DefinitionMap,
-    private hasDiagnosticRelatedInformationCapability: boolean,
+    private readonly hasDiagnosticRelatedInformationCapability: boolean,
     private readonly logger: Logger,
   ) {
     this.documents.onDidChangeContent((event) => this.onDidChangeContent(event))
@@ -216,9 +216,7 @@ export class Handlers {
 
   async validate(
     textDocument: TextDocument,
-    options: {
-      isComplete: boolean
-    } = { isComplete: false },
+    options: { isComplete: boolean } = { isComplete: false },
   ): Promise<Diagnostic[] | undefined> {
     let diagnostics: Diagnostic[] | undefined = undefined
 
@@ -236,9 +234,12 @@ export class Handlers {
         diagnostics = await validateTextDocument(
           pgPool,
           textDocument,
+          {
+            isComplete: options.isComplete,
+            hasDiagnosticRelatedInformationCapability:
+              this.hasDiagnosticRelatedInformationCapability,
+          },
           this.logger,
-          this.hasDiagnosticRelatedInformationCapability,
-          options.isComplete,
         )
       }
     }

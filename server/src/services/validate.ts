@@ -8,28 +8,30 @@ import { PostgresPool } from "@/postgres/pool"
 import { analyzeFileFunctions } from "@/postgres/queries/analyzeFileFunctions"
 import { analyzeFileSyntax } from "@/postgres/queries/analyzeFileSyntax"
 
+type ValidateTextDocumentOptions = {
+  isComplete: boolean,
+  hasDiagnosticRelatedInformationCapability: boolean,
+}
+
 export async function validateTextDocument(
   pgPool: PostgresPool,
   textDocument: TextDocument,
+  options: ValidateTextDocumentOptions,
   logger: Logger,
-  hasDiagnosticRelatedInformationCapability = false,
-  isComplete = false,
 ): Promise<Diagnostic[] | undefined> {
   let diagnostics = await checkSyntax(
     pgPool,
     textDocument,
+    options,
     logger,
-    hasDiagnosticRelatedInformationCapability,
-    isComplete,
   )
 
   if (diagnostics === undefined) {
     diagnostics = await checkStaticAnalysis(
       pgPool,
       textDocument,
+      options,
       logger,
-      hasDiagnosticRelatedInformationCapability,
-      isComplete,
     )
   }
 
@@ -39,14 +41,13 @@ export async function validateTextDocument(
 async function checkSyntax(
   pgPool: PostgresPool,
   textDocument: TextDocument,
+  options: ValidateTextDocumentOptions,
   logger: Logger,
-  hasDiagnosticRelatedInformationCapability = false,
-  isComplete = false,
 ): Promise<Diagnostic[] | undefined> {
   const errors = await analyzeFileSyntax(
     pgPool,
     textDocument,
-    isComplete,
+    options.isComplete,
     logger,
   )
 
@@ -61,7 +62,7 @@ async function checkSyntax(
       message,
     }
 
-    if (hasDiagnosticRelatedInformationCapability) {
+    if (options.hasDiagnosticRelatedInformationCapability) {
       diagnosic.relatedInformation = [
         {
           location: {
@@ -80,15 +81,14 @@ async function checkSyntax(
 async function checkStaticAnalysis(
   pgPool: PostgresPool,
   textDocument: TextDocument,
+  options: ValidateTextDocumentOptions,
   logger: Logger,
-  hasDiagnosticRelatedInformationCapability = false,
-  isComplete = false,
 ): Promise<Diagnostic[] | undefined> {
   const errors = await analyzeFileFunctions(
     pgPool,
     textDocument,
     await getFunctionList(textDocument.uri),
-    isComplete,
+    options.isComplete,
     logger,
   )
 
@@ -115,7 +115,7 @@ async function checkStaticAnalysis(
         message,
       }
 
-      if (hasDiagnosticRelatedInformationCapability) {
+      if (options.hasDiagnosticRelatedInformationCapability) {
         diagnosic.relatedInformation = [
           {
             location: {
