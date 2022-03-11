@@ -16,7 +16,7 @@ import { PostgresPoolManager } from "@/postgres/pool"
 
 import { DEFAULT_SETTINGS, Settings } from "../settings"
 import { Logger } from "../utilities/logger"
-import { workspaceFoldersChanged } from "../utilities/workspaceFoldersChanged"
+import { workspaceFoldersChanged } from "../utilities/workspace"
 import { DefinitionMap } from "./definitionMap"
 import { Handlers } from "./handlers"
 import { SettingsManager } from "./settingsManager"

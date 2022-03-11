@@ -14,10 +14,10 @@ import {
 import {
   getViewDefinitions, makeViewDefinitionText,
 } from "@/postgres/queries/getViewDefinitions"
+import { separateSchemaFromCandidate } from "@/utilities/schema"
 import {
   sanitizeWordCandidates,
-} from "@/utilities/sanitizeWord"
-import { separateSchemaFromCandidate } from "@/utilities/schema"
+} from "@/utilities/search"
 import { getWordRangeAtPosition, makePostgresCodeMarkdown } from "@/utilities/text"
 
 export async function getHover(

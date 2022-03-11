@@ -7,7 +7,7 @@ import {
   getDefinitionFileText,
   getQueryFileResource,
   getQueryFileText,
-} from "@/postgres/file"
+} from "@/__tests__/helpers/file"
 import { Server, setupTestServer } from "@/server/server"
 import { TextDocumentTestManager } from "@/server/textDocumentManager"
 import { SettingsBuilder } from "@/settings"

@@ -12,9 +12,9 @@ import {
   getTypeDefinitions,
   getViewDefinitions,
 } from "@/postgres/parsers/getDefinitions"
-import { Statement } from "@/postgres/statement"
+import { Statement } from "@/postgres/parsers/statement"
 import { DefinitionMap } from "@/server/definitionMap"
-import { sanitizeWordCandidates } from "@/utilities/sanitizeWord"
+import { sanitizeWordCandidates } from "@/utilities/search"
 import { getWordRangeAtPosition } from "@/utilities/text"
 
 

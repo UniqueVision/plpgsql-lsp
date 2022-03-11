@@ -2,8 +2,8 @@ import { readFileSync } from "fs"
 import { parseQuery } from "libpg-query"
 import { URI } from "vscode-languageserver"
 
-import { Statement } from "@/postgres/statement"
-import { asyncFlatMap } from "@/utilities/asyncFlatMap"
+import { Statement } from "@/postgres/parsers/statement"
+import { asyncFlatMap } from "@/utilities/functool"
 
 export interface FunctionInfo {
   functionName: string,

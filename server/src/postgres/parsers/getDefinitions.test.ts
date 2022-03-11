@@ -1,7 +1,7 @@
 import { parseQuery } from "libpg-query"
 import { Range, uinteger } from "vscode-languageserver"
 
-import { getDefinitionFileText } from "@/postgres/file"
+import { getDefinitionFileText } from "@/__tests__/helpers/file"
 
 import {
   getFunctionDefinitions,
