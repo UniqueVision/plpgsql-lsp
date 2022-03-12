@@ -11,11 +11,11 @@ export function getQueryFileResource(file: string): URI {
   return `file://${path.join(queryDirPath(), file)}`
 }
 
-export function getDefinitionFileText(file: string) {
+export function getDefinitionFileText(file: string): string {
   return readFileSync(path.join(definitionsDirPath(), file)).toString()
 }
 
-export function getQueryFileText(file: string) {
+export function getQueryFileText(file: string): string {
   return readFileSync(path.join(queryDirPath(), file)).toString()
 }
 
