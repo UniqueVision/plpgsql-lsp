@@ -2,13 +2,13 @@
 
 "use strict"
 
-const withDefaults = require("../shared.webpack.config")
+const withDefaults = require("../webpack.config.default")
 const path = require("path")
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin")
 
 
 module.exports = withDefaults({
-  context: path.join(__dirname),
+  context: __dirname,
   resolve: {
     mainFields: ["module", "main"],
     extensions: [".ts", ".js", ".node"],
