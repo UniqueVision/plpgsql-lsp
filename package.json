@@ -24,6 +24,22 @@
     "onLanguage:postgres"
   ],
   "main": "./client/out/extension",
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "npm run clean && webpack --mode production --config ./client/webpack.config.js && webpack --mode production --config ./server/webpack.config.js",
+    "build:dev": "npm run clean && webpack --mode none --config ./client/webpack.config.js && webpack --mode none --config ./server/webpack.config.js",
+    "compile": "tsc -b",
+    "compile:client": "tsc -b ./client/tsconfig.json",
+    "compile:server": "tsc -b ./server/tsconfig.json",
+    "watch": "npm run build:dev && tsc -b -w",
+    "package": "vsce package --target win32-x64 && vsce package --target linux-x64",
+    "package:mac": "vsce package --target darwin-x64",
+    "lint": "eslint ./client/src ./server/src --ext .ts,.tsx --fix",
+    "postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
+    "test": "cd server && npm run test && cd ..",
+    "test:ci": "cd server && npm run test:ci && cd ..",
+    "clean": "rimraf client/out && rimraf server/out"
+  },
   "contributes": {
     "languages": [
       {
@@ -105,22 +121,6 @@
         "plpgsqlLanguageServer.defaultSchema"
       ]
     }
-  },
-  "scripts": {
-    "vscode:prepublish": "npm run build",
-    "build": "npm run clean && webpack --mode production --config ./client/webpack.config.js && webpack --mode production --config ./server/webpack.config.js",
-    "build:dev": "npm run clean && webpack --mode none --config ./client/webpack.config.js && webpack --mode none --config ./server/webpack.config.js",
-    "compile": "tsc -b",
-    "compile:client": "tsc -b ./client/tsconfig.json",
-    "compile:server": "tsc -b ./server/tsconfig.json",
-    "watch": "npm run build:dev && tsc -b -w",
-    "package": "vsce package --target win32-x64 && vsce package --target linux-x64",
-    "package:mac": "vsce package --target darwin-x64",
-    "lint": "eslint ./client/src ./server/src --ext .ts,.tsx --fix",
-    "postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
-    "test": "cd server && npm run test && cd ..",
-    "test:ci": "cd server && npm run test:ci && cd ..",
-    "clean": "rimraf client/out && rimraf server/out"
   },
   "devDependencies": {
     "@types/node": "^17.0.4",
