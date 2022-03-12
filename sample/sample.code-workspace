@@ -19,6 +19,9 @@
     "[markdown]": {
       "files.trimTrailingWhitespace": false,
     },
+    "[postgres]": {
+      "editor.tabSize": 2,
+    },
     "plpgsqlLanguageServer.host": "localhost",
     "plpgsqlLanguageServer.user": "postgres",
     "plpgsqlLanguageServer.password": "password",

@@ -1,4 +1,4 @@
 SELECT
-    id
+  id
 FROM
-    users;
+  users;

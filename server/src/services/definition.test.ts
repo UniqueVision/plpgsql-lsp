@@ -112,7 +112,7 @@ describe("Definition Tests", () => {
       validateDefinitionLinks(definition, [
         LocationLink.create(
           definitionResource,
-          Range.create(0, 42, 9, 22),
+          Range.create(0, 42, 9, 20),
           Range.create(2, 12, 2, 25),
         ),
       ])

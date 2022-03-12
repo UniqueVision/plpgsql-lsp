@@ -1,12 +1,12 @@
 DROP FUNCTION IF EXISTS function_keyword_argument;
 
 CREATE FUNCTION function_keyword_argument(
-    i integer
+  i integer
 )
 RETURNS integer
 AS $$
 BEGIN
-    RETURN i + 1;
+  RETURN i + 1;
 END;
 $$
 LANGUAGE plpgsql;

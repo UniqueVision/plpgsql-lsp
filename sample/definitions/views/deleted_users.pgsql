@@ -2,9 +2,9 @@ DROP VIEW IF EXISTS deleted_users CASCADE;
 
 CREATE VIEW deleted_users AS
 SELECT
-    id,
-    name
+  id,
+  name
 FROM
-    users
+  users
 WHERE
-    deleted_at <> NULL;
+  deleted_at <> NULL;
