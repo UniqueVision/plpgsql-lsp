@@ -3,17 +3,21 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { PostgresPool } from "@/postgres/pool"
 import {
-  getFunctionDefinitions, makeFunctionDefinitionText,
-} from "@/postgres/queries/getFunctionDefinitions"
+  makeFunctionDefinitionText,
+  queryFunctionDefinitions,
+} from "@/postgres/queries/queryFunctionDefinitions"
 import {
-  getTableDefinitions, makeTableDefinitionText,
-} from "@/postgres/queries/getTableDefinitions"
+  makeTableDefinitionText,
+  queryTableDefinitions,
+} from "@/postgres/queries/queryTableDefinitions"
 import {
-  getTypeDefinitions, makeTypeDefinitionText,
-} from "@/postgres/queries/getTypeDefinitions"
+  makeTypeDefinitionText,
+  queryTypeDefinitions,
+} from "@/postgres/queries/queryTypeDefinitions"
 import {
-  getViewDefinitions, makeViewDefinitionText,
-} from "@/postgres/queries/getViewDefinitions"
+  makeViewDefinitionText,
+  queryViewDefinitions,
+} from "@/postgres/queries/queryViewDefinitions"
 import { sanitizeWordCandidates } from "@/utilities/sanitization"
 import { separateSchemaFromCandidate } from "@/utilities/schema"
 import { getWordRangeAtPosition, makePostgresCodeMarkdown } from "@/utilities/text"
@@ -83,7 +87,7 @@ async function getTableHover(
   defaultSchema: string,
   logger: Logger,
 ): Promise<Hover | undefined> {
-  const definitions = await getTableDefinitions(
+  const definitions = await queryTableDefinitions(
     pgPool, schema, defaultSchema, logger, tableName,
   )
 
@@ -110,7 +114,7 @@ async function getViewHover(
   defaultSchema: string,
   logger: Logger,
 ): Promise<Hover | undefined> {
-  const definitions = await getViewDefinitions(
+  const definitions = await queryViewDefinitions(
     pgPool, schema, defaultSchema, logger, tableName,
   )
 
@@ -137,7 +141,7 @@ async function getFunctionHover(
   defaultSchema: string,
   logger: Logger,
 ): Promise<Hover | undefined> {
-  const definitions = await getFunctionDefinitions(
+  const definitions = await queryFunctionDefinitions(
     pgPool, schema, defaultSchema, logger, functionName,
   )
 
@@ -164,7 +168,7 @@ async function getTypeHover(
   defaultSchema: string,
   logger: Logger,
 ): Promise<Hover | undefined> {
-  const definitions = await getTypeDefinitions(
+  const definitions = await queryTypeDefinitions(
     pgPool, schema, defaultSchema, logger, typeName,
   )
 

@@ -11,7 +11,7 @@ interface TableDefinition {
   }[]
 }
 
-export async function getTableDefinitions(
+export async function queryTableDefinitions(
   pgPool: PostgresPool,
   schema: string | undefined,
   defaultSchema: string,

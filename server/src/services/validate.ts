@@ -5,8 +5,12 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { getFunctionList } from "@/postgres/parsers/getFunctionList"
 import { PostgresPool } from "@/postgres/pool"
-import { analyzeFileFunctions } from "@/postgres/queries/analyzeFileFunctions"
-import { analyzeFileSyntax } from "@/postgres/queries/analyzeFileSyntax"
+import {
+  queryFileFunctionsAnalysis,
+} from "@/postgres/queries/queryFileFunctionsAnalysis"
+import {
+  queryFileSyntaxAnalysis,
+} from "@/postgres/queries/queryFileSyntaxAnalysis"
 
 type ValidateTextDocumentOptions = {
   isComplete: boolean,
@@ -44,7 +48,7 @@ async function checkSyntax(
   options: ValidateTextDocumentOptions,
   logger: Logger,
 ): Promise<Diagnostic[] | undefined> {
-  const errors = await analyzeFileSyntax(
+  const errors = await queryFileSyntaxAnalysis(
     pgPool,
     textDocument,
     options.isComplete,
@@ -84,7 +88,7 @@ async function checkStaticAnalysis(
   options: ValidateTextDocumentOptions,
   logger: Logger,
 ): Promise<Diagnostic[] | undefined> {
-  const errors = await analyzeFileFunctions(
+  const errors = await queryFileFunctionsAnalysis(
     pgPool,
     textDocument,
     await getFunctionList(textDocument.uri),

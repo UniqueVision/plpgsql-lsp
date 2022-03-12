@@ -7,7 +7,7 @@ interface ViewDefinition {
   viewName: string
 }
 
-export async function getViewDefinitions(
+export async function queryViewDefinitions(
   pgPool: PostgresPool,
   schema: string | undefined,
   defaultSchema: string,

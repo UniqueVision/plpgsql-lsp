@@ -1,18 +1,26 @@
 import {
-  CompletionItem, CompletionItemKind, CompletionParams, Logger,
+  CompletionItem,
+  CompletionItemKind,
+  CompletionParams,
+  Logger,
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { PostgresPool } from "@/postgres/pool"
 import {
-  getFunctionDefinitions, makeFunctionDefinitionText, makeInsertFunctionText,
-} from "@/postgres/queries/getFunctionDefinitions"
+  makeFunctionDefinitionText,
+  makeInsertFunctionText,
+  queryFunctionDefinitions,
+} from "@/postgres/queries/queryFunctionDefinitions"
+import { querySchemas } from "@/postgres/queries/querySchemas"
 import {
-  getTableDefinitions, makeTableDefinitionText,
-} from "@/postgres/queries/getTableDefinitions"
+  makeTableDefinitionText,
+  queryTableDefinitions,
+} from "@/postgres/queries/queryTableDefinitions"
 import {
-  getTypeDefinitions, makeTypeDefinitionText,
-} from "@/postgres/queries/getTypeDefinitions"
+  makeTypeDefinitionText,
+  queryTypeDefinitions,
+} from "@/postgres/queries/queryTypeDefinitions"
 import { getWordRangeAtPosition } from "@/utilities/text"
 
 
@@ -71,40 +79,18 @@ async function getSchemaCompletionItems(
   pgPool: PostgresPool,
   logger: Logger,
 ): Promise<CompletionItem[]> {
-  let completionItems: CompletionItem[] = []
+  const schemas = await querySchemas(pgPool, logger)
 
-  const pgClient = await pgPool.connect()
-  try {
-    const results = await pgClient.query(`
-        SELECT
-            DISTINCT schema_name
-        FROM
-            information_schema.schemata
-        ORDER BY
-            schema_name
-    `)
-    const formattedResults = results.rows.map(
-      (row, index) => {
-        const schemaName = `${row["schema_name"]}`
-
-        return {
-          label: schemaName,
-          kind: CompletionItemKind.Module,
-          data: index,
-          detail: `SCHEMA ${schemaName}`,
-        }
-      },
-    )
-    completionItems = completionItems.concat(formattedResults)
-  }
-  catch (error: unknown) {
-    logger.error(`${(error as Error).toString()}`)
-  }
-  finally {
-    pgClient.release()
-  }
-
-  return completionItems
+  return schemas.map(
+    (schema, index) => {
+      return {
+        label: schema,
+        kind: CompletionItemKind.Module,
+        data: index,
+        detail: `SCHEMA ${schema}`,
+      }
+    },
+  )
 }
 
 async function getTableCompletionItems(
@@ -113,7 +99,7 @@ async function getTableCompletionItems(
   defaultSchema: string,
   logger: Logger,
 ): Promise<CompletionItem[]> {
-  const definitions = await getTableDefinitions(
+  const definitions = await queryTableDefinitions(
     pgPool, schema, defaultSchema, logger,
   )
 
@@ -134,7 +120,7 @@ async function getFunctionCompletionItems(
   defaultSchema: string,
   logger: Logger,
 ): Promise<CompletionItem[]> {
-  const definitions = await getFunctionDefinitions(
+  const definitions = await queryFunctionDefinitions(
     pgPool, schema, defaultSchema, logger,
   )
 
@@ -156,7 +142,7 @@ async function getTypeCompletionItems(
   defaultSchema: string,
   logger: Logger,
 ): Promise<CompletionItem[]> {
-  const definition = await getTypeDefinitions(
+  const definition = await queryTypeDefinitions(
     pgPool, schema, defaultSchema, logger,
   )
 

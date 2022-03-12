@@ -11,7 +11,7 @@ interface TypeDefinition {
   }[]
 }
 
-export async function getTypeDefinitions(
+export async function queryTypeDefinitions(
   pgPool: PostgresPool,
   schema: string | undefined,
   defaultSchema: string,

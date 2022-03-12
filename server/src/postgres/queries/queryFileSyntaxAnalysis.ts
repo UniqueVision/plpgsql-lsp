@@ -11,7 +11,7 @@ export interface SyntaxError {
   message: string
 }
 
-export async function analyzeFileSyntax(
+export async function queryFileSyntaxAnalysis(
   pgPool: PostgresPool,
   textDocument: TextDocument,
   isComplete = false,

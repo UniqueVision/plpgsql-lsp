@@ -14,7 +14,7 @@ interface FunctionDefinition {
   parallel?: string
 }
 
-export async function getFunctionDefinitions(
+export async function queryFunctionDefinitions(
   pgPool: PostgresPool,
   schema: string | undefined,
   defaultSchema: string,
