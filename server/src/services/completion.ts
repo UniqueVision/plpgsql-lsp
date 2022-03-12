@@ -21,7 +21,7 @@ import {
   makeTypeDefinitionText,
   queryTypeDefinitions,
 } from "@/postgres/queries/queryTypeDefinitions"
-import { getWordRangeAtPosition } from "@/utilities/text"
+import { getWordRangeAtPosition, isFirstCommentLine } from "@/utilities/text"
 
 
 export async function getCompletionItems(
@@ -31,6 +31,10 @@ export async function getCompletionItems(
   defaultSchema: string,
   logger: Logger,
 ): Promise<CompletionItem[] | undefined> {
+  if (isFirstCommentLine(textDocument, params.position)) {
+    return getDisableCommentCompletionItems()
+  }
+
   const wordRange = getWordRangeAtPosition(textDocument, params.position)
   if (wordRange === undefined) {
     return undefined
@@ -73,6 +77,23 @@ function findSchema(
   else {
     return schemaMatch[1]
   }
+}
+
+function getDisableCommentCompletionItems(): CompletionItem[] {
+  return [
+    {
+      label: "plpgsql-language-server:disable",
+      kind: CompletionItemKind.Text,
+      data: 0,
+      detail: "Disable all features.",
+    },
+    {
+      label: "plpgsql-language-server:disable validation",
+      kind: CompletionItemKind.Text,
+      data: 0,
+      detail: "Disable validation feature only.",
+    },
+  ]
 }
 
 async function getSchemaCompletionItems(
