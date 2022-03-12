@@ -9,18 +9,17 @@ import {
   TextDocumentSyncKind,
   WorkspaceFolder,
 } from "vscode-languageserver"
-import { createConnection } from "vscode-languageserver/node"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { PostgresPoolManager } from "@/postgres/pool"
 
-import { DEFAULT_SETTINGS, Settings } from "../settings"
+import { DEFAULT_SETTINGS } from "../settings"
 import { Logger } from "../utilities/logger"
 import { workspaceFoldersChanged } from "../utilities/workspace"
 import { DefinitionMap } from "./definitionMap"
 import { Handlers } from "./handlers"
 import { SettingsManager } from "./settingsManager"
-import { TextDocumentsManager, TextDocumentTestManager } from "./textDocumentManager"
+import { TextDocumentsManager } from "./textDocumentManager"
 
 export class Server {
   handlers?: Handlers
@@ -167,34 +166,4 @@ export class Server {
       })
     }
   }
-}
-
-export function setupTestServer(settings: Settings): Server {
-  process.argv.push("--node-ipc")
-
-  const connection = createConnection()
-  const logger = new Logger(connection)
-
-  const server = new Server(
-    connection,
-    logger,
-  )
-
-  server.documents = new TextDocumentTestManager()
-  server.settings = new SettingsManager(
-    connection,
-    {
-      hasConfigurationCapability: false,
-      globalSettings: settings,
-    },
-  )
-
-  server.connectionInitialize({
-    processId: null,
-    capabilities: {},
-    rootUri: null,
-    workspaceFolders: null,
-  })
-
-  return server
 }

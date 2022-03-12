@@ -6,7 +6,8 @@ import {
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { getDefinitionFileResource } from "@/__tests__/helpers/file"
-import { Server, setupTestServer } from "@/server/server"
+import { setupTestServer } from "@/__tests__/helpers/server"
+import { Server } from "@/server/server"
 import { TextDocumentTestManager } from "@/server/textDocumentManager"
 import { SettingsBuilder } from "@/settings"
 

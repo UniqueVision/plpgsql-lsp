@@ -3,7 +3,8 @@ import dedent from "ts-dedent"
 import { CompletionItem, Position } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { Server, setupTestServer } from "@/server/server"
+import { setupTestServer } from "@/__tests__/helpers/server"
+import { Server } from "@/server/server"
 import { TextDocumentTestManager } from "@/server/textDocumentManager"
 import { SettingsBuilder } from "@/settings"
 
