@@ -14,10 +14,8 @@ import {
 import {
   getViewDefinitions, makeViewDefinitionText,
 } from "@/postgres/queries/getViewDefinitions"
+import { sanitizeWordCandidates } from "@/utilities/sanitization"
 import { separateSchemaFromCandidate } from "@/utilities/schema"
-import {
-  sanitizeWordCandidates,
-} from "@/utilities/search"
 import { getWordRangeAtPosition, makePostgresCodeMarkdown } from "@/utilities/text"
 
 export async function getHover(

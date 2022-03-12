@@ -14,7 +14,7 @@ import {
 } from "@/postgres/parsers/getDefinitions"
 import { Statement } from "@/postgres/parsers/statement"
 import { DefinitionMap } from "@/server/definitionMap"
-import { sanitizeWordCandidates } from "@/utilities/search"
+import { sanitizeWordCandidates } from "@/utilities/sanitization"
 import { getWordRangeAtPosition } from "@/utilities/text"
 
 
