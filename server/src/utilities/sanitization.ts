@@ -9,8 +9,8 @@ export function sanitizeWordCandidates(word: string): string[] {
 
 /**
  * sanitize table row type.
- *     ex)
- *       public.table_name%ROWTYPE
+ *   e.g.)
+ *     public.table_name%ROWTYPE
  */
 export function sanitizeTableRowType(word: string): string {
   return word.replace(/"?([a-zA-Z_]\w*)"?%(ROWTYPE|rowtype)$/, "$1")
@@ -18,9 +18,9 @@ export function sanitizeTableRowType(word: string): string {
 
 /**
  * sanitize quoted table.
- *     ex)
- *       public."table_name"
- *              "table_name"
+ *   e.g.)
+ *     public."table_name"
+ *            "table_name"
  */
 export function sanitizeQuotedTable(word: string): string {
   return word.replace(/(^[a-zA-Z_]\w*\.)?"([a-zA-Z_]\w*)"$/, "$1$2")
@@ -28,9 +28,9 @@ export function sanitizeQuotedTable(word: string): string {
 
 /**
  * sanitize dynamic partition table.
- *     ex)
- *       public."table_name_$$ || partition_key || $$"
- *              "table_name_$$ || partition_key || $$"
+ *   e.g.)
+ *     public."table_name_$$ || partition_key || $$"
+ *            "table_name_$$ || partition_key || $$"
  */
 export function sanitizeDynamicPartitionTable(word: string) {
   return word
@@ -39,11 +39,11 @@ export function sanitizeDynamicPartitionTable(word: string) {
 
 /**
  * sanitize number partition table.
- *     ex)
- *       public.table_name_1234
- *              table_name_1234
- *       public."table_name_1234"
- *              "table_name_1234"
+ *   e.g.)
+ *     public.table_name_1234
+ *            table_name_1234
+ *     public."table_name_1234"
+ *            "table_name_1234"
  */
 export function sanitizeNumberPartitionTable(word: string): string {
   return word.replace(/"?([a-zA-Z_]\w*)_[0-9]+"?$/, "$1")
@@ -51,11 +51,11 @@ export function sanitizeNumberPartitionTable(word: string): string {
 
 /**
  * sanitize uuid partition table.
- *     ex)
- *       public.table_name_12345678-1234-1234-1234-123456789012
- *              table_name_12345678-1234-1234-1234-123456789012
- *       public."table_name_12345678-1234-1234-1234-123456789012"
- *              "table_name_12345678-1234-1234-1234-123456789012"
+ *   e.g.)
+ *     public.table_name_12345678-1234-1234-1234-123456789012
+ *            table_name_12345678-1234-1234-1234-123456789012
+ *     public."table_name_12345678-1234-1234-1234-123456789012"
+ *            "table_name_12345678-1234-1234-1234-123456789012"
  */
 export function sanitizeUuidPartitionTable(word: string): string {
   return word.replace(
