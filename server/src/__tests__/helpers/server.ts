@@ -26,7 +26,7 @@ export function setupTestServer(settings: Settings): Server {
     },
   )
 
-  server.connectionInitialize({
+  server.initialize({
     processId: null,
     capabilities: {},
     rootUri: null,

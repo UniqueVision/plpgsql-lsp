@@ -29,6 +29,9 @@ import { getHover } from "@/services/hover"
 import { validateTextDocument } from "@/services/validate"
 import { useLanguageServer, useValidation } from "@/utilities/useLanguageServer"
 
+export type HandlersOptions = {
+  hasDiagnosticRelatedInformationCapability: boolean
+}
 
 export class Handlers {
   constructor(
@@ -37,7 +40,7 @@ export class Handlers {
     private readonly documents: TextDocumentsManager,
     private readonly settings: SettingsManager,
     private readonly definitionMap: DefinitionMap,
-    private readonly hasDiagnosticRelatedInformationCapability: boolean,
+    private readonly options: HandlersOptions,
     private readonly logger: Logger,
   ) {
     this.documents.onDidChangeContent((event) => this.onDidChangeContent(event))
@@ -231,7 +234,7 @@ export class Handlers {
           {
             isComplete: options.isComplete,
             hasDiagnosticRelatedInformationCapability:
-              this.hasDiagnosticRelatedInformationCapability,
+              this.options.hasDiagnosticRelatedInformationCapability,
           },
           this.logger,
         )

@@ -49,20 +49,19 @@ export class Server {
       connection, { hasConfigurationCapability: undefined },
     )
 
-    this.connection.onInitialize(
-      (params) => this.connectionInitialize(params),
-    )
+    this.connection.onInitialize(params => this.onInitialize(params))
+    this.connection.onInitialized(params => this.onInitialized(params))
+  }
 
-    this.connection.onInitialized(
-      (params) => this.connectionInitialized(params),
-    )
+  initialize(params: InitializeParams): void {
+    this.onInitialize(params)
   }
 
   start(): void {
     this.connection.listen()
   }
 
-  connectionInitialize(params: InitializeParams): InitializeResult {
+  onInitialize(params: InitializeParams): InitializeResult {
     this.capabilities = params.capabilities
     this.workspaceFolders = params.workspaceFolders || []
 
@@ -110,7 +109,7 @@ export class Server {
     }
   }
 
-  private async connectionInitialized(_params: InitializedParams) {
+  private async onInitialized(_params: InitializedParams) {
     if (this.hasConfigurationCapability
       && this.clientDynamicRegisterSupport
     ) {
@@ -121,9 +120,9 @@ export class Server {
         )
       }
       catch (error: unknown) {
-        const errorMessage = (error as Error).toString()
         this.logger.error(
-          `DidChangeConfigurationNotification cannot register. ${errorMessage}`,
+          "DidChangeConfigurationNotification cannot register."
+            + ` ${(error as Error).toString()}`,
         )
       }
     }
@@ -140,6 +139,11 @@ export class Server {
   }
 
   private registerHandlers(): void {
+    const options = {
+      hasDiagnosticRelatedInformationCapability:
+        this.hasDiagnosticRelatedInformationCapability,
+    }
+
     // Register all features that the language server has
     this.handlers = new Handlers(
       this.connection,
@@ -147,7 +151,7 @@ export class Server {
       this.documents,
       this.settings,
       this.definitionMap,
-      this.hasDiagnosticRelatedInformationCapability,
+      options,
       this.logger,
     )
   }
