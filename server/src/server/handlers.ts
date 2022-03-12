@@ -104,7 +104,7 @@ export class Handlers {
       this.definitionMap.fileDefinitions.has(event.document.uri)
       || await this.settings.isDefinitionTarget(event.document.uri)
     ) {
-      console.log("Definition updationg...")
+      console.log("Definitions updationg...")
 
       const settings = await this.settings.get(event.document.uri)
 
@@ -115,7 +115,7 @@ export class Handlers {
       if (candidates !== undefined) {
         const definitions = candidates.map(candidate => candidate.definition)
 
-        console.log(`Definition updated!! 😎 ${JSON.stringify(definitions)}`)
+        console.log(`Definitions updated!! 😎 ${JSON.stringify(definitions)}`)
       }
     }
   }
