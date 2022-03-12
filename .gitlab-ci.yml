@@ -15,13 +15,13 @@ before_script:
 
 lint:
   stage: test
-  image: node:17-bullseye-slim
+  image: node:16-bullseye-slim
   script:
     - npm run lint
 
 test:
   stage: test
-  image: node:17-bullseye-slim
+  image: node:16-bullseye-slim
   services:
     - yassun4dev/plpgsql-check:latest
   variables:
