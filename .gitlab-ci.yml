@@ -22,5 +22,15 @@ lint:
 test:
   stage: test
   image: node:17-bullseye-slim
+  services:
+    - yassun4dev/plpgsql-check:latest
+  variables:
+    POSTGRES_HOST: yassun4dev-plpgsql-check
+    POSTGRES_DB: postgres
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: password
+    POSTGRES_HOST_AUTH_METHOD: trust
   script:
+    - apt-get install -y postgresql-client
+    - CI_MODE=true ./sample/prepare.sh
     - npm run test:ci
