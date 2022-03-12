@@ -220,17 +220,11 @@ export class Handlers {
   ): Promise<Diagnostic[] | undefined> {
     let diagnostics: Diagnostic[] | undefined = undefined
 
-    if (!useValidation(textDocument)) {
-      diagnostics = []
-    }
-    else {
+    if (useValidation(textDocument)) {
       const settings = await this.settings.get(textDocument.uri)
 
       const pgPool = getPool(this.pgPools, settings, this.logger)
-      if (pgPool === undefined) {
-        diagnostics = []
-      }
-      else {
+      if (pgPool !== undefined) {
         diagnostics = await validateTextDocument(
           pgPool,
           textDocument,
@@ -244,13 +238,9 @@ export class Handlers {
       }
     }
 
-    if (diagnostics === undefined) {
-      return undefined
-    }
-
     this.connection.sendDiagnostics({
       uri: textDocument.uri,
-      diagnostics,
+      diagnostics: diagnostics || [],
     })
 
     return diagnostics
