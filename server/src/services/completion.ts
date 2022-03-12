@@ -79,7 +79,7 @@ function findSchema(
   }
 }
 
-function getDisableCommentCompletionItems(): CompletionItem[] {
+export function getDisableCommentCompletionItems(): CompletionItem[] {
   return [
     {
       label: "plpgsql-language-server:disable",

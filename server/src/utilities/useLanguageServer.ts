@@ -1,8 +1,9 @@
-import { Range } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
+import { getFirstLine } from "./text"
+
 export function useLanguageServer(textDocument: TextDocument): boolean {
-  const firstLine = textDocument.getText(Range.create(0, 0, 1, 0)).slice(0, -1)
+  const firstLine = getFirstLine(textDocument)
 
   return (
     firstLine.match(/^ *-- +plpgsql-language-server:disable *$/) === null
@@ -11,7 +12,7 @@ export function useLanguageServer(textDocument: TextDocument): boolean {
 }
 
 export function useValidation(textDocument: TextDocument): boolean {
-  const firstLine = textDocument.getText(Range.create(0, 0, 1, 0)).slice(0, -1)
+  const firstLine = getFirstLine(textDocument)
 
   return (
     firstLine.match(/^ *-- +plpgsql-language-server:disable( +validation)? *$/) === null

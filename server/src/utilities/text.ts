@@ -121,6 +121,10 @@ export function makePostgresCodeMarkdown(code: string): string {
   return `\`\`\`postgres\n${code}\n\`\`\``
 }
 
+export function getFirstLine(textDocument: TextDocument): string {
+  return textDocument.getText(Range.create(0, 0, 1, 0)).split("\n")[0]
+}
+
 export function isFirstCommentLine(
   textDocument: TextDocument,
   position: Position,
@@ -131,10 +135,10 @@ export function isFirstCommentLine(
     return false
   }
 
-  const lineText = textDocument.getText(Range.create(line, 0, line + 1, 0)).slice(0, -1)
+  const firstLine = getFirstLine(textDocument)
 
   return (
-    lineText.match(/^ *-- +.*$/) !== null
-    || lineText.match(/^ *\/\* +.*$/) !== null
+    firstLine.match(/^ *-- +.*$/) !== null
+    || firstLine.match(/^ *\/\* +.*$/) !== null
   )
 }

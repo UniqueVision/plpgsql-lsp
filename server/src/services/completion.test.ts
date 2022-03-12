@@ -8,6 +8,8 @@ import { Server } from "@/server/server"
 import { TextDocumentTestManager } from "@/server/textDocumentManager"
 import { SettingsBuilder } from "@/settings"
 
+import { getDisableCommentCompletionItems } from "./completion"
+
 
 describe("Completion Tests", () => {
   let server: Server
@@ -40,12 +42,44 @@ describe("Completion Tests", () => {
     })
   }
 
+  function validateCompletionItems(
+    definitoins: CompletionItem[] | undefined,
+    expected: CompletionItem[],
+  ) {
+    expect(definitoins).toBeDefined()
+    if (definitoins === undefined) return
+
+    assert.deepEqual(definitoins, expected)
+  }
+
   describe("Completion", function () {
     it("Completion items exist", async () => {
       const completions = await onCompletion(
         "companies", Position.create(1, 1),
       )
       assert.ok(completions && completions.length > 1)
+    })
+
+    it("Disable comment completion", async () => {
+      const completions = await onCompletion(
+        "-- ", Position.create(0, 0),
+      )
+
+      validateCompletionItems(
+        completions,
+        getDisableCommentCompletionItems(),
+      )
+    })
+
+    it("Disable block comment completion", async () => {
+      const completions = await onCompletion(
+        "/* ", Position.create(0, 0),
+      )
+
+      validateCompletionItems(
+        completions,
+        getDisableCommentCompletionItems(),
+      )
     })
 
     it("Completion with language servcer disable comment", async () => {
