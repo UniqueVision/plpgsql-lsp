@@ -1,7 +1,7 @@
 import { parseQuery } from "libpg-query"
 import { Range, uinteger } from "vscode-languageserver"
 
-import { getDefinitionFileText } from "@/__tests__/helpers/file"
+import { loadDefinitionFile } from "@/__tests__/helpers/file"
 
 import {
   getFunctionDefinitions,
@@ -26,7 +26,7 @@ test.each([
 ])(
   'getTableDefinitions <- "%s"',
   async (file, expected) => {
-    const fileText = getDefinitionFileText(file)
+    const fileText = loadDefinitionFile(file)
     const stmts = getTableDefinitions(
       fileText, await getStmt(fileText, 1), `file://${file}`, "public",
     )
@@ -54,7 +54,7 @@ test.each([
   ],
 ])(
   'getViewDefinitions <- "%s"', async (file, expected) => {
-    const fileText = getDefinitionFileText(file)
+    const fileText = loadDefinitionFile(file)
     const stmts = getViewDefinitions(
       fileText, await getStmt(fileText, 1), `file://${file}`, "public",
     )
@@ -74,7 +74,7 @@ test.each([
   ],
 ])(
   'getTypeDefinitions <- "%s"', async (file, expected) => {
-    const fileText = getDefinitionFileText(file)
+    const fileText = loadDefinitionFile(file)
     const stmts = getTypeDefinitions(
       fileText, await getStmt(fileText, 1), `file://${file}`, "public",
     )
@@ -95,7 +95,7 @@ test.each([
 ])(
   'getFunctionDefinitions <- "%s"',
   async (file, expected) => {
-    const fileText = getDefinitionFileText(file)
+    const fileText = loadDefinitionFile(file)
     const stmts = getFunctionDefinitions(
       fileText, await getStmt(fileText, 1), `file://${file}`, "public",
     )

@@ -27,7 +27,7 @@ import {
 } from "@/services/definition"
 import { getHover } from "@/services/hover"
 import { validateTextDocument } from "@/services/validate"
-import { useLanguageServer, useValidation } from "@/utilities/comment"
+import { useLanguageServer, useValidation } from "@/utilities/useLanguageServer"
 
 
 export class Handlers {

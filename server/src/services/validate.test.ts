@@ -4,9 +4,9 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 
 import {
   getDefinitionFileResource,
-  getDefinitionFileText,
   getQueryFileResource,
-  getQueryFileText,
+  loadDefinitionFile,
+  loadQueryFile,
 } from "@/__tests__/helpers/file"
 import { Server, setupTestServer } from "@/server/server"
 import { TextDocumentTestManager } from "@/server/textDocumentManager"
@@ -31,7 +31,7 @@ describe("Validate Tests", () => {
     file: string,
     options: { ignoreDesableFlag: boolean } = { ignoreDesableFlag: false },
   ): Promise<Diagnostic[] | undefined> {
-    let context = getDefinitionFileText(file)
+    let context = loadDefinitionFile(file)
 
     if (options.ignoreDesableFlag) {
       context = context.split("\n").slice(1).join("\n")
@@ -60,7 +60,7 @@ describe("Validate Tests", () => {
       getQueryFileResource(file),
       "postgres",
       0,
-      getQueryFileText(file),
+      loadQueryFile(file),
     );
 
     (server.documents as TextDocumentTestManager).set(textDocument)

@@ -11,12 +11,12 @@ export function getQueryFileResource(file: string): URI {
   return `file://${path.join(queryDirPath(), file)}`
 }
 
-export function getDefinitionFileText(file: string): string {
-  return readFileSync(path.join(definitionsDirPath(), file)).toString()
+export function loadDefinitionFile(filename: string): string {
+  return readFileSync(path.join(definitionsDirPath(), filename)).toString()
 }
 
-export function getQueryFileText(file: string): string {
-  return readFileSync(path.join(queryDirPath(), file)).toString()
+export function loadQueryFile(filename: string): string {
+  return readFileSync(path.join(queryDirPath(), filename)).toString()
 }
 
 function definitionsDirPath(): string {
