@@ -154,7 +154,7 @@ describe("Validate Tests", () => {
         "syntax_error_query_with_language_server_disable_comment.pgsql",
       )
 
-      validateDiagnostics(diagnostics, [])
+      expect(diagnostics).toBeUndefined()
     })
 
     it("Syntax error query with language server disable block comment.", async () => {
@@ -162,7 +162,7 @@ describe("Validate Tests", () => {
         "syntax_error_query_with_language_server_disable_block_comment.pgsql",
       )
 
-      validateDiagnostics(diagnostics, [])
+      expect(diagnostics).toBeUndefined()
     })
 
     it(
@@ -172,7 +172,7 @@ describe("Validate Tests", () => {
           "syntax_error_query_with_language_server_validation_disable_comment.pgsql",
         )
 
-        validateDiagnostics(diagnostics, [])
+        expect(diagnostics).toBeUndefined()
       },
     )
 
@@ -184,7 +184,7 @@ describe("Validate Tests", () => {
           + "_with_language_server_validation_disable_block_comment.pgsql",
         )
 
-        validateDiagnostics(diagnostics, [])
+        expect(diagnostics).toBeUndefined()
       },
     )
   })
