@@ -1,4 +1,5 @@
 /* plpgsql-language-server:disable validation */
+
 DROP FUNCTION IF EXISTS function_column_does_not_exist;
 
 CREATE FUNCTION function_column_does_not_exist(

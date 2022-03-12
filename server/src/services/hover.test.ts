@@ -23,7 +23,10 @@ describe("Hover Tests", () => {
     }
   })
 
-  async function onHover(content: string): Promise<Hover | undefined> {
+  async function onHover(
+    content: string,
+    position = Position.create(1, 1),
+  ): Promise<Hover | undefined> {
     const textDocument = TextDocument.create("test.pgsql", "postgres", 0, content);
 
     (server.documents as TextDocumentTestManager).set(textDocument)
@@ -34,7 +37,7 @@ describe("Hover Tests", () => {
 
     return server.handlers.onHover({
       textDocument,
-      position: Position.create(1, 1),
+      position,
     })
   }
 
@@ -202,6 +205,32 @@ describe("Hover Tests", () => {
           id uuid
         )
       `)
+    })
+
+    it("Hover with language server disable comment", async () => {
+      const hover = await onHover(
+        dedent`
+          -- plpgsql-language-server:disable
+
+          public.type_user
+        `,
+        Position.create(3, 0),
+      )
+
+      expect(hover).toBeUndefined()
+    })
+
+    it("Hover with language server disable block comment", async () => {
+      const hover = await onHover(
+        dedent`
+          /* plpgsql-language-server:disable */
+
+          public.type_user
+        `,
+        Position.create(3, 0),
+      )
+
+      expect(hover).toBeUndefined()
     })
   })
 })

@@ -1,4 +1,5 @@
 import * as assert from "assert"
+import dedent from "ts-dedent"
 import { CompletionItem, Position } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
@@ -44,6 +45,30 @@ describe("Completion Tests", () => {
         "companies", Position.create(1, 1),
       )
       assert.ok(completions && completions.length > 1)
+    })
+
+    it("Completion with language servcer disable comment", async () => {
+      const completions = await onCompletion(
+        dedent`
+          -- plpgsql-language-server:disable
+
+          companies
+        `,
+        Position.create(3, 0),
+      )
+      expect(completions).toBeUndefined()
+    })
+
+    it("Completion with language servcer disable block comment", async () => {
+      const completions = await onCompletion(
+        dedent`
+          /* plpgsql-language-server:disable */
+
+          companies
+        `,
+        Position.create(3, 0),
+      )
+      expect(completions).toBeUndefined()
     })
   })
 })

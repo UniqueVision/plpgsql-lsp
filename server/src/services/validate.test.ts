@@ -3,9 +3,11 @@ import { Diagnostic, DiagnosticSeverity, Range } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import {
+  DEFAULT_LOAD_FILE_OPTIONS,
   getDefinitionFileResource,
   getQueryFileResource,
   loadDefinitionFile,
+  LoadFileOptions,
   loadQueryFile,
 } from "@/__tests__/helpers/file"
 import { Server, setupTestServer } from "@/server/server"
@@ -55,12 +57,13 @@ describe("Validate Tests", () => {
 
   async function validateQuery(
     file: string,
+    options: LoadFileOptions = DEFAULT_LOAD_FILE_OPTIONS,
   ): Promise<Diagnostic[] | undefined> {
     const textDocument = TextDocument.create(
       getQueryFileResource(file),
       "postgres",
       0,
-      loadQueryFile(file),
+      loadQueryFile(file, options),
     );
 
     (server.documents as TextDocumentTestManager).set(textDocument)
@@ -90,6 +93,7 @@ describe("Validate Tests", () => {
       const diagnostics = await validateDefinition(
         "stored/function_correct.pgsql",
       )
+
       validateDiagnostics(diagnostics, [])
     })
 
@@ -97,6 +101,7 @@ describe("Validate Tests", () => {
       const diagnostics = await validateDefinition(
         "stored/static_analysis_warning_function_unused_variable.pgsql",
       )
+
       validateDiagnostics(diagnostics, [
         {
           severity: DiagnosticSeverity.Warning,
@@ -111,20 +116,76 @@ describe("Validate Tests", () => {
         "stored/syntax_error_function_column_does_not_exist.pgsql",
         { ignoreDesableFlag: true },
       )
+
       validateDiagnostics(diagnostics, [
         {
           severity: DiagnosticSeverity.Error,
           message: 'column "tags" does not exist',
-          range: Range.create(12, 2, 12, 6),
+          range: Range.create(13, 2, 13, 6),
         },
       ])
     })
 
     it("Correct query", async () => {
       const diagnostics = await validateQuery(
-        "select_correct.pgsql",
+        "correct_query.pgsql",
       )
+
       validateDiagnostics(diagnostics, [])
     })
+
+    it("Syntax error query", async () => {
+      const diagnostics = await validateQuery(
+        "syntax_error_query_with_language_server_disable_comment.pgsql",
+        { skipDisableComment: true },
+      )
+
+      validateDiagnostics(diagnostics, [
+        {
+          severity: DiagnosticSeverity.Error,
+          message: 'error: column "tags" does not exist',
+          range: Range.create(3, 2, 3, 3),
+        },
+      ])
+    })
+
+    it("Syntax error query with language server disable comment.", async () => {
+      const diagnostics = await validateQuery(
+        "syntax_error_query_with_language_server_disable_comment.pgsql",
+      )
+
+      validateDiagnostics(diagnostics, [])
+    })
+
+    it("Syntax error query with language server disable block comment.", async () => {
+      const diagnostics = await validateQuery(
+        "syntax_error_query_with_language_server_disable_block_comment.pgsql",
+      )
+
+      validateDiagnostics(diagnostics, [])
+    })
+
+    it(
+      "Syntax error query with language server validation disable comment.",
+      async () => {
+        const diagnostics = await validateQuery(
+          "syntax_error_query_with_language_server_validation_disable_comment.pgsql",
+        )
+
+        validateDiagnostics(diagnostics, [])
+      },
+    )
+
+    it(
+      "Syntax error query with language server validation disable block comment.",
+      async () => {
+        const diagnostics = await validateQuery(
+          "syntax_error_query"
+          + "_with_language_server_validation_disable_block_comment.pgsql",
+        )
+
+        validateDiagnostics(diagnostics, [])
+      },
+    )
   })
 })

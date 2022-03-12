@@ -1,4 +1,5 @@
 import * as assert from "assert"
+import dedent from "ts-dedent"
 import {
   DefinitionLink, LocationLink, Position, Range, URI,
 } from "vscode-languageserver"
@@ -29,7 +30,7 @@ describe("Definition Tests", () => {
   async function onDefinition(
     definitionResource: URI,
     content: string,
-    position: Position,
+    position = Position.create(0, 0),
   ): Promise<DefinitionLink[] | undefined> {
     const textDocument = TextDocument.create("test.pgsql", "postgres", 0, content);
 
@@ -64,9 +65,8 @@ describe("Definition Tests", () => {
   describe("Definition", function () {
     it("Definition on table", async () => {
       const definitionResource = getDefinitionFileResource("tables/companies.pgsql")
-      const definition = await onDefinition(
-        definitionResource, "companies", Position.create(1, 23),
-      )
+      const definition = await onDefinition(definitionResource, "companies")
+
       validateDefinitionLinks(definition, [
         LocationLink.create(
           definitionResource,
@@ -78,9 +78,8 @@ describe("Definition Tests", () => {
 
     it("Definition on table with default schema", async () => {
       const definitionResource = getDefinitionFileResource("tables/public_users.pgsql")
-      const definition = await onDefinition(
-        definitionResource, "public.users", Position.create(1, 23),
-      )
+      const definition = await onDefinition(definitionResource, "public.users")
+
       validateDefinitionLinks(definition, [
         LocationLink.create(
           definitionResource,
@@ -94,9 +93,8 @@ describe("Definition Tests", () => {
       const definitionResource = getDefinitionFileResource(
         "tables/campaign_participants.pgsql",
       )
-      const definition = await onDefinition(
-        definitionResource, "campaign.participants", Position.create(1, 23),
-      )
+      const definition = await onDefinition(definitionResource, "campaign.participants")
+
       validateDefinitionLinks(definition, [
         LocationLink.create(
           definitionResource,
@@ -108,9 +106,8 @@ describe("Definition Tests", () => {
 
     it("Definition on view", async () => {
       const definitionResource = getDefinitionFileResource("views/deleted_users.pgsql")
-      const definition = await onDefinition(
-        definitionResource, "deleted_users", Position.create(1, 23),
-      )
+      const definition = await onDefinition(definitionResource, "deleted_users")
+
       validateDefinitionLinks(definition, [
         LocationLink.create(
           definitionResource,
@@ -118,6 +115,36 @@ describe("Definition Tests", () => {
           Range.create(2, 12, 2, 25),
         ),
       ])
+    })
+
+    it("Definition with language server disable comment", async () => {
+      const definitionResource = getDefinitionFileResource("tables/companies.pgsql")
+      const definition = await onDefinition(
+        definitionResource,
+        dedent`
+          -- plpgsql-language-server:disable
+
+          companies
+        `,
+        Position.create(3, 0),
+      )
+
+      expect(definition).toBeUndefined()
+    })
+
+    it("Definition with language server disable block comment", async () => {
+      const definitionResource = getDefinitionFileResource("tables/companies.pgsql")
+      const definition = await onDefinition(
+        definitionResource,
+        dedent`
+          /* plpgsql-language-server:disable */
+
+          companies
+        `,
+        Position.create(3, 0),
+      )
+
+      expect(definition).toBeUndefined()
     })
   })
 })
