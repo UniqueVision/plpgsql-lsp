@@ -6,23 +6,23 @@ import { findIndexFromBuffer, getRangeFromBuffer } from "@/utilities/text"
 
 export function getDefinitions(
   fileText: string,
-  stmts: Statement[],
+  statements: Statement[],
   uri: URI,
   defaultSchema: string,
 ): DefinitionCandidate[] {
-  return stmts.flatMap(
-    (stmt) => {
-      if (stmt?.stmt?.CreateStmt !== undefined) {
-        return getTableDefinitions(fileText, stmt, uri, defaultSchema)
+  return statements.flatMap(
+    (statement) => {
+      if (statement?.stmt?.CreateStmt !== undefined) {
+        return getTableDefinitions(fileText, statement, uri, defaultSchema)
       }
-      else if (stmt?.stmt?.ViewStmt !== undefined) {
-        return getViewDefinitions(fileText, stmt, uri, defaultSchema)
+      else if (statement?.stmt?.ViewStmt !== undefined) {
+        return getViewDefinitions(fileText, statement, uri, defaultSchema)
       }
-      else if (stmt?.stmt?.CompositeTypeStmt !== undefined) {
-        return getTypeDefinitions(fileText, stmt, uri, defaultSchema)
+      else if (statement?.stmt?.CompositeTypeStmt !== undefined) {
+        return getTypeDefinitions(fileText, statement, uri, defaultSchema)
       }
-      else if (stmt?.stmt?.CreateFunctionStmt !== undefined) {
-        return getFunctionDefinitions(fileText, stmt, uri, defaultSchema)
+      else if (statement?.stmt?.CreateFunctionStmt !== undefined) {
+        return getFunctionDefinitions(fileText, statement, uri, defaultSchema)
       }
       else {
         return []
@@ -33,25 +33,25 @@ export function getDefinitions(
 
 export function getTableDefinitions(
   fileText: string,
-  stmt: Statement,
+  statement: Statement,
   uri: URI,
   defaultSchema: string,
 ): DefinitionCandidate[] {
-  const createStmt = stmt?.stmt?.CreateStmt
+  const createStmt = statement?.stmt?.CreateStmt
   if (createStmt === undefined) {
     return []
   }
 
   const schemaname = createStmt.relation.schemaname
   const relname = createStmt.relation.relname
-  const stmtLocation = stmt.stmt_location || 0
+  const stmtLocation = statement.stmt_location || 0
 
   const definitionLink = LocationLink.create(
     uri,
     getRangeFromBuffer(
       fileText,
       stmtLocation,
-      stmtLocation + stmt.stmt_len,
+      stmtLocation + statement.stmt_len,
     ),
     getRangeFromBuffer(
       fileText,
@@ -82,25 +82,25 @@ export function getTableDefinitions(
 
 export function getViewDefinitions(
   fileText: string,
-  stmt: Statement,
+  statement: Statement,
   uri: URI,
   defaultSchema: string,
 ): DefinitionCandidate[] {
-  const createStmt = stmt?.stmt?.ViewStmt
+  const createStmt = statement?.stmt?.ViewStmt
   if (createStmt === undefined) {
     return []
   }
 
   const schemaname = createStmt.view.schemaname
   const relname = createStmt.view.relname
-  const stmtLocation = stmt.stmt_location || 0
+  const stmtLocation = statement.stmt_location || 0
 
   const definitionLink = LocationLink.create(
     uri,
     getRangeFromBuffer(
       fileText,
       stmtLocation,
-      stmtLocation + stmt.stmt_len,
+      stmtLocation + statement.stmt_len,
     ),
     getRangeFromBuffer(
       fileText,
@@ -131,24 +131,24 @@ export function getViewDefinitions(
 
 export function getTypeDefinitions(
   fileText: string,
-  stmt: Statement,
+  statement: Statement,
   uri: URI,
   defaultSchema: string,
 ): DefinitionCandidate[] {
-  const compositTypeStmt = stmt?.stmt?.CompositeTypeStmt
+  const compositTypeStmt = statement?.stmt?.CompositeTypeStmt
   if (compositTypeStmt === undefined) {
     return []
   }
   const relname = compositTypeStmt.typevar.relname
   const schemaname = compositTypeStmt.typevar.schemaname
-  const stmtLocation = stmt.stmt_location || 0
+  const stmtLocation = statement.stmt_location || 0
 
   const definitionLink = LocationLink.create(
     uri,
     getRangeFromBuffer(
       fileText,
       stmtLocation,
-      stmtLocation + stmt.stmt_len,
+      stmtLocation + statement.stmt_len,
     ),
     getRangeFromBuffer(
       fileText,
@@ -177,11 +177,11 @@ export function getTypeDefinitions(
 
 export function getFunctionDefinitions(
   fileText: string,
-  stmt: Statement,
+  statement: Statement,
   uri: URI,
   defaultSchema: string,
 ): DefinitionCandidate[] {
-  const createFunctionStmt = stmt?.stmt?.CreateFunctionStmt
+  const createFunctionStmt = statement?.stmt?.CreateFunctionStmt
   if (createFunctionStmt === undefined) {
     return []
   }
@@ -209,9 +209,9 @@ export function getFunctionDefinitions(
   const definition = nameList.join(".")
 
   const functionNameLocation = findIndexFromBuffer(
-    fileText, definition, stmt.stmt_location,
+    fileText, definition, statement.stmt_location,
   )
-  const stmtLocation = stmt.stmt_location || 0
+  const stmtLocation = statement.stmt_location || 0
 
 
   const definitionLink = LocationLink.create(
@@ -219,7 +219,7 @@ export function getFunctionDefinitions(
     getRangeFromBuffer(
       fileText,
       stmtLocation,
-      stmtLocation + stmt.stmt_len,
+      stmtLocation + statement.stmt_len,
     ),
     getRangeFromBuffer(
       fileText,

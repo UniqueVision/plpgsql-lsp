@@ -90,12 +90,12 @@ export async function updateFileDefinition(
   const fileText = readFileFromUri(uri)
   const query = await parseQuery(fileText)
 
-  const stmts: Statement[] | undefined = query?.["stmts"]
+  const statements: Statement[] | undefined = query?.["stmts"]
 
-  if (stmts === undefined) {
+  if (statements === undefined) {
     return
   }
-  const candidates = getDefinitions(fileText, stmts, uri, defaultSchema)
+  const candidates = getDefinitions(fileText, statements, uri, defaultSchema)
 
   definitionMap.updateCandidates(uri, candidates)
 

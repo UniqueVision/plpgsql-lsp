@@ -16,16 +16,16 @@ export async function getFunctionList(
   const fileText = readFileFromUri(uri)
   const query = await parseQuery(fileText)
 
-  const stmts: Statement[] | undefined = query?.["stmts"]
-  if (stmts === undefined) {
+  const statements: Statement[] | undefined = query?.["stmts"]
+  if (statements === undefined) {
     return []
   }
 
   return asyncFlatMap(
-    stmts,
-    async (stmt) => {
-      if (stmt?.stmt?.CreateFunctionStmt !== undefined) {
-        return await getCreateFunctionList(stmt)
+    statements,
+    async (statement) => {
+      if (statement?.stmt?.CreateFunctionStmt !== undefined) {
+        return await getCreateFunctionList(statement)
       }
       else {
         return []
@@ -35,9 +35,9 @@ export async function getFunctionList(
 }
 
 async function getCreateFunctionList(
-  stmt: Statement,
+  statement: Statement,
 ): Promise<FunctionInfo[]> {
-  const createFunctionStmt = stmt?.stmt?.CreateFunctionStmt
+  const createFunctionStmt = statement?.stmt?.CreateFunctionStmt
   if (createFunctionStmt === undefined) {
     return []
   }

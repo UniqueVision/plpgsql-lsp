@@ -9,6 +9,7 @@ import {
   getTypeDefinitions,
   getViewDefinitions,
 } from "./getDefinitions"
+import { Statement } from "./statement"
 
 test.each([
   [
@@ -27,13 +28,13 @@ test.each([
   'getTableDefinitions <- "%s"',
   async (file, expected) => {
     const fileText = loadDefinitionFile(file)
-    const stmts = getTableDefinitions(
-      fileText, await getStmt(fileText, 1), `file://${file}`, "public",
+    const statements = getTableDefinitions(
+      fileText, await getStmtement(fileText, 1), `file://${file}`, "public",
     )
 
     expect(
-      stmts.map(
-        (stmt) => stmt.definitionLink.targetSelectionRange,
+      statements.map(
+        (statement) => statement.definitionLink.targetSelectionRange,
       ),
     ).toStrictEqual(expected)
   },
@@ -55,13 +56,13 @@ test.each([
 ])(
   'getViewDefinitions <- "%s"', async (file, expected) => {
     const fileText = loadDefinitionFile(file)
-    const stmts = getViewDefinitions(
-      fileText, await getStmt(fileText, 1), `file://${file}`, "public",
+    const statements = getViewDefinitions(
+      fileText, await getStmtement(fileText, 1), `file://${file}`, "public",
     )
 
     expect(
-      stmts.map(
-        (stmt) => stmt.definitionLink.targetSelectionRange,
+      statements.map(
+        (statement) => statement.definitionLink.targetSelectionRange,
       ),
     ).toStrictEqual(expected)
   },
@@ -75,13 +76,13 @@ test.each([
 ])(
   'getTypeDefinitions <- "%s"', async (file, expected) => {
     const fileText = loadDefinitionFile(file)
-    const stmts = getTypeDefinitions(
-      fileText, await getStmt(fileText, 1), `file://${file}`, "public",
+    const statements = getTypeDefinitions(
+      fileText, await getStmtement(fileText, 1), `file://${file}`, "public",
     )
 
     expect(
-      stmts.map(
-        (stmt) => stmt.definitionLink.targetSelectionRange,
+      statements.map(
+        (statement) => statement.definitionLink.targetSelectionRange,
       ),
     ).toStrictEqual(expected)
   },
@@ -96,19 +97,19 @@ test.each([
   'getFunctionDefinitions <- "%s"',
   async (file, expected) => {
     const fileText = loadDefinitionFile(file)
-    const stmts = getFunctionDefinitions(
-      fileText, await getStmt(fileText, 1), `file://${file}`, "public",
+    const statements = getFunctionDefinitions(
+      fileText, await getStmtement(fileText, 1), `file://${file}`, "public",
     )
 
     expect(
-      stmts.map(
-        (stmt) => stmt.definitionLink.targetSelectionRange,
+      statements.map(
+        (statement) => statement.definitionLink.targetSelectionRange,
       ),
     ).toStrictEqual(expected)
   },
 )
 
 
-async function getStmt(fileText: string, index: uinteger) {
+async function getStmtement(fileText: string, index: uinteger): Promise<Statement> {
   return (await parseQuery(fileText))["stmts"][index]
 }
