@@ -1,4 +1,4 @@
-import { LocationLink, URI } from "vscode-languageserver"
+import { DefinitionLink, LocationLink, URI } from "vscode-languageserver"
 
 import { Statement } from "@/postgres/parsers/statement"
 import { DefinitionCandidate } from "@/server/definitionMap"
@@ -62,22 +62,12 @@ export function getTableDefinitions(
     ),
   )
 
-  const candidates = [
-    {
-      definition: (schemaname || defaultSchema) + "." + relname,
-      definitionLink,
-    },
-  ]
-
-  // When default schema, add raw relname candidate.
-  if (schemaname === undefined || schemaname === defaultSchema) {
-    candidates.push({
-      definition: relname,
-      definitionLink,
-    })
-  }
-
-  return candidates
+  return makeMultiSchemaDefinitionCandidates(
+    relname,
+    definitionLink,
+    schemaname,
+    defaultSchema,
+  )
 }
 
 export function getViewDefinitions(
@@ -111,22 +101,12 @@ export function getViewDefinitions(
     ),
   )
 
-  const candidates = [
-    {
-      definition: (schemaname || defaultSchema) + "." + relname,
-      definitionLink,
-    },
-  ]
-
-  // When default schema, add raw relname candidate.
-  if (schemaname === undefined || schemaname === defaultSchema) {
-    candidates.push({
-      definition: relname,
-      definitionLink,
-    })
-  }
-
-  return candidates
+  return makeMultiSchemaDefinitionCandidates(
+    relname,
+    definitionLink,
+    schemaname,
+    defaultSchema,
+  )
 }
 
 export function getTypeDefinitions(
@@ -157,22 +137,12 @@ export function getTypeDefinitions(
     ),
   )
 
-  const candidates = [
-    {
-      definition: (schemaname || defaultSchema) + "." + relname,
-      definitionLink,
-    },
-  ]
-
-  // When default schema, add raw relname candidate.
-  if (schemaname === undefined || schemaname === defaultSchema) {
-    candidates.push({
-      definition: relname,
-      definitionLink,
-    })
-  }
-
-  return candidates
+  return makeMultiSchemaDefinitionCandidates(
+    relname,
+    definitionLink,
+    schemaname,
+    defaultSchema,
+  )
 }
 
 export function getFunctionDefinitions(
@@ -228,16 +198,31 @@ export function getFunctionDefinitions(
     ),
   )
 
+  return makeMultiSchemaDefinitionCandidates(
+    functionName,
+    definitionLink,
+    schemaname,
+    defaultSchema,
+  )
+}
+
+function makeMultiSchemaDefinitionCandidates(
+  definitionName: string,
+  definitionLink: DefinitionLink,
+  schema: string | undefined,
+  defaultSchema: string,
+): DefinitionCandidate[] {
   const candidates = [
     {
-      definition: (schemaname || defaultSchema) + "." + functionName,
+      definition: (schema || defaultSchema) + "." + definitionName,
       definitionLink,
     },
   ]
 
-  if (schemaname === undefined || schemaname === defaultSchema) {
+  // On the default schema, add candidate without schema.
+  if (schema === undefined || schema === defaultSchema) {
     candidates.push({
-      definition: functionName,
+      definition: definitionName,
       definitionLink,
     })
   }
