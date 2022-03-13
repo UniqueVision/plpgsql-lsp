@@ -44,12 +44,14 @@ export function getTableDefinitions(
 
   const schemaname = createStmt.relation.schemaname
   const relname = createStmt.relation.relname
+  const stmtLocation = stmt.stmt_location || 0
+
   const definitionLink = LocationLink.create(
     uri,
     getRangeFromBuffer(
       fileText,
-      stmt.stmt_location,
-      stmt.stmt_location + stmt.stmt_len,
+      stmtLocation,
+      stmtLocation + stmt.stmt_len,
     ),
     getRangeFromBuffer(
       fileText,
@@ -91,12 +93,14 @@ export function getViewDefinitions(
 
   const schemaname = createStmt.view.schemaname
   const relname = createStmt.view.relname
+  const stmtLocation = stmt.stmt_location || 0
+
   const definitionLink = LocationLink.create(
     uri,
     getRangeFromBuffer(
       fileText,
-      stmt.stmt_location,
-      stmt.stmt_location + stmt.stmt_len,
+      stmtLocation,
+      stmtLocation + stmt.stmt_len,
     ),
     getRangeFromBuffer(
       fileText,
@@ -137,13 +141,14 @@ export function getTypeDefinitions(
   }
   const relname = compositTypeStmt.typevar.relname
   const schemaname = compositTypeStmt.typevar.schemaname
+  const stmtLocation = stmt.stmt_location || 0
 
   const definitionLink = LocationLink.create(
     uri,
     getRangeFromBuffer(
       fileText,
-      stmt.stmt_location,
-      stmt.stmt_location + stmt.stmt_len,
+      stmtLocation,
+      stmtLocation + stmt.stmt_len,
     ),
     getRangeFromBuffer(
       fileText,
@@ -206,13 +211,15 @@ export function getFunctionDefinitions(
   const functionNameLocation = findIndexFromBuffer(
     fileText, definition, stmt.stmt_location,
   )
+  const stmtLocation = stmt.stmt_location || 0
+
 
   const definitionLink = LocationLink.create(
     uri,
     getRangeFromBuffer(
       fileText,
-      stmt.stmt_location,
-      stmt.stmt_location + stmt.stmt_len,
+      stmtLocation,
+      stmtLocation + stmt.stmt_len,
     ),
     getRangeFromBuffer(
       fileText,

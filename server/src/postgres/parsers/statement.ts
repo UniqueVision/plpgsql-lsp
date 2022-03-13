@@ -2,7 +2,7 @@ import { uinteger } from "vscode-languageserver"
 
 export interface Statement {
   stmt: StatementItem
-  stmt_location: uinteger
+  stmt_location?: uinteger
   stmt_len: uinteger
 }
 
