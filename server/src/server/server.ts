@@ -53,6 +53,11 @@ export class Server {
     this.connection.onInitialized(params => this.onInitialized(params))
   }
 
+  /**
+   * Manual initialization.
+   *
+   * Used only for testing.
+   */
   initialize(params: InitializeParams): void {
     this.onInitialize(params)
   }
@@ -61,7 +66,7 @@ export class Server {
     this.connection.listen()
   }
 
-  onInitialize(params: InitializeParams): InitializeResult {
+  private onInitialize(params: InitializeParams): InitializeResult {
     this.capabilities = params.capabilities
     this.workspaceFolders = params.workspaceFolders || []
 
