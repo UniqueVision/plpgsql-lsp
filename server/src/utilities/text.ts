@@ -1,4 +1,5 @@
-import { Position, Range, uinteger } from "vscode-languageserver"
+import { readFileSync } from "fs"
+import { Position, Range, uinteger, URI } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 export function getWordRangeAtPosition(
@@ -141,4 +142,8 @@ export function isFirstCommentLine(
     firstLine.match(/^ *-- +.*$/) !== null
     || firstLine.match(/^ *\/\* +.*$/) !== null
   )
+}
+
+export function readFileFromUri(uri: URI): string {
+  return readFileSync(uri.replace(/^file:\/\//, "")).toString()
 }

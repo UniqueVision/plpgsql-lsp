@@ -1,9 +1,9 @@
-import { readFileSync } from "fs"
 import { parseQuery } from "libpg-query"
 import { URI } from "vscode-languageserver"
 
 import { Statement } from "@/postgres/parsers/statement"
 import { asyncFlatMap } from "@/utilities/functool"
+import { readFileFromUri } from "@/utilities/text"
 
 export interface FunctionInfo {
   functionName: string,
@@ -11,9 +11,9 @@ export interface FunctionInfo {
 }
 
 export async function getFunctionList(
-  resource: URI,
+  uri: URI,
 ): Promise<FunctionInfo[]> {
-  const fileText = readFileSync(resource.replace(/^file:\/\//, "")).toString()
+  const fileText = readFileFromUri(uri)
   const query = await parseQuery(fileText)
 
   const stmts: Statement[] | undefined = query?.["stmts"]

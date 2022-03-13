@@ -4,10 +4,37 @@ import { Statement } from "@/postgres/parsers/statement"
 import { DefinitionCandidate } from "@/server/definitionMap"
 import { findIndexFromBuffer, getRangeFromBuffer } from "@/utilities/text"
 
+export function getDefinitions(
+  fileText: string,
+  stmts: Statement[],
+  uri: URI,
+  defaultSchema: string,
+): DefinitionCandidate[] {
+  return stmts.flatMap(
+    (stmt) => {
+      if (stmt?.stmt?.CreateStmt !== undefined) {
+        return getTableDefinitions(fileText, stmt, uri, defaultSchema)
+      }
+      else if (stmt?.stmt?.ViewStmt !== undefined) {
+        return getViewDefinitions(fileText, stmt, uri, defaultSchema)
+      }
+      else if (stmt?.stmt?.CompositeTypeStmt !== undefined) {
+        return getTypeDefinitions(fileText, stmt, uri, defaultSchema)
+      }
+      else if (stmt?.stmt?.CreateFunctionStmt !== undefined) {
+        return getFunctionDefinitions(fileText, stmt, uri, defaultSchema)
+      }
+      else {
+        return []
+      }
+    },
+  )
+}
+
 export function getTableDefinitions(
   fileText: string,
   stmt: Statement,
-  resource: URI,
+  uri: URI,
   defaultSchema: string,
 ): DefinitionCandidate[] {
   const createStmt = stmt?.stmt?.CreateStmt
@@ -18,7 +45,7 @@ export function getTableDefinitions(
   const schemaname = createStmt.relation.schemaname
   const relname = createStmt.relation.relname
   const definitionLink = LocationLink.create(
-    resource,
+    uri,
     getRangeFromBuffer(
       fileText,
       stmt.stmt_location,
@@ -54,7 +81,7 @@ export function getTableDefinitions(
 export function getViewDefinitions(
   fileText: string,
   stmt: Statement,
-  resource: URI,
+  uri: URI,
   defaultSchema: string,
 ): DefinitionCandidate[] {
   const createStmt = stmt?.stmt?.ViewStmt
@@ -65,7 +92,7 @@ export function getViewDefinitions(
   const schemaname = createStmt.view.schemaname
   const relname = createStmt.view.relname
   const definitionLink = LocationLink.create(
-    resource,
+    uri,
     getRangeFromBuffer(
       fileText,
       stmt.stmt_location,
@@ -101,7 +128,7 @@ export function getViewDefinitions(
 export function getTypeDefinitions(
   fileText: string,
   stmt: Statement,
-  resource: URI,
+  uri: URI,
   defaultSchema: string,
 ): DefinitionCandidate[] {
   const compositTypeStmt = stmt?.stmt?.CompositeTypeStmt
@@ -112,7 +139,7 @@ export function getTypeDefinitions(
   const schemaname = compositTypeStmt.typevar.schemaname
 
   const definitionLink = LocationLink.create(
-    resource,
+    uri,
     getRangeFromBuffer(
       fileText,
       stmt.stmt_location,
@@ -146,7 +173,7 @@ export function getTypeDefinitions(
 export function getFunctionDefinitions(
   fileText: string,
   stmt: Statement,
-  resource: URI,
+  uri: URI,
   defaultSchema: string,
 ): DefinitionCandidate[] {
   const createFunctionStmt = stmt?.stmt?.CreateFunctionStmt
@@ -181,7 +208,7 @@ export function getFunctionDefinitions(
   )
 
   const definitionLink = LocationLink.create(
-    resource,
+    uri,
     getRangeFromBuffer(
       fileText,
       stmt.stmt_location,

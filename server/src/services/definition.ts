@@ -1,4 +1,3 @@
-import { readFileSync } from "fs"
 import { sync as glob } from "glob"
 import { parseQuery } from "libpg-query"
 import {
@@ -7,15 +6,12 @@ import {
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import {
-  getFunctionDefinitions,
-  getTableDefinitions,
-  getTypeDefinitions,
-  getViewDefinitions,
+  getDefinitions,
 } from "@/postgres/parsers/getDefinitions"
 import { Statement } from "@/postgres/parsers/statement"
 import { DefinitionMap } from "@/server/definitionMap"
 import { sanitizeWordCandidates } from "@/utilities/sanitization"
-import { getWordRangeAtPosition } from "@/utilities/text"
+import { getWordRangeAtPosition, readFileFromUri } from "@/utilities/text"
 
 
 export async function getDefinitionLinks(
@@ -88,10 +84,10 @@ export async function loadDefinitionFilesInWorkspace(
 
 export async function updateFileDefinition(
   definitionMap: DefinitionMap,
-  resource: URI,
+  uri: URI,
   defaultSchema: string,
 ) {
-  const fileText = readFileSync(resource.replace(/^file:\/\//, "")).toString()
+  const fileText = readFileFromUri(uri)
   const query = await parseQuery(fileText)
 
   const stmts: Statement[] | undefined = query?.["stmts"]
@@ -99,27 +95,9 @@ export async function updateFileDefinition(
   if (stmts === undefined) {
     return
   }
-  const candidates = stmts.flatMap(
-    (stmt) => {
-      if (stmt?.stmt?.CreateStmt !== undefined) {
-        return getTableDefinitions(fileText, stmt, resource, defaultSchema)
-      }
-      else if (stmt?.stmt?.ViewStmt !== undefined) {
-        return getViewDefinitions(fileText, stmt, resource, defaultSchema)
-      }
-      else if (stmt?.stmt?.CompositeTypeStmt !== undefined) {
-        return getTypeDefinitions(fileText, stmt, resource, defaultSchema)
-      }
-      else if (stmt?.stmt?.CreateFunctionStmt !== undefined) {
-        return getFunctionDefinitions(fileText, stmt, resource, defaultSchema)
-      }
-      else {
-        return []
-      }
-    },
-  )
+  const candidates = getDefinitions(fileText, stmts, uri, defaultSchema)
 
-  definitionMap.updateCandidates(resource, candidates)
+  definitionMap.updateCandidates(uri, candidates)
 
   return candidates
 }

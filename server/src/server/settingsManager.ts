@@ -29,16 +29,16 @@ export class SettingsManager {
 
   }
 
-  async get(resource: URI): Promise<Settings> {
+  async get(uri: URI): Promise<Settings> {
     if (this.settings.hasConfigurationCapability) {
-      let newSettings = this.settings.documentSettingsMap.get(resource)
+      let newSettings = this.settings.documentSettingsMap.get(uri)
       if (newSettings === undefined) {
         newSettings = this.connection.workspace.getConfiguration({
-          scopeUri: resource,
+          scopeUri: uri,
           section: PLPGSQL_LANGUAGE_SERVER_SECTION,
         })
         this.settings.documentSettingsMap.set(
-          resource, newSettings || DEFAULT_SETTINGS,
+          uri, newSettings || DEFAULT_SETTINGS,
         )
       }
 
@@ -52,9 +52,9 @@ export class SettingsManager {
     }
   }
 
-  delete(resource: URI): void {
+  delete(uri: URI): void {
     if (this.settings.hasConfigurationCapability) {
-      this.settings.documentSettingsMap.delete(resource)
+      this.settings.documentSettingsMap.delete(uri)
     }
   }
 
@@ -70,14 +70,14 @@ export class SettingsManager {
   }
 
   async getWorkspaceFolder(
-    resource: URI,
+    uri: URI,
   ): Promise<WorkspaceFolder | undefined> {
     const workspaces = await this.connection.workspace.getWorkspaceFolders()
     if (workspaces === null) {
       return undefined
     }
     const workspaceCandidates = workspaces.filter(
-      workspace => resource.startsWith(workspace.uri),
+      workspace => uri.startsWith(workspace.uri),
     )
 
     if (workspaceCandidates.length === 0) {
@@ -89,20 +89,20 @@ export class SettingsManager {
     )[0]
   }
 
-  async isDefinitionTarget(resource: URI): Promise<boolean> {
-    const settings = await this.get(resource)
+  async isDefinitionTarget(uri: URI): Promise<boolean> {
+    const settings = await this.get(uri)
     if (settings.definitionFiles === undefined) {
       return false
     }
 
-    const workspaceFolder = await this.getWorkspaceFolder(resource)
+    const workspaceFolder = await this.getWorkspaceFolder(uri)
     if (workspaceFolder === undefined) {
       return false
     }
 
     return settings.definitionFiles.some(
       filePattern => {
-        return minimatch(resource, path.join(workspaceFolder.uri, filePattern))
+        return minimatch(uri, path.join(workspaceFolder.uri, filePattern))
       },
     )
   }
