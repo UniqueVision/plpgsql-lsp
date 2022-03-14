@@ -15,7 +15,9 @@ export type LoadFileOptions = {
   skipDisableComment: boolean,
 }
 
-export const DEFAULT_LOAD_FILE_OPTIONS = { skipDisableComment: false }
+export const DEFAULT_LOAD_FILE_OPTIONS = {
+  skipDisableComment: false,
+}
 
 export function loadDefinitionFile(
   filename: string,
