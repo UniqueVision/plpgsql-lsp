@@ -18,7 +18,7 @@ import {
   makeViewDefinitionText,
   queryViewDefinitions,
 } from "@/postgres/queries/queryViewDefinitions"
-import { sanitizeWordCandidates } from "@/utilities/sanitization"
+import { sanitizeWordCandidates } from "@/utilities/sanitizeWord"
 import { separateSchemaFromCandidate } from "@/utilities/schema"
 import { getWordRangeAtPosition, makePostgresCodeMarkdown } from "@/utilities/text"
 

@@ -10,7 +10,7 @@ import {
 } from "@/postgres/parsers/getDefinitions"
 import { Statement } from "@/postgres/parsers/statement"
 import { DefinitionMap } from "@/server/definitionMap"
-import { sanitizeWordCandidates } from "@/utilities/sanitization"
+import { sanitizeWordCandidates } from "@/utilities/sanitizeWord"
 import { getWordRangeAtPosition, readFileFromUri } from "@/utilities/text"
 
 

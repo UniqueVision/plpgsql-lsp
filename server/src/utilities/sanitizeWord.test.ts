@@ -4,7 +4,7 @@ import {
   sanitizeQuotedTable,
   sanitizeTableRowType,
   sanitizeUuidPartitionTable,
-} from "./sanitization"
+} from "./sanitizeWord"
 
 
 test.each([
