@@ -1,7 +1,11 @@
 import { sync as glob } from "glob"
 import { parseQuery } from "libpg-query"
 import {
-  DefinitionLink, DefinitionParams, Logger, URI, WorkspaceFolder,
+  DefinitionLink,
+  DefinitionParams,
+  Logger,
+  URI,
+  WorkspaceFolder,
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 

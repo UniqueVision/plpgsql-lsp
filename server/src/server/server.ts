@@ -5,6 +5,7 @@ import {
   InitializedParams,
   InitializeParams,
   InitializeResult,
+  Logger,
   TextDocuments,
   TextDocumentSyncKind,
   WorkspaceFolder,
@@ -14,7 +15,6 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 import { PostgresPoolManager } from "@/postgres/pool"
 
 import { DEFAULT_SETTINGS } from "../settings"
-import { Logger } from "../utilities/logger"
 import { workspaceFoldersChanged } from "../utilities/workspace"
 import { DefinitionMap } from "./definitionMap"
 import { Handlers } from "./handlers"

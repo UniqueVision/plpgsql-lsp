@@ -1,6 +1,4 @@
-import {
-  Diagnostic, DiagnosticSeverity, Logger,
-} from "vscode-languageserver"
+import { Diagnostic, DiagnosticSeverity, Logger } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { getFunctions } from "@/postgres/parsers/getFunctions"

@@ -1,4 +1,9 @@
-import { Hover, HoverParams, Logger, MarkupKind } from "vscode-languageserver"
+import {
+  Hover,
+  HoverParams,
+  Logger,
+  MarkupKind,
+} from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { PostgresPool } from "@/postgres/pool"

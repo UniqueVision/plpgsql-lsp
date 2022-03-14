@@ -1,6 +1,6 @@
 import { Connection } from "vscode-languageserver"
 
-export class Logger {
+export class ConsoleLogger {
   constructor(private readonly connection: Connection) { }
 
   log(message: string): void {

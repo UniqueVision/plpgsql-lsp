@@ -5,7 +5,7 @@ import {
 } from "vscode-languageserver/node"
 
 import { Server } from "@/server/server"
-import { Logger } from "@/utilities/logger"
+import { ConsoleLogger } from "@/utilities/logger"
 
 
 // Create a connection for the server.
@@ -16,4 +16,4 @@ if (process.argv.indexOf("--stdio") === -1) {
   connection = createConnection()
 }
 
-new Server(connection, new Logger(connection)).start()
+new Server(connection, new ConsoleLogger(connection)).start()
