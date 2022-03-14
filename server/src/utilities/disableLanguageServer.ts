@@ -2,19 +2,19 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { getFirstLine } from "./text"
 
-export function useLanguageServer(textDocument: TextDocument): boolean {
+export function disableLanguageServer(textDocument: TextDocument): boolean {
   const firstLine = getFirstLine(textDocument)
 
-  return (
+  return !(
     firstLine.match(/^ *-- +plpgsql-language-server:disable *$/) === null
     && firstLine.match(/^ *\/\* +plpgsql-language-server:disable +\*\/$/) === null
   )
 }
 
-export function useValidation(textDocument: TextDocument): boolean {
+export function disableValidation(textDocument: TextDocument): boolean {
   const firstLine = getFirstLine(textDocument)
 
-  return (
+  return !(
     firstLine.match(/^ *-- +plpgsql-language-server:disable( +validation)? *$/) === null
     && firstLine.match(
       /^ *\/\* +plpgsql-language-server:disable( +validation)? +\*\/$/,

@@ -27,7 +27,9 @@ import {
 } from "@/services/definition"
 import { getHover } from "@/services/hover"
 import { validateTextDocument } from "@/services/validation"
-import { useLanguageServer, useValidation } from "@/utilities/useLanguageServer"
+import {
+  disableLanguageServer, disableValidation,
+} from "@/utilities/disableLanguageServer"
 
 export type HandlersOptions = {
   hasDiagnosticRelatedInformationCapability: boolean
@@ -127,7 +129,7 @@ export class Handlers {
     params: CompletionParams,
   ): Promise<CompletionItem[] | undefined> {
     const textDocument = this.documents.get(params.textDocument.uri)
-    if (textDocument === undefined || !useLanguageServer(textDocument)) {
+    if (textDocument === undefined || disableLanguageServer(textDocument)) {
       return undefined
     }
 
@@ -151,7 +153,7 @@ export class Handlers {
     params: DefinitionParams,
   ): Promise<DefinitionLink[] | undefined> {
     const textDocument = this.documents.get(params.textDocument.uri)
-    if (textDocument === undefined || !useLanguageServer(textDocument)) {
+    if (textDocument === undefined || disableLanguageServer(textDocument)) {
       return undefined
     }
 
@@ -197,7 +199,7 @@ export class Handlers {
     params: HoverParams,
   ): Promise<Hover | undefined> {
     const textDocument = this.documents.get(params.textDocument.uri)
-    if (textDocument === undefined || !useLanguageServer(textDocument)) {
+    if (textDocument === undefined || disableLanguageServer(textDocument)) {
       return undefined
     }
 
@@ -223,7 +225,7 @@ export class Handlers {
   ): Promise<Diagnostic[] | undefined> {
     let diagnostics: Diagnostic[] | undefined = undefined
 
-    if (useValidation(textDocument)) {
+    if (!disableValidation(textDocument)) {
       const settings = await this.settingsManager.get(textDocument.uri)
 
       const pgPool = getPool(this.pgPools, settings, this.logger)
