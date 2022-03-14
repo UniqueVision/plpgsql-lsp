@@ -26,7 +26,7 @@ export interface StaticAnalysisError {
   message: string
 }
 
-export async function queryFileFunctionsAnalysis(
+export async function queryFileStaticAnalysis(
   pgPool: PostgresPool,
   textDocument: TextDocument,
   functionInfos: FunctionInfo[],

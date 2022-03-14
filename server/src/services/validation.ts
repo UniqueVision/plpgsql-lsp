@@ -6,8 +6,8 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 import { getFunctionList } from "@/postgres/parsers/getFunctionList"
 import { PostgresPool } from "@/postgres/pool"
 import {
-  queryFileFunctionsAnalysis,
-} from "@/postgres/queries/queryFileFunctionsAnalysis"
+  queryFileStaticAnalysis,
+} from "@/postgres/queries/queryFileStaticAnalysis"
 import {
   queryFileSyntaxAnalysis,
 } from "@/postgres/queries/queryFileSyntaxAnalysis"
@@ -23,7 +23,7 @@ export async function validateTextDocument(
   options: ValidateTextDocumentOptions,
   logger: Logger,
 ): Promise<Diagnostic[] | undefined> {
-  let diagnostics = await checkSyntax(
+  let diagnostics = await checkSyntaxAnalysis(
     pgPool,
     textDocument,
     options,
@@ -42,7 +42,7 @@ export async function validateTextDocument(
   return diagnostics
 }
 
-async function checkSyntax(
+async function checkSyntaxAnalysis(
   pgPool: PostgresPool,
   textDocument: TextDocument,
   options: ValidateTextDocumentOptions,
@@ -88,7 +88,7 @@ async function checkStaticAnalysis(
   options: ValidateTextDocumentOptions,
   logger: Logger,
 ): Promise<Diagnostic[] | undefined> {
-  const errors = await queryFileFunctionsAnalysis(
+  const errors = await queryFileStaticAnalysis(
     pgPool,
     textDocument,
     await getFunctionList(textDocument.uri),
