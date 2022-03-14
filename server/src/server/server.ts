@@ -27,7 +27,7 @@ export class Server {
   // supports full document sync only
   documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
   // Cache the settings of all open documents
-  settings: SettingsManager
+  settingsManager: SettingsManager
   // PostgresSQL file definitions.
   definitionsManager: DefinitionsManager = new DefinitionsManager()
 
@@ -44,7 +44,7 @@ export class Server {
     private logger: Logger,
   ) {
     this.documents.listen(this.connection)
-    this.settings = new SettingsManager(
+    this.settingsManager = new SettingsManager(
       connection, { hasConfigurationCapability: undefined },
     )
 
@@ -153,7 +153,7 @@ export class Server {
       this.connection,
       this.pgPools,
       this.documents,
-      this.settings,
+      this.settingsManager,
       this.definitionsManager,
       options,
       this.logger,
@@ -162,13 +162,13 @@ export class Server {
 
   private initializeSettingsManager(): void {
     if (this.hasConfigurationCapability) {
-      this.settings = new SettingsManager(this.connection, {
+      this.settingsManager = new SettingsManager(this.connection, {
         hasConfigurationCapability: this.hasConfigurationCapability,
         documentSettingsMap: new Map(),
       })
     }
     else {
-      this.settings = new SettingsManager(this.connection, {
+      this.settingsManager = new SettingsManager(this.connection, {
         hasConfigurationCapability: this.hasConfigurationCapability,
         globalSettings: DEFAULT_SETTINGS,
       })

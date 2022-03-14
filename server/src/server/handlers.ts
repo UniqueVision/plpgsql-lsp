@@ -38,7 +38,7 @@ export class Handlers {
     private readonly connection: Connection,
     private readonly pgPools: PostgresPoolMap,
     private readonly documents: TextDocuments<TextDocument>,
-    private readonly settings: SettingsManager,
+    private readonly settingsManager: SettingsManager,
     private readonly definitionsManager: DefinitionsManager,
     private readonly options: HandlersOptions,
     private readonly logger: Logger,
@@ -68,7 +68,7 @@ export class Handlers {
   async onDidClose(
     event: TextDocumentChangeEvent<TextDocument>,
   ): Promise<void> {
-    this.settings.delete(event.document.uri)
+    this.settingsManager.delete(event.document.uri)
     this.connection.sendDiagnostics({
       uri: event.document.uri,
       diagnostics: [],
@@ -79,9 +79,9 @@ export class Handlers {
     event: TextDocumentChangeEvent<TextDocument>,
   ): Promise<void> {
     if (this.definitionsManager.isEmpty()) {
-      const settings = await this.settings.get(event.document.uri)
+      const settings = await this.settingsManager.get(event.document.uri)
 
-      const workspace = await this.settings.getWorkspaceFolder(
+      const workspace = await this.settingsManager.getWorkspaceFolder(
         event.document.uri,
       )
       if (workspace === undefined) {
@@ -105,11 +105,11 @@ export class Handlers {
 
     if (
       this.definitionsManager.fileDefinitions.has(event.document.uri)
-      || await this.settings.isDefinitionTarget(event.document.uri)
+      || await this.settingsManager.isDefinitionTarget(event.document.uri)
     ) {
       console.log("Definitions updationg...")
 
-      const settings = await this.settings.get(event.document.uri)
+      const settings = await this.settingsManager.get(event.document.uri)
 
       const candidates = await updateFileDefinition(
         this.definitionsManager, event.document.uri, settings.defaultSchema,
@@ -131,7 +131,7 @@ export class Handlers {
       return undefined
     }
 
-    const settings = await this.settings.get(params.textDocument.uri)
+    const settings = await this.settingsManager.get(params.textDocument.uri)
 
     const pgPool = getPool(this.pgPools, settings, this.logger)
     if (pgPool === undefined) {
@@ -166,7 +166,7 @@ export class Handlers {
   async onDidChangeConfiguration(
     params: DidChangeConfigurationParams,
   ): Promise<void> {
-    this.settings.reset(params.settings.plpgsqlLanguageServer)
+    this.settingsManager.reset(params.settings.plpgsqlLanguageServer)
     for (const document of this.documents.all()) {
 
       await this.validate(document)
@@ -201,7 +201,7 @@ export class Handlers {
       return undefined
     }
 
-    const settings = await this.settings.get(params.textDocument.uri)
+    const settings = await this.settingsManager.get(params.textDocument.uri)
 
     const pgPool = getPool(this.pgPools, settings, this.logger)
     if (pgPool === undefined) {
@@ -224,7 +224,7 @@ export class Handlers {
     let diagnostics: Diagnostic[] | undefined = undefined
 
     if (useValidation(textDocument)) {
-      const settings = await this.settings.get(textDocument.uri)
+      const settings = await this.settingsManager.get(textDocument.uri)
 
       const pgPool = getPool(this.pgPools, settings, this.logger)
       if (pgPool !== undefined) {

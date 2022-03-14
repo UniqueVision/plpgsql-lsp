@@ -40,7 +40,7 @@ describe("Definition Tests", () => {
     await updateFileDefinition(
       server.definitionsManager,
       definitionResource,
-      (await server.settings.get(textDocument.uri)).defaultSchema,
+      (await server.settingsManager.get(textDocument.uri)).defaultSchema,
     )
 
     if (server.handlers === undefined) {

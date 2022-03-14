@@ -19,7 +19,7 @@ export function setupTestServer(settings: Settings): Server {
   )
 
   server.documents = new TestTextDocuments()
-  server.settings = new SettingsManager(
+  server.settingsManager = new SettingsManager(
     connection,
     {
       hasConfigurationCapability: false,
