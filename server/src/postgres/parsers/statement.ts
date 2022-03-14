@@ -64,27 +64,27 @@ export interface CreateFunctionStmtFuncNameString {
 }
 
 export interface CreateFunctionStmtOption {
-  DefElem: CreateFunctionStmtOptionsDefElm
+  DefElem: CreateFunctionStmtOptionsDefElem
 }
 
-export interface CreateFunctionStmtOptionsDefElm {
+export interface CreateFunctionStmtOptionsDefElem {
   defname: string
-  arg: CreateFunctionStmtOptionsDefElmArg
+  arg: CreateFunctionStmtOptionsDefElemArg
   location: uinteger
 }
 
-export interface CreateFunctionStmtOptionsDefElmArg {
-  List: CreateFunctionStmtOptionsDefElmArgList
+export interface CreateFunctionStmtOptionsDefElemArg {
+  List: CreateFunctionStmtOptionsDefElemArgList
 }
 
-export interface CreateFunctionStmtOptionsDefElmArgList {
-  items: CreateFunctionStmtOptionsDefElmArgListItem[]
+export interface CreateFunctionStmtOptionsDefElemArgList {
+  items: CreateFunctionStmtOptionsDefElemArgListItem[]
 }
 
-export interface CreateFunctionStmtOptionsDefElmArgListItem {
-  String: CreateFunctionStmtOptionsDefElmArgListItemString
+export interface CreateFunctionStmtOptionsDefElemArgListItem {
+  String: CreateFunctionStmtOptionsDefElemArgListItemString
 }
 
-export interface CreateFunctionStmtOptionsDefElmArgListItemString {
+export interface CreateFunctionStmtOptionsDefElemArgListItemString {
   str: string
 }
