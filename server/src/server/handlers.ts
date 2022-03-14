@@ -26,7 +26,7 @@ import {
   updateFileDefinition,
 } from "@/services/definition"
 import { getHover } from "@/services/hover"
-import { validateTextDocument } from "@/services/validate"
+import { validateTextDocument } from "@/services/validation"
 import { useLanguageServer, useValidation } from "@/utilities/useLanguageServer"
 
 export type HandlersOptions = {
