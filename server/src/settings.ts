@@ -1,6 +1,3 @@
-export const PLPGSQL_LANGUAGE_SERVER_SECTION = "plpgsqlLanguageServer"
-export const DEFAULT_SCHEMA = "public"
-
 // The example settings
 export interface Settings {
   host: string;
@@ -22,5 +19,5 @@ export const DEFAULT_SETTINGS: Settings = {
     "**/*.psql",
     "**/*.pgsql",
   ],
-  defaultSchema: DEFAULT_SCHEMA,
+  defaultSchema: "public",
 }

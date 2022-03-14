@@ -2,9 +2,7 @@ import minimatch from "minimatch"
 import path from "path"
 import { Connection, URI, WorkspaceFolder } from "vscode-languageserver"
 
-import {
-  DEFAULT_SETTINGS, PLPGSQL_LANGUAGE_SERVER_SECTION, Settings,
-} from "@/settings"
+import { DEFAULT_SETTINGS, Settings } from "@/settings"
 
 type DocumentSettings = {
   hasConfigurationCapability: true,
@@ -35,7 +33,7 @@ export class SettingsManager {
       if (newSettings === undefined) {
         newSettings = this.connection.workspace.getConfiguration({
           scopeUri: uri,
-          section: PLPGSQL_LANGUAGE_SERVER_SECTION,
+          section: "plpgsqlLanguageServer",
         })
         this.settings.documentSettingsMap.set(
           uri, newSettings || DEFAULT_SETTINGS,
