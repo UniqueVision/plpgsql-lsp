@@ -1,4 +1,4 @@
-import { DefinitionLink, URI } from "vscode-languageserver"
+import { DefinitionLink, URI, WorkspaceFolder } from "vscode-languageserver"
 
 export type Definition = string;
 export type DefinitionCandidate = {
@@ -7,17 +7,9 @@ export type DefinitionCandidate = {
 };
 
 export class DefinitionsManager {
-  candidates: Map<Definition, DefinitionLink[]>
-  fileDefinitions: Map<URI, Definition[]>
-
-  constructor() {
-    this.candidates = new Map()
-    this.fileDefinitions = new Map()
-  }
-
-  isEmpty(): boolean {
-    return this.candidates.size === 0 && this.fileDefinitions.size === 0
-  }
+  workspaceFolders: Set<WorkspaceFolder> = new Set()
+  candidates: Map<Definition, DefinitionLink[]> = new Map()
+  fileDefinitions: Map<URI, Definition[]> = new Map()
 
   getDefinitionLinks(definition: Definition): DefinitionLink[] | undefined {
     return this.candidates.get(definition)

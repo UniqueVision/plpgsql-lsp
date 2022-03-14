@@ -80,20 +80,20 @@ export class Handlers {
   async onDidOpen(
     event: TextDocumentChangeEvent<TextDocument>,
   ): Promise<void> {
-    if (this.definitionsManager.isEmpty()) {
-      const settings = await this.settingsManager.get(event.document.uri)
+    const workspaceFolder = await this.settingsManager.getWorkspaceFolder(
+      event.document.uri,
+    )
+    if (workspaceFolder === undefined) {
+      return
+    }
 
-      const workspace = await this.settingsManager.getWorkspaceFolder(
-        event.document.uri,
-      )
-      if (workspace === undefined) {
-        return
-      }
+    if (!this.definitionsManager.workspaceFolders.has(workspaceFolder)) {
+      const settings = await this.settingsManager.get(event.document.uri)
 
       await loadDefinitionFilesInWorkspace(
         settings.definitionFiles,
         this.definitionsManager,
-        workspace,
+        workspaceFolder,
         settings.defaultSchema,
         this.logger,
       )

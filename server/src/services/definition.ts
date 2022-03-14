@@ -59,31 +59,33 @@ export async function loadDefinitionFilesInWorkspace(
   defaultSchema: string,
   logger: Logger,
 ): Promise<void> {
-  if (definitionFiles) {
-    logger.info("Definition files loading...")
+  logger.info(
+    `The definition files of the "${workspaceFolder.name}" workspace are loading...`,
+  )
 
-    const files = [
-      ...new Set(
-        definitionFiles.flatMap((filePattern) => glob(filePattern)),
-      ),
-    ]
+  definitionsManager.workspaceFolders.add(workspaceFolder)
 
-    for (const file of files) {
-      const resource = `${workspaceFolder.uri}/${file}`
-      try {
-        await updateFileDefinition(
-          definitionsManager, resource, defaultSchema,
-        )
-      }
-      catch (error: unknown) {
-        logger.error(
-          `${resource} cannot load the definitions. ${(error as Error).toString()}`,
-        )
-      }
+  const files = [
+    ...new Set(
+      definitionFiles.flatMap((filePattern) => glob(filePattern)),
+    ),
+  ]
+
+  for (const file of files) {
+    const fileUri = `${workspaceFolder.uri}/${file}`
+    try {
+      await updateFileDefinition(
+        definitionsManager, fileUri, defaultSchema,
+      )
     }
-
-    logger.info("Definition files loaded!! 👍")
+    catch (error: unknown) {
+      logger.error(
+        `"${fileUri}" cannot load the definitions. ${(error as Error).toString()}`,
+      )
+    }
   }
+
+  logger.info("The definition files has been loaded!! 👍")
 }
 
 export async function updateFileDefinition(
