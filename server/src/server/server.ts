@@ -12,7 +12,7 @@ import {
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { PostgresPoolManager } from "@/postgres/pool"
+import { PostgresPoolMap } from "@/postgres/pool"
 
 import { DEFAULT_SETTINGS } from "../settings"
 import { workspaceFoldersChanged } from "../utilities/workspace"
@@ -22,7 +22,7 @@ import { SettingsManager } from "./settingsManager"
 
 export class Server {
   handlers?: Handlers
-  pgPools: PostgresPoolManager = new Map()
+  pgPools: PostgresPoolMap = new Map()
   // Create a simple text document manager. The text document manager
   // supports full document sync only
   documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)

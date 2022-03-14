@@ -16,7 +16,7 @@ import {
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { getPool, PostgresPoolManager } from "@/postgres/pool"
+import { getPool, PostgresPoolMap } from "@/postgres/pool"
 import { DefinitionMap } from "@/server/definitionMap"
 import { SettingsManager } from "@/server/settingsManager"
 import { getCompletionItems } from "@/services/completion"
@@ -36,7 +36,7 @@ export type HandlersOptions = {
 export class Handlers {
   constructor(
     private readonly connection: Connection,
-    private readonly pgPools: PostgresPoolManager,
+    private readonly pgPools: PostgresPoolMap,
     private readonly documents: TextDocuments<TextDocument>,
     private readonly settings: SettingsManager,
     private readonly definitionMap: DefinitionMap,

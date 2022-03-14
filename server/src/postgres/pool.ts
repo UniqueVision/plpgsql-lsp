@@ -13,10 +13,10 @@ export type PostgresConfig = {
 export type PostgresPool = Pool
 export type PostgresClient = PoolClient
 
-export type PostgresPoolManager = Map<PostgresConfig, PostgresPool>
+export type PostgresPoolMap = Map<PostgresConfig, PostgresPool>
 
 export function getPool(
-  pgPools: PostgresPoolManager,
+  pgPools: PostgresPoolMap,
   settings: Settings,
   logger: Logger,
 ): PostgresPool | undefined {
