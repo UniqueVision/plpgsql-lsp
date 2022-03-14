@@ -9,13 +9,13 @@ import {
   TextDocuments,
   TextDocumentSyncKind,
   WorkspaceFolder,
+  WorkspaceFoldersChangeEvent,
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { PostgresPoolMap } from "@/postgres/pool"
 
 import { DEFAULT_SETTINGS } from "../settings"
-import { workspaceFoldersChanged } from "../utilities/workspace"
 import { DefinitionsManager } from "./definitionsManager"
 import { Handlers } from "./handlers"
 import { SettingsManager } from "./settingsManager"
@@ -134,7 +134,7 @@ export class Server {
     if (this.hasWsChangeWatchedFileDynamicRegistration) {
       this.connection.workspace.onDidChangeWorkspaceFolders(
         (changedFolders) => {
-          this.workspaceFolders = workspaceFoldersChanged(
+          this.workspaceFolders = this.getChangedWorkspaceFolders(
             this.workspaceFolders, changedFolders,
           )
         },
@@ -173,5 +173,27 @@ export class Server {
         globalSettings: DEFAULT_SETTINGS,
       })
     }
+  }
+
+  private getChangedWorkspaceFolders(
+    workspaceFolders: WorkspaceFolder[],
+    changedFolders: WorkspaceFoldersChangeEvent,
+  ): WorkspaceFolder[] {
+    workspaceFolders = workspaceFolders
+      .filter((workspaceFolder) => {
+        return !changedFolders.removed.some((changedFolder) => {
+          return changedFolder.uri === workspaceFolder.uri
+        })
+      })
+
+    workspaceFolders = workspaceFolders
+      .filter((workspaceFolder) => {
+        return !changedFolders.added.some((changedFolder) => {
+          return changedFolder.uri === workspaceFolder.uri
+        })
+      })
+      .concat(changedFolders.added)
+
+    return workspaceFolders
   }
 }
