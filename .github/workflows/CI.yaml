@@ -59,13 +59,13 @@ jobs:
       - name: Run tests
         run: npm run test:ci
 
-      - name: Build vsix package
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          npx vsce package -o vscode-plpgsql-lsp-${{ matrix.os }}-${VERSION}-${GITHUB_RUN_ID}-${GITHUB_RUN_NUMBER}.vsix
+      # - name: Build vsix package
+      #   run: |
+      #     VERSION=$(node -p "require('./package.json').version")
+      #     npx vsce package -o vscode-plpgsql-lsp-${{ matrix.os }}-${VERSION}-${GITHUB_RUN_ID}-${GITHUB_RUN_NUMBER}.vsix
 
-      - name: Upload built vsix
-        uses: actions/upload-artifact@v2
-        with:
-          name: vscode-plpgsql-lsp
-          path: vscode-plpgsql-lsp*.vsix
+      # - name: Upload built vsix
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: vscode-plpgsql-lsp
+      #     path: vscode-plpgsql-lsp*.vsix
