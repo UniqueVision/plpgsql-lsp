@@ -89,6 +89,7 @@ export async function queryFunctionDefinitions(
         ns.nspname,
         p.proname
     `)
+
     definitions = results.rows.map(
       (row) => ({
         schema: row.schema,

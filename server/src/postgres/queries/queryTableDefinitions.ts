@@ -63,6 +63,7 @@ export async function queryTableDefinitions(
         t_columns.table_schema,
         t_columns.table_name
     `)
+
     definitions = results.rows.map(
       (row) => ({
         schema: row.schema,

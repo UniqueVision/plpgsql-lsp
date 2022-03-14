@@ -70,8 +70,8 @@ export async function queryFileStaticAnalysis(
         FROM
           plpgsql_check_function_tb('${functionName}') AS pcf
       `)
-      const rows: StaticAnalysisErrorRow[] = result.rows
 
+      const rows: StaticAnalysisErrorRow[] = result.rows
       if (rows.length === 0) {
         continue
       }

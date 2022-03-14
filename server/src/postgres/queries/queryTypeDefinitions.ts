@@ -124,6 +124,7 @@ export async function queryTypeDefinitions(
         cols.schema,
         cols.type_name
     `)
+
     definitions = results.rows.map(
       (row) => ({
         schema: row.schema,
