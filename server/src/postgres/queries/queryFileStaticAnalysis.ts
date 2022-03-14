@@ -4,7 +4,7 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 import { PostgresPool } from "@/postgres/pool"
 import { getLineRangeFromBuffer, getTextAllRange } from "@/utilities/text"
 
-import { FunctionInfo } from "../parsers/getFunctionList"
+import { FunctionInfo } from "../parsers/getFunctions"
 
 export interface StaticAnalysisErrorRow {
   procedure: string

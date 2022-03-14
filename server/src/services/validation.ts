@@ -3,7 +3,7 @@ import {
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { getFunctionList } from "@/postgres/parsers/getFunctionList"
+import { getFunctions } from "@/postgres/parsers/getFunctions"
 import { PostgresPool } from "@/postgres/pool"
 import {
   queryFileStaticAnalysis,
@@ -91,7 +91,7 @@ async function checkStaticAnalysis(
   const errors = await queryFileStaticAnalysis(
     pgPool,
     textDocument,
-    await getFunctionList(textDocument.uri),
+    await getFunctions(textDocument.uri),
     options.isComplete,
     logger,
   )

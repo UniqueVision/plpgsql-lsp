@@ -10,7 +10,7 @@ export interface FunctionInfo {
   location: number | undefined,
 }
 
-export async function getFunctionList(
+export async function getFunctions(
   uri: URI,
 ): Promise<FunctionInfo[]> {
   const fileText = readFileFromUri(uri)
@@ -25,7 +25,7 @@ export async function getFunctionList(
     statements,
     async (statement) => {
       if (statement?.stmt?.CreateFunctionStmt !== undefined) {
-        return await getCreateFunctionList(statement)
+        return await getCreateFunctions(statement)
       }
       else {
         return []
@@ -34,7 +34,7 @@ export async function getFunctionList(
   )
 }
 
-async function getCreateFunctionList(
+async function getCreateFunctions(
   statement: Statement,
 ): Promise<FunctionInfo[]> {
   const createFunctionStmt = statement?.stmt?.CreateFunctionStmt
