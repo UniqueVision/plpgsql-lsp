@@ -28,7 +28,7 @@ import { validateTextDocument } from "@/services/validation"
 import {
   disableLanguageServer, disableValidation,
 } from "@/utilities/disableLanguageServer"
-import { readFileFromUri } from "@/utilities/text"
+import { readTextDocumentFromUri } from "@/utilities/text"
 
 export type HandlersOptions = {
   hasDiagnosticRelatedInformationCapability: boolean
@@ -107,9 +107,7 @@ export class Handlers {
     event: TextDocumentChangeEvent<TextDocument>,
   ): Promise<void> {
     const documentUri = event.document.uri
-    const textDocument = TextDocument.create(
-      documentUri, "postgres", 1, readFileFromUri(documentUri),
-    )
+    const textDocument = readTextDocumentFromUri(documentUri)
 
     if (disableLanguageServer(textDocument)) {
       return

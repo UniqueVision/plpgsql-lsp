@@ -7,7 +7,7 @@ import { getDefinitions } from "@/postgres/parsers/getDefinitions"
 import { Statement } from "@/postgres/parsers/statement"
 import { Settings } from "@/settings"
 import { disableLanguageServer } from "@/utilities/disableLanguageServer"
-import { readFileFromUri } from "@/utilities/text"
+import { readTextDocumentFromUri } from "@/utilities/text"
 
 export type Definition = string;
 export type DefinitionCandidate = {
@@ -69,9 +69,7 @@ export class DefinitionsManager {
 
     for (const file of files) {
       const documentUri = `${workspaceFolder.uri}/${file}`
-      const textDocument = TextDocument.create(
-        documentUri, "postgres", 1, readFileFromUri(documentUri),
-      )
+      const textDocument = readTextDocumentFromUri(documentUri)
 
       if (disableLanguageServer(textDocument)) {
         continue

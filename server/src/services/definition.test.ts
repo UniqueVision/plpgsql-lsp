@@ -10,7 +10,7 @@ import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
 import { TestTextDocuments } from "@/__tests__/helpers/textDocuments"
 import { Server } from "@/server/server"
-import { readFileFromUri } from "@/utilities/text"
+import { readTextDocumentFromUri } from "@/utilities/text"
 
 
 describe("Definition Tests", () => {
@@ -37,7 +37,7 @@ describe("Definition Tests", () => {
     (server.documents as TestTextDocuments).set(textDocument)
 
     await server.definitionsManager.updateFileDefinitions(
-      TextDocument.create(documentUri, "postgres", 0, readFileFromUri(documentUri)),
+      readTextDocumentFromUri(documentUri),
       (await server.settingsManager.get(textDocument.uri)).defaultSchema,
     )
 

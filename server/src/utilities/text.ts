@@ -147,3 +147,9 @@ export function isFirstCommentLine(
 export function readFileFromUri(uri: URI): string {
   return readFileSync(uri.replace(/^file:\/\//, "")).toString()
 }
+
+export function readTextDocumentFromUri(uri: URI): TextDocument {
+  return TextDocument.create(
+    uri, "postgres", 1, readFileFromUri(uri),
+  )
+}
