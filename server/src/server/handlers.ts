@@ -17,7 +17,7 @@ import {
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { getPool, PostgresPoolMap } from "@/postgres/pool"
-import { DefinitionMap } from "@/server/definitionMap"
+import { DefinitionsManager } from "@/server/definitionsManager"
 import { SettingsManager } from "@/server/settingsManager"
 import { getCompletionItems } from "@/services/completion"
 import {
@@ -39,7 +39,7 @@ export class Handlers {
     private readonly pgPools: PostgresPoolMap,
     private readonly documents: TextDocuments<TextDocument>,
     private readonly settings: SettingsManager,
-    private readonly definitionMap: DefinitionMap,
+    private readonly definitionsManager: DefinitionsManager,
     private readonly options: HandlersOptions,
     private readonly logger: Logger,
   ) {
@@ -78,7 +78,7 @@ export class Handlers {
   async onDidOpen(
     event: TextDocumentChangeEvent<TextDocument>,
   ): Promise<void> {
-    if (this.definitionMap.isEmpty()) {
+    if (this.definitionsManager.isEmpty()) {
       const settings = await this.settings.get(event.document.uri)
 
       const workspace = await this.settings.getWorkspaceFolder(
@@ -90,7 +90,7 @@ export class Handlers {
 
       await loadDefinitionFilesInWorkspace(
         settings.definitionFiles,
-        this.definitionMap,
+        this.definitionsManager,
         workspace,
         settings.defaultSchema,
         this.logger,
@@ -104,7 +104,7 @@ export class Handlers {
     await this.validate(event.document, { isComplete: true })
 
     if (
-      this.definitionMap.fileDefinitions.has(event.document.uri)
+      this.definitionsManager.fileDefinitions.has(event.document.uri)
       || await this.settings.isDefinitionTarget(event.document.uri)
     ) {
       console.log("Definitions updationg...")
@@ -112,7 +112,7 @@ export class Handlers {
       const settings = await this.settings.get(event.document.uri)
 
       const candidates = await updateFileDefinition(
-        this.definitionMap, event.document.uri, settings.defaultSchema,
+        this.definitionsManager, event.document.uri, settings.defaultSchema,
       )
 
       if (candidates !== undefined) {
@@ -156,7 +156,7 @@ export class Handlers {
     }
 
     return await getDefinitionLinks(
-      this.definitionMap,
+      this.definitionsManager,
       params,
       textDocument,
       this.logger,

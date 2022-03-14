@@ -7,7 +7,7 @@ export type DefinitionCandidate = {
   definitionLink: DefinitionLink
 };
 
-export class DefinitionMap {
+export class DefinitionsManager {
   candidates: Map<Definition, DefinitionLink[]>
   fileDefinitions: Map<FilePath, Definition[]>
 

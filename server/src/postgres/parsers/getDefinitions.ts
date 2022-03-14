@@ -1,7 +1,7 @@
 import { DefinitionLink, LocationLink, URI } from "vscode-languageserver"
 
 import { Statement } from "@/postgres/parsers/statement"
-import { DefinitionCandidate } from "@/server/definitionMap"
+import { DefinitionCandidate } from "@/server/definitionsManager"
 import { findIndexFromBuffer, getRangeFromBuffer } from "@/utilities/text"
 
 export function getDefinitions(

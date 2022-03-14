@@ -13,13 +13,13 @@ import {
   getDefinitions,
 } from "@/postgres/parsers/getDefinitions"
 import { Statement } from "@/postgres/parsers/statement"
-import { DefinitionCandidate, DefinitionMap } from "@/server/definitionMap"
+import { DefinitionCandidate, DefinitionsManager } from "@/server/definitionsManager"
 import { sanitizeWordCandidates } from "@/utilities/sanitizeWord"
 import { getWordRangeAtPosition, readFileFromUri } from "@/utilities/text"
 
 
 export async function getDefinitionLinks(
-  definitionMap: DefinitionMap,
+  definitionsManager: DefinitionsManager,
   params: DefinitionParams,
   textDocument: TextDocument,
   logger: Logger,
@@ -34,7 +34,7 @@ export async function getDefinitionLinks(
   const sanitizedWordCandidates = sanitizeWordCandidates(word)
 
   for (const [index, wordCandidate] of sanitizedWordCandidates.entries()) {
-    const definitionLinks = definitionMap
+    const definitionLinks = definitionsManager
       .getDefinitionLinks(wordCandidate)
 
     if (definitionLinks !== undefined) {
@@ -54,7 +54,7 @@ export async function getDefinitionLinks(
 
 export async function loadDefinitionFilesInWorkspace(
   definitionFiles: string[],
-  definitionMap: DefinitionMap,
+  definitionsManager: DefinitionsManager,
   workspaceFolder: WorkspaceFolder,
   defaultSchema: string,
   logger: Logger,
@@ -72,7 +72,7 @@ export async function loadDefinitionFilesInWorkspace(
       const resource = `${workspaceFolder.uri}/${file}`
       try {
         await updateFileDefinition(
-          definitionMap, resource, defaultSchema,
+          definitionsManager, resource, defaultSchema,
         )
       }
       catch (error: unknown) {
@@ -87,7 +87,7 @@ export async function loadDefinitionFilesInWorkspace(
 }
 
 export async function updateFileDefinition(
-  definitionMap: DefinitionMap,
+  definitionsManager: DefinitionsManager,
   uri: URI,
   defaultSchema: string,
 ): Promise<DefinitionCandidate[] | undefined> {
@@ -101,7 +101,7 @@ export async function updateFileDefinition(
   }
   const candidates = getDefinitions(fileText, statements, uri, defaultSchema)
 
-  definitionMap.updateCandidates(uri, candidates)
+  definitionsManager.updateCandidates(uri, candidates)
 
   return candidates
 }

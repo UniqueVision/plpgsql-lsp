@@ -16,7 +16,7 @@ import { PostgresPoolMap } from "@/postgres/pool"
 
 import { DEFAULT_SETTINGS } from "../settings"
 import { workspaceFoldersChanged } from "../utilities/workspace"
-import { DefinitionMap } from "./definitionMap"
+import { DefinitionsManager } from "./definitionsManager"
 import { Handlers } from "./handlers"
 import { SettingsManager } from "./settingsManager"
 
@@ -29,7 +29,7 @@ export class Server {
   // Cache the settings of all open documents
   settings: SettingsManager
   // PostgresSQL file definitions.
-  definitionMap: DefinitionMap = new DefinitionMap()
+  definitionsManager: DefinitionsManager = new DefinitionsManager()
 
   // Language client configuration
   private capabilities?: ClientCapabilities
@@ -154,7 +154,7 @@ export class Server {
       this.pgPools,
       this.documents,
       this.settings,
-      this.definitionMap,
+      this.definitionsManager,
       options,
       this.logger,
     )
