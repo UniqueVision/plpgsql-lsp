@@ -1,9 +1,10 @@
 import { TextDocuments } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-export type TextDocumentsManager = TextDocuments<TextDocument> | TextDocumentTestManager
+export type TextDocumentsManager =
+  TextDocuments<TextDocument> | TextDocumentsTestManager
 
-export class TextDocumentTestManager extends TextDocuments<TextDocument> {
+export class TextDocumentsTestManager extends TextDocuments<TextDocument> {
   testTextDocuments = new Map<string, TextDocument>()
 
   constructor() {

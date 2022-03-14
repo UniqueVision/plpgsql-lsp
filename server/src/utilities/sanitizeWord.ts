@@ -32,7 +32,7 @@ export function sanitizeQuotedTable(word: string): string {
  *     public."table_name_$$ || partition_key || $$"
  *            "table_name_$$ || partition_key || $$"
  */
-export function sanitizeDynamicPartitionTable(word: string) {
+export function sanitizeDynamicPartitionTable(word: string): string {
   return word
     .replace(/"([a-zA-Z_]\w*)_\$\$$/, "$1")
 }

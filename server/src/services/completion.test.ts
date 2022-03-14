@@ -5,7 +5,7 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { setupTestServer } from "@/__tests__/helpers/server"
 import { Server } from "@/server/server"
-import { TextDocumentTestManager } from "@/server/textDocumentManager"
+import { TextDocumentsTestManager } from "@/server/textDocumentsManager"
 import { SettingsBuilder } from "@/settings"
 
 import { getDisableCommentCompletionItems } from "./completion"
@@ -30,7 +30,7 @@ describe("Completion Tests", () => {
   ): Promise<CompletionItem[] | undefined> {
     const textDocument = TextDocument.create("test.pgsql", "postgres", 0, content);
 
-    (server.documents as TextDocumentTestManager).set(textDocument)
+    (server.documents as TextDocumentsTestManager).set(textDocument)
 
     if (server.handlers === undefined) {
       throw new Error("handlers is undefined")

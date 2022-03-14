@@ -16,7 +16,7 @@ export class DefinitionMap {
     this.fileDefinitions = new Map()
   }
 
-  isEmpty() {
+  isEmpty(): boolean {
     return this.candidates.size === 0 && this.fileDefinitions.size === 0
   }
 
@@ -26,7 +26,7 @@ export class DefinitionMap {
 
   updateCandidates(
     filepath: FilePath, candidates: DefinitionCandidate[] | undefined,
-  ) {
+  ): void {
     const oldDefinitions = this.fileDefinitions.get(filepath)
 
     // Remove old definition of a target uri.
@@ -44,7 +44,7 @@ export class DefinitionMap {
     }
 
     if (candidates === undefined || candidates.length === 0) {
-      return undefined
+      return
     }
 
     // Update new definition of a target uri.

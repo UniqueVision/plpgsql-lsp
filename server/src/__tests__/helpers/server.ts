@@ -2,7 +2,7 @@ import { createConnection } from "vscode-languageserver/node"
 
 import { Server } from "@/server/server"
 import { SettingsManager } from "@/server/settingsManager"
-import { TextDocumentTestManager } from "@/server/textDocumentManager"
+import { TextDocumentsTestManager } from "@/server/textDocumentsManager"
 import { Settings } from "@/settings"
 import { ConsoleLogger } from "@/utilities/logger"
 
@@ -17,7 +17,7 @@ export function setupTestServer(settings: Settings): Server {
     logger,
   )
 
-  server.documents = new TextDocumentTestManager()
+  server.documents = new TextDocumentsTestManager()
   server.settings = new SettingsManager(
     connection,
     {

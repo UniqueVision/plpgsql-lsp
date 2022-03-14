@@ -18,7 +18,7 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 import { getPool, PostgresPoolManager } from "@/postgres/pool"
 import { DefinitionMap } from "@/server/definitionMap"
 import { SettingsManager } from "@/server/settingsManager"
-import { TextDocumentsManager } from "@/server/textDocumentManager"
+import { TextDocumentsManager } from "@/server/textDocumentsManager"
 import { getCompletionItems } from "@/services/completion"
 import {
   getDefinitionLinks,

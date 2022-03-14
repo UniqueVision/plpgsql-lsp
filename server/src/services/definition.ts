@@ -13,7 +13,7 @@ import {
   getDefinitions,
 } from "@/postgres/parsers/getDefinitions"
 import { Statement } from "@/postgres/parsers/statement"
-import { DefinitionMap } from "@/server/definitionMap"
+import { DefinitionCandidate, DefinitionMap } from "@/server/definitionMap"
 import { sanitizeWordCandidates } from "@/utilities/sanitizeWord"
 import { getWordRangeAtPosition, readFileFromUri } from "@/utilities/text"
 
@@ -58,7 +58,7 @@ export async function loadDefinitionFilesInWorkspace(
   workspaceFolder: WorkspaceFolder,
   defaultSchema: string,
   logger: Logger,
-) {
+): Promise<void> {
   if (definitionFiles) {
     logger.info("Definition files loading...")
 
@@ -90,14 +90,14 @@ export async function updateFileDefinition(
   definitionMap: DefinitionMap,
   uri: URI,
   defaultSchema: string,
-) {
+): Promise<DefinitionCandidate[] | undefined> {
   const fileText = readFileFromUri(uri)
   const query = await parseQuery(fileText)
 
   const statements: Statement[] | undefined = query?.["stmts"]
 
   if (statements === undefined) {
-    return
+    return undefined
   }
   const candidates = getDefinitions(fileText, statements, uri, defaultSchema)
 

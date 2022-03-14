@@ -19,7 +19,7 @@ import { workspaceFoldersChanged } from "../utilities/workspace"
 import { DefinitionMap } from "./definitionMap"
 import { Handlers } from "./handlers"
 import { SettingsManager } from "./settingsManager"
-import { TextDocumentsManager } from "./textDocumentManager"
+import { TextDocumentsManager } from "./textDocumentsManager"
 
 export class Server {
   handlers?: Handlers
@@ -114,7 +114,7 @@ export class Server {
     }
   }
 
-  private async onInitialized(_params: InitializedParams) {
+  private async onInitialized(_params: InitializedParams): Promise<void> {
     if (this.hasConfigurationCapability
       && this.clientDynamicRegisterSupport
     ) {
@@ -161,7 +161,7 @@ export class Server {
     )
   }
 
-  private initializeSettingsManager() {
+  private initializeSettingsManager(): void {
     if (this.hasConfigurationCapability) {
       this.settings = new SettingsManager(this.connection, {
         hasConfigurationCapability: this.hasConfigurationCapability,

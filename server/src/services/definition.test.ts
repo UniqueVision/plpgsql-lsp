@@ -8,7 +8,7 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 import { getDefinitionFileResource } from "@/__tests__/helpers/file"
 import { setupTestServer } from "@/__tests__/helpers/server"
 import { Server } from "@/server/server"
-import { TextDocumentTestManager } from "@/server/textDocumentManager"
+import { TextDocumentsTestManager } from "@/server/textDocumentsManager"
 import { SettingsBuilder } from "@/settings"
 
 import { updateFileDefinition } from "./definition"
@@ -35,7 +35,7 @@ describe("Definition Tests", () => {
   ): Promise<DefinitionLink[] | undefined> {
     const textDocument = TextDocument.create("test.pgsql", "postgres", 0, content);
 
-    (server.documents as TextDocumentTestManager).set(textDocument)
+    (server.documents as TextDocumentsTestManager).set(textDocument)
 
     await updateFileDefinition(
       server.definitionMap,
