@@ -12,13 +12,13 @@ import {
   HoverParams,
   Logger,
   TextDocumentChangeEvent,
+  TextDocuments,
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { getPool, PostgresPoolManager } from "@/postgres/pool"
 import { DefinitionMap } from "@/server/definitionMap"
 import { SettingsManager } from "@/server/settingsManager"
-import { TextDocumentsManager } from "@/server/textDocumentsManager"
 import { getCompletionItems } from "@/services/completion"
 import {
   getDefinitionLinks,
@@ -37,7 +37,7 @@ export class Handlers {
   constructor(
     private readonly connection: Connection,
     private readonly pgPools: PostgresPoolManager,
-    private readonly documents: TextDocumentsManager,
+    private readonly documents: TextDocuments<TextDocument>,
     private readonly settings: SettingsManager,
     private readonly definitionMap: DefinitionMap,
     private readonly options: HandlersOptions,

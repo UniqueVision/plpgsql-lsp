@@ -11,8 +11,8 @@ import {
   loadQueryFile,
 } from "@/__tests__/helpers/file"
 import { setupTestServer } from "@/__tests__/helpers/server"
+import { TestTextDocuments } from "@/__tests__/helpers/textDocuments"
 import { Server } from "@/server/server"
-import { TextDocumentsTestManager } from "@/server/textDocumentsManager"
 import { SettingsBuilder } from "@/settings"
 
 
@@ -47,7 +47,7 @@ describe("Validate Tests", () => {
       context,
     );
 
-    (server.documents as TextDocumentsTestManager).set(textDocument)
+    (server.documents as TestTextDocuments).set(textDocument)
 
     if (server.handlers === undefined) {
       throw new Error("handlers is undefined")
@@ -67,7 +67,7 @@ describe("Validate Tests", () => {
       loadQueryFile(file, options),
     );
 
-    (server.documents as TextDocumentsTestManager).set(textDocument)
+    (server.documents as TestTextDocuments).set(textDocument)
 
     if (server.handlers === undefined) {
       throw new Error("handlers is undefined")

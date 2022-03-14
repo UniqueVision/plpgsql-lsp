@@ -2,9 +2,10 @@ import { createConnection } from "vscode-languageserver/node"
 
 import { Server } from "@/server/server"
 import { SettingsManager } from "@/server/settingsManager"
-import { TextDocumentsTestManager } from "@/server/textDocumentsManager"
 import { Settings } from "@/settings"
 import { ConsoleLogger } from "@/utilities/logger"
+
+import { TestTextDocuments } from "./textDocuments"
 
 export function setupTestServer(settings: Settings): Server {
   process.argv.push("--node-ipc")
@@ -17,7 +18,7 @@ export function setupTestServer(settings: Settings): Server {
     logger,
   )
 
-  server.documents = new TextDocumentsTestManager()
+  server.documents = new TestTextDocuments()
   server.settings = new SettingsManager(
     connection,
     {

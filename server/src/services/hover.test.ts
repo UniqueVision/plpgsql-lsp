@@ -4,8 +4,8 @@ import { Hover, MarkupContent, Position } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { setupTestServer } from "@/__tests__/helpers/server"
+import { TestTextDocuments } from "@/__tests__/helpers/textDocuments"
 import { Server } from "@/server/server"
-import { TextDocumentsTestManager } from "@/server/textDocumentsManager"
 import { SettingsBuilder } from "@/settings"
 import { makePostgresCodeMarkdown } from "@/utilities/text"
 
@@ -30,7 +30,7 @@ describe("Hover Tests", () => {
   ): Promise<Hover | undefined> {
     const textDocument = TextDocument.create("test.pgsql", "postgres", 0, content);
 
-    (server.documents as TextDocumentsTestManager).set(textDocument)
+    (server.documents as TestTextDocuments).set(textDocument)
 
     if (server.handlers === undefined) {
       throw new Error("handlers is undefined")

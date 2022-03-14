@@ -1,14 +1,17 @@
-import { TextDocuments } from "vscode-languageserver"
+import { Connection, TextDocuments } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-export type TextDocumentsManager =
-  TextDocuments<TextDocument> | TextDocumentsTestManager
 
-export class TextDocumentsTestManager extends TextDocuments<TextDocument> {
+export class TestTextDocuments
+  extends TextDocuments<TextDocument> {
   testTextDocuments = new Map<string, TextDocument>()
 
   constructor() {
     super(TextDocument)
+  }
+
+  listen(_connection: Connection): void {
+    return
   }
 
   get(uri: string): TextDocument | undefined {

@@ -19,14 +19,13 @@ import { workspaceFoldersChanged } from "../utilities/workspace"
 import { DefinitionMap } from "./definitionMap"
 import { Handlers } from "./handlers"
 import { SettingsManager } from "./settingsManager"
-import { TextDocumentsManager } from "./textDocumentsManager"
 
 export class Server {
   handlers?: Handlers
   pgPools: PostgresPoolManager = new Map()
   // Create a simple text document manager. The text document manager
   // supports full document sync only
-  documents: TextDocumentsManager = new TextDocuments(TextDocument)
+  documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
   // Cache the settings of all open documents
   settings: SettingsManager
   // PostgresSQL file definitions.
