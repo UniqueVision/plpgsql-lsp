@@ -16,7 +16,6 @@ sql_file=$(mktemp)
 
 if ${DRYRUN:-false}; then
     cat "$sql_file"
-
 else
     ./psql.sh --set "ON_ERROR_STOP=1" -f "$sql_file"
 fi
