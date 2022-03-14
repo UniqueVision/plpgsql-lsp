@@ -28,6 +28,7 @@ import { validateTextDocument } from "@/services/validation"
 import {
   disableLanguageServer, disableValidation,
 } from "@/utilities/disableLanguageServer"
+import { readFileFromUri } from "@/utilities/text"
 
 export type HandlersOptions = {
   hasDiagnosticRelatedInformationCapability: boolean
@@ -105,18 +106,27 @@ export class Handlers {
   async onDidSave(
     event: TextDocumentChangeEvent<TextDocument>,
   ): Promise<void> {
+    const documentUri = event.document.uri
+    const textDocument = TextDocument.create(
+      documentUri, "postgres", 1, readFileFromUri(documentUri),
+    )
+
+    if (disableLanguageServer(textDocument)) {
+      return
+    }
+
     await this.validate(event.document, { isComplete: true })
 
     if (
-      this.definitionsManager.hasFileDefinitions(event.document.uri)
-      || await this.settingsManager.isDefinitionTarget(event.document.uri)
+      this.definitionsManager.hasFileDefinitions(documentUri)
+      || await this.settingsManager.isDefinitionTarget(documentUri)
     ) {
+      const settings = await this.settingsManager.get(documentUri)
+
       console.log("The file definitions are updating...")
 
-      const settings = await this.settingsManager.get(event.document.uri)
-
       const candidates = await this.definitionsManager.updateFileDefinitions(
-        event.document.uri, settings.defaultSchema,
+        textDocument, settings.defaultSchema,
       )
 
       if (candidates !== undefined) {

@@ -1,10 +1,12 @@
 import { sync as glob } from "glob"
 import { parseQuery } from "libpg-query"
 import { DefinitionLink, Logger, URI, WorkspaceFolder } from "vscode-languageserver"
+import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { getDefinitions } from "@/postgres/parsers/getDefinitions"
 import { Statement } from "@/postgres/parsers/statement"
 import { Settings } from "@/settings"
+import { disableLanguageServer } from "@/utilities/disableLanguageServer"
 import { readFileFromUri } from "@/utilities/text"
 
 export type Definition = string;
@@ -31,10 +33,11 @@ export class DefinitionsManager {
   }
 
   async updateFileDefinitions(
-    uri: URI,
+    textDocument: TextDocument,
     defaultSchema: string,
   ): Promise<DefinitionCandidate[] | undefined> {
-    const fileText = readFileFromUri(uri)
+    const fileText = textDocument.getText()
+
     const query = await parseQuery(fileText)
 
     const statements: Statement[] | undefined = query?.["stmts"]
@@ -42,9 +45,11 @@ export class DefinitionsManager {
       return undefined
     }
 
-    const candidates = getDefinitions(fileText, statements, uri, defaultSchema)
+    const candidates = getDefinitions(
+      fileText, statements, textDocument.uri, defaultSchema,
+    )
 
-    this.updateCandidates(uri, candidates)
+    this.updateCandidates(textDocument.uri, candidates)
 
     return candidates
   }
@@ -63,15 +68,24 @@ export class DefinitionsManager {
     ]
 
     for (const file of files) {
-      const fileUri = `${workspaceFolder.uri}/${file}`
+      const documentUri = `${workspaceFolder.uri}/${file}`
+      const textDocument = TextDocument.create(
+        documentUri, "postgres", 1, readFileFromUri(documentUri),
+      )
+
+      if (disableLanguageServer(textDocument)) {
+        continue
+      }
+
       try {
         await this.updateFileDefinitions(
-          fileUri, settings.defaultSchema,
+          textDocument, settings.defaultSchema,
         )
       }
       catch (error: unknown) {
         logger.error(
-          `The definitions of "${fileUri}" cannot load. ${(error as Error).toString()}`,
+          `The definitions of "${documentUri}" cannot load.`
+          + ` ${(error as Error).toString()}`,
         )
       }
     }

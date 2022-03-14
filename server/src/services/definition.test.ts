@@ -10,6 +10,7 @@ import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
 import { TestTextDocuments } from "@/__tests__/helpers/textDocuments"
 import { Server } from "@/server/server"
+import { readFileFromUri } from "@/utilities/text"
 
 
 describe("Definition Tests", () => {
@@ -27,7 +28,7 @@ describe("Definition Tests", () => {
   })
 
   async function onDefinition(
-    definitionResource: URI,
+    documentUri: URI,
     content: string,
     position = Position.create(0, 0),
   ): Promise<DefinitionLink[] | undefined> {
@@ -36,7 +37,7 @@ describe("Definition Tests", () => {
     (server.documents as TestTextDocuments).set(textDocument)
 
     await server.definitionsManager.updateFileDefinitions(
-      definitionResource,
+      TextDocument.create(documentUri, "postgres", 0, readFileFromUri(documentUri)),
       (await server.settingsManager.get(textDocument.uri)).defaultSchema,
     )
 
@@ -62,12 +63,12 @@ describe("Definition Tests", () => {
 
   describe("Definition", function () {
     it("Definition on table", async () => {
-      const definitionResource = getDefinitionFileResource("tables/companies.pgsql")
-      const definition = await onDefinition(definitionResource, "companies")
+      const documentUri = getDefinitionFileResource("tables/companies.pgsql")
+      const definition = await onDefinition(documentUri, "companies")
 
       validateDefinitionLinks(definition, [
         LocationLink.create(
-          definitionResource,
+          documentUri,
           Range.create(0, 39, 5, 1),
           Range.create(2, 13, 2, 22),
         ),
@@ -75,12 +76,12 @@ describe("Definition Tests", () => {
     })
 
     it("Definition on table with default schema", async () => {
-      const definitionResource = getDefinitionFileResource("tables/public_users.pgsql")
-      const definition = await onDefinition(definitionResource, "public.users")
+      const documentUri = getDefinitionFileResource("tables/public_users.pgsql")
+      const definition = await onDefinition(documentUri, "public.users")
 
       validateDefinitionLinks(definition, [
         LocationLink.create(
-          definitionResource,
+          documentUri,
           Range.create(0, 42, 6, 1),
           Range.create(2, 13, 2, 25),
         ),
@@ -88,14 +89,14 @@ describe("Definition Tests", () => {
     })
 
     it("Definition on table with non-default schema", async () => {
-      const definitionResource = getDefinitionFileResource(
+      const documentUri = getDefinitionFileResource(
         "tables/campaign_participants.pgsql",
       )
-      const definition = await onDefinition(definitionResource, "campaign.participants")
+      const definition = await onDefinition(documentUri, "campaign.participants")
 
       validateDefinitionLinks(definition, [
         LocationLink.create(
-          definitionResource,
+          documentUri,
           Range.create(0, 51, 6, 1),
           Range.create(2, 13, 2, 34),
         ),
@@ -103,12 +104,12 @@ describe("Definition Tests", () => {
     })
 
     it("Definition on view", async () => {
-      const definitionResource = getDefinitionFileResource("views/deleted_users.pgsql")
-      const definition = await onDefinition(definitionResource, "deleted_users")
+      const documentUri = getDefinitionFileResource("views/deleted_users.pgsql")
+      const definition = await onDefinition(documentUri, "deleted_users")
 
       validateDefinitionLinks(definition, [
         LocationLink.create(
-          definitionResource,
+          documentUri,
           Range.create(0, 42, 9, 20),
           Range.create(2, 12, 2, 25),
         ),
@@ -116,9 +117,9 @@ describe("Definition Tests", () => {
     })
 
     it("Definition with language server disable comment", async () => {
-      const definitionResource = getDefinitionFileResource("tables/companies.pgsql")
+      const documentUri = getDefinitionFileResource("tables/companies.pgsql")
       const definition = await onDefinition(
-        definitionResource,
+        documentUri,
         dedent`
           -- plpgsql-language-server:disable
 
@@ -131,9 +132,9 @@ describe("Definition Tests", () => {
     })
 
     it("Definition with language server disable block comment", async () => {
-      const definitionResource = getDefinitionFileResource("tables/companies.pgsql")
+      const documentUri = getDefinitionFileResource("tables/companies.pgsql")
       const definition = await onDefinition(
-        definitionResource,
+        documentUri,
         dedent`
           /* plpgsql-language-server:disable */
 
