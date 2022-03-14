@@ -1,21 +1,13 @@
-import { sync as glob } from "glob"
-import { parseQuery } from "libpg-query"
 import {
   DefinitionLink,
   DefinitionParams,
   Logger,
-  URI,
-  WorkspaceFolder,
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import {
-  getDefinitions,
-} from "@/postgres/parsers/getDefinitions"
-import { Statement } from "@/postgres/parsers/statement"
-import { DefinitionCandidate, DefinitionsManager } from "@/server/definitionsManager"
+import { DefinitionsManager } from "@/server/definitionsManager"
 import { sanitizeWordCandidates } from "@/utilities/sanitizeWord"
-import { getWordRangeAtPosition, readFileFromUri } from "@/utilities/text"
+import { getWordRangeAtPosition } from "@/utilities/text"
 
 
 export async function getDefinitionLinks(
@@ -30,7 +22,6 @@ export async function getDefinitionLinks(
   }
 
   const word = textDocument.getText(wordRange)
-
   const sanitizedWordCandidates = sanitizeWordCandidates(word)
 
   for (const [index, wordCandidate] of sanitizedWordCandidates.entries()) {
@@ -48,62 +39,5 @@ export async function getDefinitionLinks(
 
       return definitionLinks
     }
-
   }
-}
-
-export async function loadDefinitionFilesInWorkspace(
-  definitionFiles: string[],
-  definitionsManager: DefinitionsManager,
-  workspaceFolder: WorkspaceFolder,
-  defaultSchema: string,
-  logger: Logger,
-): Promise<void> {
-  logger.info(
-    `The definition files of the "${workspaceFolder.name}" workspace are loading...`,
-  )
-
-  definitionsManager.workspaceFolders.add(workspaceFolder)
-
-  const files = [
-    ...new Set(
-      definitionFiles.flatMap((filePattern) => glob(filePattern)),
-    ),
-  ]
-
-  for (const file of files) {
-    const fileUri = `${workspaceFolder.uri}/${file}`
-    try {
-      await updateFileDefinition(
-        definitionsManager, fileUri, defaultSchema,
-      )
-    }
-    catch (error: unknown) {
-      logger.error(
-        `"${fileUri}" cannot load the definitions. ${(error as Error).toString()}`,
-      )
-    }
-  }
-
-  logger.info("The definition files has been loaded!! 👍")
-}
-
-export async function updateFileDefinition(
-  definitionsManager: DefinitionsManager,
-  uri: URI,
-  defaultSchema: string,
-): Promise<DefinitionCandidate[] | undefined> {
-  const fileText = readFileFromUri(uri)
-  const query = await parseQuery(fileText)
-
-  const statements: Statement[] | undefined = query?.["stmts"]
-
-  if (statements === undefined) {
-    return undefined
-  }
-  const candidates = getDefinitions(fileText, statements, uri, defaultSchema)
-
-  definitionsManager.updateCandidates(uri, candidates)
-
-  return candidates
 }

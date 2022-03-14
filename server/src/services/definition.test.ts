@@ -11,8 +11,6 @@ import { SettingsBuilder } from "@/__tests__/helpers/settings"
 import { TestTextDocuments } from "@/__tests__/helpers/textDocuments"
 import { Server } from "@/server/server"
 
-import { updateFileDefinition } from "./definition"
-
 
 describe("Definition Tests", () => {
   let server: Server
@@ -37,8 +35,7 @@ describe("Definition Tests", () => {
 
     (server.documents as TestTextDocuments).set(textDocument)
 
-    await updateFileDefinition(
-      server.definitionsManager,
+    await server.definitionsManager.updateFileDefinitions(
       definitionResource,
       (await server.settingsManager.get(textDocument.uri)).defaultSchema,
     )

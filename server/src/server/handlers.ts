@@ -22,8 +22,6 @@ import { SettingsManager } from "@/server/settingsManager"
 import { getCompletionItems } from "@/services/completion"
 import {
   getDefinitionLinks,
-  loadDefinitionFilesInWorkspace,
-  updateFileDefinition,
 } from "@/services/definition"
 import { getHover } from "@/services/hover"
 import { validateTextDocument } from "@/services/validation"
@@ -87,16 +85,20 @@ export class Handlers {
       return
     }
 
-    if (!this.definitionsManager.workspaceFolders.has(workspaceFolder)) {
+    if (!this.definitionsManager.hasWorkspaceFolder(workspaceFolder)) {
       const settings = await this.settingsManager.get(event.document.uri)
 
-      await loadDefinitionFilesInWorkspace(
-        settings.definitionFiles,
-        this.definitionsManager,
+      this.logger.log(
+        `The "${workspaceFolder.name}" workspace definitions are loading...`,
+      )
+
+      await this.definitionsManager.loadWorkspaceDefinitions(
         workspaceFolder,
-        settings.defaultSchema,
+        settings,
         this.logger,
       )
+
+      this.logger.log("The definitions have been loaded!! 👍")
     }
   }
 
@@ -106,21 +108,23 @@ export class Handlers {
     await this.validate(event.document, { isComplete: true })
 
     if (
-      this.definitionsManager.fileDefinitions.has(event.document.uri)
+      this.definitionsManager.hasFileDefinitions(event.document.uri)
       || await this.settingsManager.isDefinitionTarget(event.document.uri)
     ) {
-      console.log("Definitions updationg...")
+      console.log("The file definitions are updating...")
 
       const settings = await this.settingsManager.get(event.document.uri)
 
-      const candidates = await updateFileDefinition(
-        this.definitionsManager, event.document.uri, settings.defaultSchema,
+      const candidates = await this.definitionsManager.updateFileDefinitions(
+        event.document.uri, settings.defaultSchema,
       )
 
       if (candidates !== undefined) {
         const definitions = candidates.map(candidate => candidate.definition)
 
-        console.log(`Definitions updated!! 😎 ${JSON.stringify(definitions)}`)
+        console.log(
+          `The file definitions have been updated!! 😎 ${JSON.stringify(definitions)}`,
+        )
       }
     }
   }
