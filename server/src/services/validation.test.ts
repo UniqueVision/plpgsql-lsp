@@ -11,9 +11,9 @@ import {
   loadQueryFile,
 } from "@/__tests__/helpers/file"
 import { setupTestServer } from "@/__tests__/helpers/server"
+import { SettingsBuilder } from "@/__tests__/helpers/settings"
 import { TestTextDocuments } from "@/__tests__/helpers/textDocuments"
 import { Server } from "@/server/server"
-import { SettingsBuilder } from "@/settings"
 
 
 describe("Validate Tests", () => {
