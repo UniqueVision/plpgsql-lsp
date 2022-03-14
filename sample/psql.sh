@@ -10,4 +10,4 @@ cd "$(dirname "$0")"
 
 cd "$current_dir"
 
-psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST/$POSTGRES_DB" "$@"
+psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:${POSTGRES_PORT:-5432}/$POSTGRES_DB" "$@"
