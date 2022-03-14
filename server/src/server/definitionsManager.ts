@@ -1,15 +1,14 @@
-import { DefinitionLink } from "vscode-languageserver"
+import { DefinitionLink, URI } from "vscode-languageserver"
 
-export type FilePath = string;
 export type Definition = string;
 export type DefinitionCandidate = {
-  definition: string,
+  definition: Definition,
   definitionLink: DefinitionLink
 };
 
 export class DefinitionsManager {
   candidates: Map<Definition, DefinitionLink[]>
-  fileDefinitions: Map<FilePath, Definition[]>
+  fileDefinitions: Map<URI, Definition[]>
 
   constructor() {
     this.candidates = new Map()
@@ -25,22 +24,26 @@ export class DefinitionsManager {
   }
 
   updateCandidates(
-    filepath: FilePath, candidates: DefinitionCandidate[] | undefined,
+    uri: URI, candidates: DefinitionCandidate[] | undefined,
   ): void {
-    const oldDefinitions = this.fileDefinitions.get(filepath)
+    const oldDefinitions = this.fileDefinitions.get(uri)
 
     // Remove old definition of a target uri.
     if (oldDefinitions !== undefined) {
       for (const candidate of oldDefinitions) {
         const oldDefinitionLinks = this.candidates.get(candidate)
-        if (oldDefinitionLinks === undefined) continue
+        if (oldDefinitionLinks === undefined) {
+          continue
+        }
 
         this.candidates.set(
           candidate,
-          oldDefinitionLinks.filter((definition) => definition.targetUri !== filepath),
+          oldDefinitionLinks.filter(
+            (definition) => definition.targetUri !== uri,
+          ),
         )
       }
-      this.fileDefinitions.delete(filepath)
+      this.fileDefinitions.delete(uri)
     }
 
     if (candidates === undefined || candidates.length === 0) {
@@ -55,7 +58,7 @@ export class DefinitionsManager {
     }
 
     this.fileDefinitions.set(
-      filepath,
+      uri,
       candidates.map((candidate) => candidate.definition),
     )
   }
