@@ -28,7 +28,6 @@ import { validateTextDocument } from "@/services/validation"
 import {
   disableLanguageServer, disableValidation,
 } from "@/utilities/disableLanguageServer"
-import { readTextDocumentFromUri } from "@/utilities/text"
 
 export type HandlersOptions = {
   hasDiagnosticRelatedInformationCapability: boolean
@@ -106,20 +105,19 @@ export class Handlers {
   async onDidSave(
     event: TextDocumentChangeEvent<TextDocument>,
   ): Promise<void> {
-    const documentUri = event.document.uri
-    const textDocument = readTextDocumentFromUri(documentUri)
+    const textDocument = event.document
 
     if (disableLanguageServer(textDocument)) {
       return
     }
 
-    await this.validate(event.document, { isComplete: true })
+    await this.validate(textDocument, { isComplete: true })
 
     if (
-      this.definitionsManager.hasFileDefinitions(documentUri)
-      || await this.settingsManager.isDefinitionTarget(documentUri)
+      this.definitionsManager.hasFileDefinitions(textDocument.uri)
+      || await this.settingsManager.isDefinitionTarget(textDocument.uri)
     ) {
-      const settings = await this.settingsManager.get(documentUri)
+      const settings = await this.settingsManager.get(textDocument.uri)
 
       console.log("The file definitions are updating...")
 
