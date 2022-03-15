@@ -58,25 +58,25 @@ async function checkSyntaxAnalysis(
   }
 
   return errors.map(({ range, message }) => {
-    const diagnosic: Diagnostic = {
+    const diagnostic: Diagnostic = {
       severity: DiagnosticSeverity.Error,
       range,
       message,
     }
 
     if (options.hasDiagnosticRelatedInformationCapability) {
-      diagnosic.relatedInformation = [
+      diagnostic.relatedInformation = [
         {
           location: {
             uri: textDocument.uri,
-            range: Object.assign({}, diagnosic.range),
+            range: Object.assign({}, diagnostic.range),
           },
           message: `Syntax error: ${message}`,
         },
       ]
     }
 
-    return diagnosic
+    return diagnostic
   })
 }
 
@@ -111,25 +111,25 @@ async function checkStaticAnalysis(
         severity = DiagnosticSeverity.Error
       }
 
-      const diagnosic: Diagnostic = {
+      const diagnostic: Diagnostic = {
         severity,
         range,
         message,
       }
 
       if (options.hasDiagnosticRelatedInformationCapability) {
-        diagnosic.relatedInformation = [
+        diagnostic.relatedInformation = [
           {
             location: {
               uri: textDocument.uri,
-              range: Object.assign({}, diagnosic.range),
+              range: Object.assign({}, diagnostic.range),
             },
             message: `Static analysis ${level}: ${message}`,
           },
         ]
       }
 
-      return diagnosic
+      return diagnostic
     },
   )
 }
