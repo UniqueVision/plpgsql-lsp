@@ -14,7 +14,7 @@ export async function getDefinitionLinks(
   definitionsManager: DefinitionsManager,
   params: DefinitionParams,
   document: TextDocument,
-  logger: Logger,
+  _logger: Logger,
 ): Promise<DefinitionLink[] | undefined> {
   const wordRange = getWordRangeAtPosition(document, params.position)
   if (wordRange === undefined) {
@@ -24,20 +24,14 @@ export async function getDefinitionLinks(
   const word = document.getText(wordRange)
   const sanitizedWordCandidates = sanitizeWordCandidates(word)
 
-  for (const [index, wordCandidate] of sanitizedWordCandidates.entries()) {
+  for (const wordCandidate of sanitizedWordCandidates) {
     const definitionLinks = definitionsManager
       .getDefinitionLinks(wordCandidate)
 
     if (definitionLinks !== undefined) {
-      logger.log(
-        "Sanitized jump target word: "
-        + [word]
-          .concat(sanitizedWordCandidates.slice(0, index))
-          .map((word) => JSON.stringify(word))
-          .join(" => "),
-      )
-
       return definitionLinks
     }
   }
+
+  return undefined
 }
