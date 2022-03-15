@@ -1,164 +1,194 @@
-import { Hover, HoverParams } from "vscode-languageserver"
+import {
+  Hover,
+  HoverParams,
+  Logger,
+  MarkupKind,
+} from "vscode-languageserver"
+import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { getSchemaCandidate, getWordRangeAtPosition } from "../helpers"
+import { PostgresPool } from "@/postgres/pool"
 import {
-    getFunctionDefinitions, makeFunctionDefinitionText,
-} from "../postgres/queries/getFunctionDefinitions"
+  makeFunctionDefinitionText,
+  queryFunctionDefinitions,
+} from "@/postgres/queries/queryFunctionDefinitions"
 import {
-    getTableDefinitions, makeTableDefinitionText,
-} from "../postgres/queries/getTableDefinitions"
+  makeTableDefinitionText,
+  queryTableDefinitions,
+} from "@/postgres/queries/queryTableDefinitions"
 import {
-    getTypeDefinitions, makeTypeDefinitionText,
-} from "../postgres/queries/getTypeDefinitions"
-import { LanguageServerSettings } from "../settings"
-import { Space } from "../space"
+  makeTypeDefinitionText,
+  queryTypeDefinitions,
+} from "@/postgres/queries/queryTypeDefinitions"
 import {
-    sanitizeDynamicPartitionTable,
-    sanitizeNumberPartitionTable,
-    sanitizeQuotedTable,
-    sanitizeUuidPartitionTable,
-} from "./_sanitizeWord"
+  makeViewDefinitionText,
+  queryViewDefinitions,
+} from "@/postgres/queries/queryViewDefinitions"
+import { sanitizeWordCandidates } from "@/utilities/sanitizeWord"
+import { separateSchemaFromCandidate } from "@/utilities/schema"
+import { getWordRangeAtPosition, makePostgresCodeMarkdown } from "@/utilities/text"
 
 export async function getHover(
-    space: Space,
-    params: HoverParams,
+  pgPool: PostgresPool,
+  params: HoverParams,
+  textDocument: TextDocument,
+  defaultSchema: string,
+  logger: Logger,
 ): Promise<Hover | undefined> {
-    const uri = params.textDocument.uri
-    const settings = space.globalSettings
-    const document = space.documents.get(uri)
-    if (document === undefined) {
-        return undefined
-    }
-
-    const wordRange = getWordRangeAtPosition(document, params.position)
-    if (wordRange === undefined) {
-        return undefined
-    }
-
-    const word = document.getText(wordRange)
-
-    const sanitizedWordCandidates = [
-        // General match.
-        sanitizeQuotedTable(sanitizeDynamicPartitionTable(word)),
-        // Specific partition table match.
-        sanitizeUuidPartitionTable(sanitizeNumberPartitionTable(word)),
-    ]
-
-    for (const wordCandidate of
-        sanitizedWordCandidates
-    ) {
-        const schemaCandidate = getSchemaCandidate(wordCandidate)
-        if (schemaCandidate === undefined) {
-            continue
-        }
-        const { schema, candidate } = schemaCandidate
-
-        // Check as Table
-        const tableHover = await getTableHover(
-            space, schema, candidate, settings,
-        )
-        if (tableHover !== undefined) {
-            return tableHover
-        }
-
-        // Check as Table
-        const functionHover = await getFunctionHover(space, schema, candidate, settings)
-        if (functionHover !== undefined) {
-            return functionHover
-        }
-
-        // Check as Type
-        const typeHover = await getTypeHover(space, schema, candidate, settings)
-        if (typeHover !== undefined) {
-            return typeHover
-        }
-    }
-
+  const wordRange = getWordRangeAtPosition(textDocument, params.position)
+  if (wordRange === undefined) {
     return undefined
+  }
+
+  const word = textDocument.getText(wordRange)
+  const sanitizedWordCandidates = sanitizeWordCandidates(word)
+
+  for (const wordCandidate of sanitizedWordCandidates) {
+    const schemaCandidate = separateSchemaFromCandidate(wordCandidate)
+    if (schemaCandidate === undefined) {
+      continue
+    }
+    const { schema, candidate } = schemaCandidate
+
+    // Check as Table
+    const tableHover = await getTableHover(
+      pgPool, schema, candidate, defaultSchema, logger,
+    )
+    if (tableHover !== undefined) {
+      return tableHover
+    }
+
+    // Check as View
+    const viewHover = await getViewHover(
+      pgPool, schema, candidate, defaultSchema, logger,
+    )
+    if (viewHover !== undefined) {
+      return viewHover
+    }
+
+    // Check as Function
+    const functionHover = await getFunctionHover(
+      pgPool, schema, candidate, defaultSchema, logger,
+    )
+    if (functionHover !== undefined) {
+      return functionHover
+    }
+
+    // Check as Type
+    const typeHover = await getTypeHover(
+      pgPool, schema, candidate, defaultSchema, logger,
+    )
+    if (typeHover !== undefined) {
+      return typeHover
+    }
+  }
+
+  return undefined
 }
 
 async function getTableHover(
-    space: Space,
-    schema: string | undefined,
-    tableName: string,
-    settings: LanguageServerSettings,
+  pgPool: PostgresPool,
+  schema: string | undefined,
+  tableName: string,
+  defaultSchema: string,
+  logger: Logger,
 ): Promise<Hover | undefined> {
-    const pgClient = await space.getPgClient(settings)
-    if (pgClient === undefined) {
-        return undefined
-    }
+  const definitions = await queryTableDefinitions(
+    pgPool, schema, defaultSchema, logger, tableName,
+  )
 
-    const definitions = (await getTableDefinitions(
-        pgClient, schema, settings.defaultSchema, tableName,
-    )
-    )
-    if (definitions.length !== 0) {
-        return {
-            contents: {
-                language: "postgres",
-                value: makeTableDefinitionText(definitions[0]),
-            },
-        }
-    }
-    else {
-        return undefined
-    }
+  if (definitions.length === 0) {
+    return undefined
+  }
+
+  const code = definitions.map(
+    (definition) => makeTableDefinitionText(definition),
+  ).join("\n\n")
+
+  return {
+    contents: {
+      kind: MarkupKind.Markdown,
+      value: makePostgresCodeMarkdown(code),
+    },
+  }
+}
+
+async function getViewHover(
+  pgPool: PostgresPool,
+  schema: string | undefined,
+  tableName: string,
+  defaultSchema: string,
+  logger: Logger,
+): Promise<Hover | undefined> {
+  const definitions = await queryViewDefinitions(
+    pgPool, schema, defaultSchema, logger, tableName,
+  )
+
+  if (definitions.length === 0) {
+    return undefined
+  }
+
+  const code = definitions.map(
+    (definition) => makeViewDefinitionText(definition),
+  ).join("\n\n")
+
+  return {
+    contents: {
+      kind: MarkupKind.Markdown,
+      value: makePostgresCodeMarkdown(code),
+    },
+  }
 }
 
 async function getFunctionHover(
-    space: Space,
-    schema: string | undefined,
-    functionName: string,
-    settings: LanguageServerSettings,
+  pgPool: PostgresPool,
+  schema: string | undefined,
+  functionName: string,
+  defaultSchema: string,
+  logger: Logger,
 ): Promise<Hover | undefined> {
-    const pgClient = await space.getPgClient(settings)
-    if (pgClient === undefined) {
-        return undefined
-    }
+  const definitions = await queryFunctionDefinitions(
+    pgPool, schema, defaultSchema, logger, functionName,
+  )
 
-    const definitions = await getFunctionDefinitions(
-        pgClient, schema, settings.defaultSchema, functionName,
-    )
+  if (definitions.length === 0) {
+    return undefined
+  }
 
-    if (definitions.length === 0) {
-        return undefined
-    }
+  const code = definitions.map(
+    (definition) => makeFunctionDefinitionText(definition),
+  ).join("\n\n")
 
-    return {
-        contents: {
-            language: "postgres",
-            value: definitions.map(
-                definition => makeFunctionDefinitionText(definition),
-            ).join("\n\n"),
-        },
-    }
+  return {
+    contents: {
+      kind: MarkupKind.Markdown,
+      value: makePostgresCodeMarkdown(code),
+    },
+  }
 }
 
 async function getTypeHover(
-    space: Space,
-    schema: string | undefined,
-    typeName: string,
-    settings: LanguageServerSettings,
+  pgPool: PostgresPool,
+  schema: string | undefined,
+  typeName: string,
+  defaultSchema: string,
+  logger: Logger,
 ): Promise<Hover | undefined> {
-    const pgClient = await space.getPgClient(settings)
-    if (pgClient === undefined) {
-        return undefined
-    }
+  const definitions = await queryTypeDefinitions(
+    pgPool, schema, defaultSchema, logger, typeName,
+  )
 
-    const definitions = await getTypeDefinitions(
-        pgClient, schema, settings.defaultSchema, typeName,
-    )
+  if (definitions.length === 0) {
+    return undefined
+  }
 
-    if (definitions.length === 0) {
-        return undefined
+  const code = definitions.map(
+    (definition) => makeTypeDefinitionText(definition),
+  ).join("\n\n")
 
-    }
-
-    return {
-        contents: {
-            language: "postgres",
-            value: makeTypeDefinitionText(definitions[0])
-            ,
-        },
-    }
+  return {
+    contents: {
+      kind: MarkupKind.Markdown,
+      value: makePostgresCodeMarkdown(code),
+    },
+  }
 }

@@ -34,3 +34,62 @@
   }
 }
 ```
+
+## Disable Specific file
+
+If you want to disable the extension for a specific file, just add this comment your file top.
+
+```sql
+/* plpgsql-language-server:disable */
+```
+
+Or, if you want to disable only the validation feature, try this
+
+```sql
+/* plpgsql-language-server:disable validation */
+```
+
+## Development
+
+### Try sample
+
+1. Prepare database.
+
+```sh
+cd $THIS_REPOSITORY_ROOT
+
+# Prepare database.
+docker-compose up -d
+./sample/prepare.sh
+
+# Install packages.
+npm install
+```
+
+2. Open this project.
+
+```sh
+cd $THIS_REPOSITORY_ROOT
+
+code plpgsql-lsp.code-workspace
+```
+
+3. Execute "Run and Debug" -> "Launch Client"
+
+4. Open the sample workspace (`$THIS_REPOSITORY_ROOT/sample/sample.code-workspace`) on [Extension Development Host] window.
+
+### Test
+
+```sh
+cd $THIS_REPOSITORY_ROOT
+
+# Prepare database.
+docker-compose up -d
+./sample/prepare.sh
+
+# Install packages.
+npm install
+
+# Run test.
+npm run test
+```

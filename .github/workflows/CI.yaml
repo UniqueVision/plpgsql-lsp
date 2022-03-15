@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+
+    services:
+      postgres:
+        image: yassun4dev/plpgsql-check:latest
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    container:
+      image: node:17-bullseye-slim
+      env:
+        POSTGRES_HOST: yassun4dev-plpgsql-check
+        POSTGRES_DB: postgres
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: password
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+          cache: 'npm'
+
+      - name: Setup PostgreSQL client
+        uses: akanieski/setup-postgres-cli@v1
+        with:
+          password: ${POSTGRES_PASSWORD}
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline
+
+      - name: Build extension.
+        run: npm run build
+
+      - name: Prepare test database
+        run: CI_MODE=true ./sample/prepare.sh
+
+      - name: Run tests
+        run: npm run test:ci
+
+      # - name: Build vsix package
+      #   run: |
+      #     VERSION=$(node -p "require('./package.json').version")
+      #     npx vsce package -o vscode-plpgsql-lsp-${{ matrix.os }}-${VERSION}-${GITHUB_RUN_ID}-${GITHUB_RUN_NUMBER}.vsix
+
+      # - name: Upload built vsix
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: vscode-plpgsql-lsp
+      #     path: vscode-plpgsql-lsp*.vsix

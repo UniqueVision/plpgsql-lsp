@@ -10,6 +10,12 @@
     "strict": true,
     "outDir": "out",
     "rootDir": "src",
+    "baseUrl": "src",
+    "paths": {
+      "@/*": [
+        "*"
+      ]
+    },
     "esModuleInterop": true
   },
   "include": [

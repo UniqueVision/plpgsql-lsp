@@ -13,10 +13,8 @@
       "outFiles": [
         "${workspaceRoot}/client/out/**/*.js"
       ],
-      "preLaunchTask": {
-        "type": "npm",
-        "script": "watch"
-      }
+      "preLaunchTask": "Watch",
+      "sourceMaps": true
     },
     {
       "type": "node",
@@ -26,7 +24,8 @@
       "restart": true,
       "outFiles": [
         "${workspaceRoot}/server/out/**/*.js"
-      ]
+      ],
+      "sourceMaps": true
     }
   ],
   "compounds": [

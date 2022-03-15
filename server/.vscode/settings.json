@@ -1,0 +1,9 @@
+{
+    "plpgsqlLanguageServer.host": "localhost",
+    "plpgsqlLanguageServer.user": "postgres",
+    "plpgsqlLanguageServer.password": "password",
+    "plpgsqlLanguageServer.database": "postgres",
+    "plpgsqlLanguageServer.definitionFiles": [
+        "src/postgres/__fixtures__/**/*.pgsql"
+    ]
+}

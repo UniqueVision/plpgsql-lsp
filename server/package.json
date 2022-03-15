@@ -13,7 +13,8 @@
   },
   "scripts": {
     "test": "jest",
-    "test:ci": "jest --ci"
+    "test:ci": "jest --ci",
+    "lint": "eslint src --ext .ts,.tsx --fix"
   },
   "dependencies": {
     "glob": "^7.2.0",
@@ -21,8 +22,10 @@
     "minimatch": "^3.0.4",
     "pg": "^8.7.1",
     "pg-native": "^3.0.0",
+    "ts-dedent": "^2.2.0",
     "vscode-languageserver": "^7.0.0",
-    "vscode-languageserver-textdocument": "^1.0.1"
+    "vscode-languageserver-textdocument": "^1.0.1",
+    "vscode-uri": "^3.0.3"
   },
   "devDependencies": {
     "@types/glob": "^7.2.0",

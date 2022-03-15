@@ -2,8 +2,9 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Build",
       "type": "npm",
-      "script": "compile",
+      "script": "build",
       "group": "build",
       "presentation": {
         "panel": "dedicated",
@@ -14,6 +15,7 @@
       ]
     },
     {
+      "label": "Watch",
       "type": "npm",
       "script": "watch",
       "isBackground": true,
@@ -23,11 +25,38 @@
       },
       "presentation": {
         "panel": "dedicated",
-        "reveal": "never"
+        "reveal": "silent"
       },
-      "problemMatcher": [
-        "$tsc-watch"
-      ]
+      "problemMatcher": {
+        "owner": "typescript",
+        "source": "ts",
+        "applyTo": "closedDocuments",
+        "fileLocation": "absolute",
+        "severity": "error",
+        "pattern": [
+          {
+            "regexp": "\\[tsl\\] (ERROR|WARNING) in (.*)?\\((\\d+),(\\d+)\\)",
+            "severity": 1,
+            "file": 2,
+            "line": 3,
+            "column": 4
+          },
+          {
+            "regexp": "\\s*TS(\\d+):\\s*(.*)$",
+            "code": 1,
+            "message": 2
+          }
+        ],
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": {
+            "regexp": "[Cc]ompiling.*?|[Cc]ompil(ation|er) .*?starting"
+          },
+          "endsPattern": {
+            "regexp": "[Cc]ompiled (.*?successfully|with .*?error)|[Cc]ompil(ation|er) .*?finished"
+          }
+        }
+      }
     }
   ]
 }

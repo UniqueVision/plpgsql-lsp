@@ -1,7 +1,7 @@
 {
   "editor.tabSize": 4,
   "editor.rulers": [
-    80
+    88
   ],
   "eslint.enable": true,
   "files.trimFinalNewlines": true,
@@ -12,7 +12,6 @@
   "files.insertFinalNewline": true,
   "editor.useTabStops": true,
   "editor.insertSpaces": false,
-  "typescript.tsc.autoDetect": "off",
   "typescript.preferences.quoteStyle": "single",
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
