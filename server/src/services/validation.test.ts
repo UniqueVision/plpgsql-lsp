@@ -40,40 +40,40 @@ describe("Validate Tests", () => {
       context = context.split("\n").slice(1).join("\n")
     }
 
-    const textDocument = TextDocument.create(
+    const document = TextDocument.create(
       getDefinitionFileResource(file),
       "postgres",
       0,
       context,
     );
 
-    (server.documents as TestTextDocuments).set(textDocument)
+    (server.documents as TestTextDocuments).set(document)
 
     if (server.handlers === undefined) {
       throw new Error("handlers is undefined")
     }
 
-    return server.handlers.validate(textDocument)
+    return server.handlers.validate(document)
   }
 
   async function validateQuery(
     file: string,
     options: LoadFileOptions = DEFAULT_LOAD_FILE_OPTIONS,
   ): Promise<Diagnostic[] | undefined> {
-    const textDocument = TextDocument.create(
+    const document = TextDocument.create(
       getQueryFileResource(file),
       "postgres",
       0,
       loadQueryFile(file, options),
     );
 
-    (server.documents as TestTextDocuments).set(textDocument)
+    (server.documents as TestTextDocuments).set(document)
 
     if (server.handlers === undefined) {
       throw new Error("handlers is undefined")
     }
 
-    return server.handlers.validate(textDocument)
+    return server.handlers.validate(document)
   }
 
   function validateDiagnostics(

@@ -13,15 +13,15 @@ import { getWordRangeAtPosition } from "@/utilities/text"
 export async function getDefinitionLinks(
   definitionsManager: DefinitionsManager,
   params: DefinitionParams,
-  textDocument: TextDocument,
+  document: TextDocument,
   logger: Logger,
 ): Promise<DefinitionLink[] | undefined> {
-  const wordRange = getWordRangeAtPosition(textDocument, params.position)
+  const wordRange = getWordRangeAtPosition(document, params.position)
   if (wordRange === undefined) {
     return undefined
   }
 
-  const word = textDocument.getText(wordRange)
+  const word = document.getText(wordRange)
   const sanitizedWordCandidates = sanitizeWordCandidates(word)
 
   for (const [index, wordCandidate] of sanitizedWordCandidates.entries()) {

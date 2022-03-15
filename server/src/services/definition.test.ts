@@ -32,13 +32,13 @@ describe("Definition Tests", () => {
     content: string,
     position = Position.create(0, 0),
   ): Promise<DefinitionLink[] | undefined> {
-    const textDocument = TextDocument.create("test.pgsql", "postgres", 0, content);
+    const document = TextDocument.create("test.pgsql", "postgres", 0, content);
 
-    (server.documents as TestTextDocuments).set(textDocument)
+    (server.documents as TestTextDocuments).set(document)
 
     await server.definitionsManager.updateFileDefinitions(
       readTextDocumentFromUri(documentUri),
-      (await server.settingsManager.get(textDocument.uri)).defaultSchema,
+      (await server.settingsManager.get(document.uri)).defaultSchema,
     )
 
     if (server.handlers === undefined) {
@@ -47,7 +47,7 @@ describe("Definition Tests", () => {
 
     return server.handlers.onDefinition({
       position,
-      textDocument,
+      textDocument: document,
     })
   }
 

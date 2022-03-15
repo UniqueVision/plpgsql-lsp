@@ -28,9 +28,9 @@ describe("Completion Tests", () => {
   async function onCompletion(
     content: string, position: Position,
   ): Promise<CompletionItem[] | undefined> {
-    const textDocument = TextDocument.create("test.pgsql", "postgres", 0, content);
+    const document = TextDocument.create("test.pgsql", "postgres", 0, content);
 
-    (server.documents as TestTextDocuments).set(textDocument)
+    (server.documents as TestTextDocuments).set(document)
 
     if (server.handlers === undefined) {
       throw new Error("handlers is undefined")
@@ -38,7 +38,7 @@ describe("Completion Tests", () => {
 
     return server.handlers.onCompletion({
       position,
-      textDocument,
+      textDocument: document,
     })
   }
 

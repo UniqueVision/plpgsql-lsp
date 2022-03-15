@@ -28,16 +28,16 @@ describe("Hover Tests", () => {
     content: string,
     position = Position.create(1, 1),
   ): Promise<Hover | undefined> {
-    const textDocument = TextDocument.create("test.pgsql", "postgres", 0, content);
+    const document = TextDocument.create("test.pgsql", "postgres", 0, content);
 
-    (server.documents as TestTextDocuments).set(textDocument)
+    (server.documents as TestTextDocuments).set(document)
 
     if (server.handlers === undefined) {
       throw new Error("handlers is undefined")
     }
 
     return server.handlers.onHover({
-      textDocument,
+      textDocument: document,
       position,
     })
   }

@@ -28,13 +28,13 @@ export interface StaticAnalysisError {
 
 export async function queryFileStaticAnalysis(
   pgPool: PostgresPool,
-  textDocument: TextDocument,
+  document: TextDocument,
   functionInfos: FunctionInfo[],
   isComplete = false,
   logger: Logger,
 ): Promise<StaticAnalysisError[] | undefined> {
   const analysisInfos: StaticAnalysisError[] = []
-  const fileText = textDocument.getText()
+  const fileText = document.getText()
 
   const pgClient = await pgPool.connect()
   try {
@@ -80,14 +80,14 @@ export async function queryFileStaticAnalysis(
         (row) => {
           let range: Range | undefined = undefined
           if (location === undefined) {
-            range = getTextAllRange(textDocument)
+            range = getTextAllRange(document)
           }
           else {
             range = getLineRangeFromBuffer(
               fileText,
               location,
               row.lineno ? row.lineno - 1 : 0,
-            ) || getTextAllRange(textDocument)
+            ) || getTextAllRange(document)
           }
 
           analysisInfos.push({

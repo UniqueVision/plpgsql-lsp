@@ -17,13 +17,13 @@ type ValidateTextDocumentOptions = {
 
 export async function validateTextDocument(
   pgPool: PostgresPool,
-  textDocument: TextDocument,
+  document: TextDocument,
   options: ValidateTextDocumentOptions,
   logger: Logger,
 ): Promise<Diagnostic[] | undefined> {
   let diagnostics = await checkSyntaxAnalysis(
     pgPool,
-    textDocument,
+    document,
     options,
     logger,
   )
@@ -31,7 +31,7 @@ export async function validateTextDocument(
   if (diagnostics === undefined) {
     diagnostics = await checkStaticAnalysis(
       pgPool,
-      textDocument,
+      document,
       options,
       logger,
     )
@@ -42,13 +42,13 @@ export async function validateTextDocument(
 
 async function checkSyntaxAnalysis(
   pgPool: PostgresPool,
-  textDocument: TextDocument,
+  document: TextDocument,
   options: ValidateTextDocumentOptions,
   logger: Logger,
 ): Promise<Diagnostic[] | undefined> {
   const errors = await queryFileSyntaxAnalysis(
     pgPool,
-    textDocument,
+    document,
     options.isComplete,
     logger,
   )
@@ -68,7 +68,7 @@ async function checkSyntaxAnalysis(
       diagnostic.relatedInformation = [
         {
           location: {
-            uri: textDocument.uri,
+            uri: document.uri,
             range: Object.assign({}, diagnostic.range),
           },
           message: `Syntax error: ${message}`,
@@ -82,14 +82,14 @@ async function checkSyntaxAnalysis(
 
 async function checkStaticAnalysis(
   pgPool: PostgresPool,
-  textDocument: TextDocument,
+  document: TextDocument,
   options: ValidateTextDocumentOptions,
   logger: Logger,
 ): Promise<Diagnostic[] | undefined> {
   const errors = await queryFileStaticAnalysis(
     pgPool,
-    textDocument,
-    await getFunctions(textDocument.uri),
+    document,
+    await getFunctions(document.uri),
     options.isComplete,
     logger,
   )
@@ -121,7 +121,7 @@ async function checkStaticAnalysis(
         diagnostic.relatedInformation = [
           {
             location: {
-              uri: textDocument.uri,
+              uri: document.uri,
               range: Object.assign({}, diagnostic.range),
             },
             message: `Static analysis ${level}: ${message}`,
