@@ -33,10 +33,10 @@ export class DefinitionsManager {
   }
 
   async updateFileDefinitions(
-    textDocument: TextDocument,
+    document: TextDocument,
     defaultSchema: string,
   ): Promise<DefinitionCandidate[] | undefined> {
-    const fileText = textDocument.getText()
+    const fileText = document.getText()
 
     const query = await parseQuery(fileText)
 
@@ -46,10 +46,10 @@ export class DefinitionsManager {
     }
 
     const candidates = getDefinitions(
-      fileText, statements, textDocument.uri, defaultSchema,
+      fileText, statements, document.uri, defaultSchema,
     )
 
-    this.updateCandidates(textDocument.uri, candidates)
+    this.updateCandidates(document.uri, candidates)
 
     return candidates
   }
@@ -69,15 +69,15 @@ export class DefinitionsManager {
 
     for (const file of files) {
       const documentUri = `${workspaceFolder.uri}/${file}`
-      const textDocument = readTextDocumentFromUri(documentUri)
+      const document = readTextDocumentFromUri(documentUri)
 
-      if (disableLanguageServer(textDocument)) {
+      if (disableLanguageServer(document)) {
         continue
       }
 
       try {
         await this.updateFileDefinitions(
-          textDocument, settings.defaultSchema,
+          document, settings.defaultSchema,
         )
       }
       catch (error: unknown) {

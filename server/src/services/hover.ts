@@ -30,16 +30,16 @@ import { getWordRangeAtPosition, makePostgresCodeMarkdown } from "@/utilities/te
 export async function getHover(
   pgPool: PostgresPool,
   params: HoverParams,
-  textDocument: TextDocument,
+  document: TextDocument,
   defaultSchema: string,
   logger: Logger,
 ): Promise<Hover | undefined> {
-  const wordRange = getWordRangeAtPosition(textDocument, params.position)
+  const wordRange = getWordRangeAtPosition(document, params.position)
   if (wordRange === undefined) {
     return undefined
   }
 
-  const word = textDocument.getText(wordRange)
+  const word = document.getText(wordRange)
   const sanitizedWordCandidates = sanitizeWordCandidates(word)
 
   for (const wordCandidate of sanitizedWordCandidates) {

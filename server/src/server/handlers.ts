@@ -105,24 +105,24 @@ export class Handlers {
   async onDidSave(
     event: TextDocumentChangeEvent<TextDocument>,
   ): Promise<void> {
-    const textDocument = event.document
+    const document = event.document
 
-    if (disableLanguageServer(textDocument)) {
+    if (disableLanguageServer(document)) {
       return
     }
 
-    await this.validate(textDocument, { isComplete: true })
+    await this.validate(document, { isComplete: true })
 
     if (
-      this.definitionsManager.hasFileDefinitions(textDocument.uri)
-      || await this.settingsManager.isDefinitionTarget(textDocument.uri)
+      this.definitionsManager.hasFileDefinitions(document.uri)
+      || await this.settingsManager.isDefinitionTarget(document.uri)
     ) {
-      const settings = await this.settingsManager.get(textDocument.uri)
+      const settings = await this.settingsManager.get(document.uri)
 
       console.log("The file definitions are updating...")
 
       const candidates = await this.definitionsManager.updateFileDefinitions(
-        textDocument, settings.defaultSchema,
+        document, settings.defaultSchema,
       )
 
       if (candidates !== undefined) {
@@ -138,8 +138,8 @@ export class Handlers {
   async onCompletion(
     params: CompletionParams,
   ): Promise<CompletionItem[] | undefined> {
-    const textDocument = this.documents.get(params.textDocument.uri)
-    if (textDocument === undefined || disableLanguageServer(textDocument)) {
+    const document = this.documents.get(params.textDocument.uri)
+    if (document === undefined || disableLanguageServer(document)) {
       return undefined
     }
 
@@ -153,7 +153,7 @@ export class Handlers {
     return getCompletionItems(
       pgPool,
       params,
-      textDocument,
+      document,
       settings.defaultSchema,
       this.logger,
     )
@@ -162,15 +162,15 @@ export class Handlers {
   async onDefinition(
     params: DefinitionParams,
   ): Promise<DefinitionLink[] | undefined> {
-    const textDocument = this.documents.get(params.textDocument.uri)
-    if (textDocument === undefined || disableLanguageServer(textDocument)) {
+    const document = this.documents.get(params.textDocument.uri)
+    if (document === undefined || disableLanguageServer(document)) {
       return undefined
     }
 
     return await getDefinitionLinks(
       this.definitionsManager,
       params,
-      textDocument,
+      document,
       this.logger,
     )
   }
@@ -208,8 +208,8 @@ export class Handlers {
   async onHover(
     params: HoverParams,
   ): Promise<Hover | undefined> {
-    const textDocument = this.documents.get(params.textDocument.uri)
-    if (textDocument === undefined || disableLanguageServer(textDocument)) {
+    const document = this.documents.get(params.textDocument.uri)
+    if (document === undefined || disableLanguageServer(document)) {
       return undefined
     }
 
@@ -223,26 +223,26 @@ export class Handlers {
     return await getHover(
       pgPool,
       params,
-      textDocument,
+      document,
       settings.defaultSchema,
       this.logger,
     )
   }
 
   async validate(
-    textDocument: TextDocument,
+    document: TextDocument,
     options: { isComplete: boolean } = { isComplete: false },
   ): Promise<Diagnostic[] | undefined> {
     let diagnostics: Diagnostic[] | undefined = undefined
 
-    if (!disableValidation(textDocument)) {
-      const settings = await this.settingsManager.get(textDocument.uri)
+    if (!disableValidation(document)) {
+      const settings = await this.settingsManager.get(document.uri)
 
       const pgPool = getPool(this.pgPools, settings, this.logger)
       if (pgPool !== undefined) {
         diagnostics = await validateTextDocument(
           pgPool,
-          textDocument,
+          document,
           {
             isComplete: options.isComplete,
             hasDiagnosticRelatedInformationCapability:
@@ -254,7 +254,7 @@ export class Handlers {
     }
 
     this.connection.sendDiagnostics({
-      uri: textDocument.uri,
+      uri: document.uri,
       diagnostics: diagnostics || [],
     })
 

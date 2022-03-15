@@ -13,11 +13,11 @@ export interface SyntaxError {
 
 export async function queryFileSyntaxAnalysis(
   pgPool: PostgresPool,
-  textDocument: TextDocument,
+  document: TextDocument,
   isComplete = false,
   logger: Logger,
 ): Promise<SyntaxError[] | undefined> {
-  const fileText = textDocument.getText()
+  const fileText = document.getText()
 
   const pgClient = await pgPool.connect()
   try {
@@ -43,7 +43,7 @@ export async function queryFileSyntaxAnalysis(
       )
     }
     else {
-      range = getTextAllRange(textDocument)
+      range = getTextAllRange(document)
     }
 
     return [

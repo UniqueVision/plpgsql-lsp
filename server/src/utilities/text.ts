@@ -3,9 +3,9 @@ import { Position, Range, uinteger, URI } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 export function getWordRangeAtPosition(
-  textDocument: TextDocument, position: Position,
+  document: TextDocument, position: Position,
 ): Range | undefined {
-  const lines = textDocument.getText().split("\n")
+  const lines = document.getText().split("\n")
   const line = Math.max(0, Math.min(lines.length - 1, position.line))
   const lineText = lines[line]
   const character = Math.max(0, Math.min(lineText.length - 1, position.character))
@@ -101,10 +101,10 @@ export function getLineRangeFromBuffer(
   }
 }
 
-export function getTextAllRange(textDocument: TextDocument): Range {
+export function getTextAllRange(document: TextDocument): Range {
   return Range.create(
-    textDocument.positionAt(0),
-    textDocument.positionAt(textDocument.getText().length - 1),
+    document.positionAt(0),
+    document.positionAt(document.getText().length - 1),
   )
 }
 
@@ -122,12 +122,12 @@ export function makePostgresCodeMarkdown(code: string): string {
   return `\`\`\`postgres\n${code}\n\`\`\``
 }
 
-export function getFirstLine(textDocument: TextDocument): string {
-  return textDocument.getText(Range.create(0, 0, 1, 0)).split("\n")[0]
+export function getFirstLine(document: TextDocument): string {
+  return document.getText(Range.create(0, 0, 1, 0)).split("\n")[0]
 }
 
 export function isFirstCommentLine(
-  textDocument: TextDocument,
+  document: TextDocument,
   position: Position,
 ): boolean {
   const line = position.line
@@ -136,7 +136,7 @@ export function isFirstCommentLine(
     return false
   }
 
-  const firstLine = getFirstLine(textDocument)
+  const firstLine = getFirstLine(document)
 
   return (
     firstLine.match(/^ *-- +.*$/) !== null

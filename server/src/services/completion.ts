@@ -27,19 +27,19 @@ import { getWordRangeAtPosition, isFirstCommentLine } from "@/utilities/text"
 export async function getCompletionItems(
   pgPool: PostgresPool,
   params: CompletionParams,
-  textDocument: TextDocument,
+  document: TextDocument,
   defaultSchema: string,
   logger: Logger,
 ): Promise<CompletionItem[] | undefined> {
-  if (isFirstCommentLine(textDocument, params.position)) {
+  if (isFirstCommentLine(document, params.position)) {
     return getDisableCommentCompletionItems()
   }
 
-  const wordRange = getWordRangeAtPosition(textDocument, params.position)
+  const wordRange = getWordRangeAtPosition(document, params.position)
   if (wordRange === undefined) {
     return undefined
   }
-  const word = textDocument.getText(wordRange)
+  const word = document.getText(wordRange)
 
   const schmaCompletionItems = await getSchemaCompletionItems(pgPool, logger)
 
@@ -55,7 +55,7 @@ export async function getCompletionItems(
 
   return completionItems
     .concat(await getKeywordCompletionItems(
-      word, textDocument.getText(), completionItems,
+      word, document.getText(), completionItems,
     ))
     .map(
       (item, index) => {
