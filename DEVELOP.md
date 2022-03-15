@@ -32,7 +32,7 @@ When code is changed, you'll need to refresh with `> Reload Window`. Until then,
 
 1. VSCodeで推薦拡張をインストールする。（`extensions.json`の内容）
 1. `npm`をインストール。
-1. `npm`
+1. `npm install`
 1. `npm watch`
 1. VSCodeの中から`F5`。
 
