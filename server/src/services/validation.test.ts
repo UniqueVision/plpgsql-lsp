@@ -122,7 +122,7 @@ describe("Validate Tests", () => {
         {
           severity: DiagnosticSeverity.Error,
           message: 'column "tags" does not exist',
-          range: Range.create(13, 2, 13, 6),
+          range: Range.create(13, 4, 13, 9),
         },
       ])
     })
