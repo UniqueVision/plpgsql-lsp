@@ -31,7 +31,7 @@ jobs:
     container:
       image: node:17-bullseye-slim
       env:
-        POSTGRES_HOST: yassun4dev-plpgsql-check
+        POSTGRES_HOST: postgres
         POSTGRES_DB: postgres
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: password
