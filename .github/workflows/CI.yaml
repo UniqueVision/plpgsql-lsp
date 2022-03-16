@@ -47,7 +47,7 @@ jobs:
           cache: "npm"
 
       - name: Setup PostgreSQL client
-        uses: akanieski/setup-postgres-cli@v1
+        uses: ikalnytskyi/action-setup-postgres@v2
         with:
           password: ${POSTGRES_PASSWORD}
 
