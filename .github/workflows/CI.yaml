@@ -48,9 +48,9 @@ jobs:
           cache: "npm"
 
       - name: Setup PostgreSQL client
-        uses: ikalnytskyi/action-setup-postgres@v2
-        with:
-          password: ${POSTGRES_PASSWORD}
+        run: |
+          apt-get update
+          apt-get install --yes --no-install-recommends build-essential git python3 libpq-dev postgresql-client
 
       - name: Install dependencies
         run: npm ci --prefer-offline
