@@ -15,14 +15,18 @@ jobs:
 
     services:
       postgres:
-        image: yassun4dev/plpgsql-check:latest
+        image: postgres
         ports:
           - 5432:5432
         env:
           POSTGRES_DB: postgres
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     container:
       image: node:17-bullseye-slim
@@ -39,8 +43,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
-          node-version: '16'
-          cache: 'npm'
+          node-version: "16"
+          cache: "npm"
 
       - name: Setup PostgreSQL client
         uses: akanieski/setup-postgres-cli@v1
