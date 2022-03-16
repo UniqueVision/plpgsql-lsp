@@ -50,7 +50,7 @@ jobs:
       - name: Setup PostgreSQL client
         run: |
           apt-get update
-          apt-get install --yes build-essential git python3 libpg-query-dev postgresql-client
+          apt-get install --yes build-essential git python3 libpg-dev postgresql-client
 
       - name: Install dependencies
         run: npm ci --prefer-offline
