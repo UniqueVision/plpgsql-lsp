@@ -14,6 +14,8 @@
 1. Set your database connection to VSCode settings.
 1. Open `.pgsql` file and edit your code!
 
+![preview](images/preview.gif)
+
 ## VSCode Settings sample
 
 ```jsonc
