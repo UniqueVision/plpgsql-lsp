@@ -19,7 +19,7 @@
 
 ![preview](images/preview.gif)
 
-## VSCode Settings sample
+## VSCode Settings Sample
 
 ```jsonc
 {
@@ -40,7 +40,7 @@
 }
 ```
 
-## Disable Specific file
+## Disable Specific File
 
 If you want to disable the extension for a specific file, just add this comment your file top.
 
