@@ -6,6 +6,13 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: password
+  POSTGRES_HOST: localhost
+  POSTGRES_DB: postgres
+  POSTGRES_HOST_AUTH_METHOD: trust
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -16,7 +23,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres
+        image: yassun4dev/plpgsql-check:latest
         ports:
           - 5432:5432
         env:
@@ -29,48 +36,38 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-    container:
-      image: node:17-bullseye-slim
-      env:
-        POSTGRES_HOST: postgres
-        POSTGRES_DB: postgres
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: password
-
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup Node
-        uses: actions/setup-node@v2
+      - name: Install Packages
+        run: |-
+          sudo apt-get update
+          sudo apt-get install --yes build-essential git python3 libpq-dev postgresql-client
+
+      - name: Use Node 14
+        uses: actions/setup-node@v1
         with:
-          node-version: "16"
-          cache: "npm"
+          node-version: 14
 
-      - name: Setup PostgreSQL client
-        run: |
-          apt-get update
-          apt-get remove libpg5
-          apt-get install --yes build-essential git python3 libpg5 libpg-dev postgresql-client
+      - name: Install Node Dependencies
+        run: npm install
 
-      - name: Install dependencies
-        run: npm ci --prefer-offline
-
-      - name: Build extension.
+      - name: Build This Extension.
         run: npm run build
 
-      - name: Prepare test database
-        run: CI_MODE=true ./sample/prepare.sh
+      - name: Prepare Test Database
+        run: ./sample/prepare.sh
 
-      - name: Run tests
+      - name: Run Tests
         run: npm run test:ci
 
-      # - name: Build vsix package
+      # - name: Build VSIX Package
       #   run: |
       #     VERSION=$(node -p "require('./package.json').version")
       #     npx vsce package -o vscode-plpgsql-lsp-${{ matrix.os }}-${VERSION}-${GITHUB_RUN_ID}-${GITHUB_RUN_NUMBER}.vsix
 
-      # - name: Upload built vsix
+      # - name: Upload Built VSIX
       #   uses: actions/upload-artifact@v2
       #   with:
       #     name: vscode-plpgsql-lsp
