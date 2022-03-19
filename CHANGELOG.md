@@ -1,6 +1,6 @@
 # Change Log
 
-## v2.0.0 - TBD
+## v2.0.0 - 2022/03/19
 
 - Migrate from GitLab to GitHub and publish the repository.
 - Add the feature to disable language server services
