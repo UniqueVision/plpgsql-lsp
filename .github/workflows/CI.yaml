@@ -6,13 +6,6 @@ on:
   pull_request:
     branches: [main]
 
-env:
-  POSTGRES_USER: postgres
-  POSTGRES_PASSWORD: password
-  POSTGRES_HOST: localhost
-  POSTGRES_DB: postgres
-  POSTGRES_HOST_AUTH_METHOD: trust
-
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -37,30 +30,18 @@ jobs:
           --health-retries 5
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Install Packages
-        run: |-
+      - uses: actions/checkout@v3
+      - run: |-
           sudo apt-get update
           sudo apt-get install --yes build-essential git python3 libpq-dev postgresql-client
-
-      - name: Use Node 14
-        uses: actions/setup-node@v1
+      - uses: actions/setup-node@v1
         with:
           node-version: 14
-
-      - name: Install Node Dependencies
-        run: npm install
-
-      - name: Build This Extension.
-        run: npm run build
-
-      - name: Prepare Test Database
-        run: ./sample/prepare.sh
-
-      - name: Run Tests
-        run: npm run test:ci
+          cache: "npm"
+      - run: npm install
+      - run: npm run build
+      - run: ./sample/prepare.sh
+      - run: npm run test:ci
 
       # - name: Build VSIX Package
       #   run: |
