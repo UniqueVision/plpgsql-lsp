@@ -7,8 +7,8 @@
 **/*.ts
 **/tsconfig.json
 **/webpack.*
-CHANGELOG.md
 DEVELOP.md
+DEVELOP.ja.md
 docker-compose.yaml
 sample/**
 client/node_modules/**
