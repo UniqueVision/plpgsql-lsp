@@ -96,20 +96,11 @@ async function getTableHover(
     pgPool, schema, defaultSchema, logger, tableName,
   )
 
-  if (definitions.length === 0) {
-    return undefined
-  }
-
-  const code = definitions.map(
-    (definition) => makeTableDefinitionText(definition),
-  ).join("\n\n")
-
-  return {
-    contents: {
-      kind: MarkupKind.Markdown,
-      value: makePostgresCodeMarkdown(code),
-    },
-  }
+  return await makeHover(
+    definitions.map(
+      (definition) => makeTableDefinitionText(definition),
+    ),
+  )
 }
 
 async function getViewHover(
@@ -123,20 +114,11 @@ async function getViewHover(
     pgPool, schema, defaultSchema, logger, tableName,
   )
 
-  if (definitions.length === 0) {
-    return undefined
-  }
-
-  const code = definitions.map(
-    (definition) => makeViewDefinitionText(definition),
-  ).join("\n\n")
-
-  return {
-    contents: {
-      kind: MarkupKind.Markdown,
-      value: makePostgresCodeMarkdown(code),
-    },
-  }
+  return await makeHover(
+    definitions.map(
+      (definition) => makeViewDefinitionText(definition),
+    ),
+  )
 }
 
 async function getFunctionHover(
@@ -150,20 +132,11 @@ async function getFunctionHover(
     pgPool, schema, defaultSchema, logger, functionName,
   )
 
-  if (definitions.length === 0) {
-    return undefined
-  }
-
-  const code = definitions.map(
-    (definition) => makeFunctionDefinitionText(definition),
-  ).join("\n\n")
-
-  return {
-    contents: {
-      kind: MarkupKind.Markdown,
-      value: makePostgresCodeMarkdown(code),
-    },
-  }
+  return await makeHover(
+    definitions.map(
+      (definition) => makeFunctionDefinitionText(definition),
+    ),
+  )
 }
 
 async function getTypeHover(
@@ -177,13 +150,21 @@ async function getTypeHover(
     pgPool, schema, defaultSchema, logger, typeName,
   )
 
-  if (definitions.length === 0) {
+  return await makeHover(
+    definitions.map(
+      (definition) => makeTypeDefinitionText(definition),
+    ),
+  )
+}
+
+async function makeHover(
+  definitionTexts: string[],
+): Promise<Hover | undefined> {
+  if (definitionTexts.length === 0) {
     return undefined
   }
 
-  const code = definitions.map(
-    (definition) => makeTypeDefinitionText(definition),
-  ).join("\n\n")
+  const code = definitionTexts.join("\n\n")
 
   return {
     contents: {
