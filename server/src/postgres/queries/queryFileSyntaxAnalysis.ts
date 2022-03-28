@@ -25,10 +25,11 @@ export async function queryFileSyntaxAnalysis(
     await pgClient.query(fileText)
   }
   catch (error: unknown) {
-    const message = (error as Error).toString()
+    const databaseError = error as DatabaseError
+    const message = databaseError.toString()
 
     if (isComplete) {
-      logger.error(`SyntaxError: ${message}`)
+      logger.error(`SyntaxError code: ${databaseError.code || "unknown"}, ${error}`)
     }
 
     let range: Range | undefined = undefined

@@ -71,7 +71,7 @@ async function checkSyntaxAnalysis(
             uri: document.uri,
             range: Object.assign({}, diagnostic.range),
           },
-          message: `Syntax error: ${message}`,
+          message: `Syntax ${message}`,
         },
       ]
     }
