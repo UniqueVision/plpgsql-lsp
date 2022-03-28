@@ -1,6 +1,5 @@
 .github/**
 .gitignore
-.gitlab-ci.yml
 .vscode/**
 *.code-workspace
 **/.eslint*

@@ -6,7 +6,7 @@
   "publisher": "uniquevision",
   "repository": {
     "type": "git",
-    "url": "https://gitlab.com/uniquevision/utilities/plpgsql-lsp"
+    "url": "https://github.com/UniqueVision/plpgsql-lsp"
   },
   "engines": {
     "vscode": "^1.52.0"

@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://gitlab.com/uniquevision/utilities/plpgsql-lsp"
+    "url": "https://github.com/UniqueVision/plpgsql-lsp"
   },
   "scripts": {
     "test": "jest",
