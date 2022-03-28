@@ -28,6 +28,7 @@ import { validateTextDocument } from "@/services/validation"
 import {
   disableLanguageServer, disableValidation,
 } from "@/utilities/disableLanguageServer"
+import { getQueryParameterNumber } from "@/utilities/getQueryParameterNumber"
 
 export type HandlersOptions = {
   hasDiagnosticRelatedInformationCapability: boolean
@@ -238,6 +239,8 @@ export class Handlers {
     if (!disableValidation(document)) {
       const settings = await this.settingsManager.get(document.uri)
 
+      const queryParameterNumber = getQueryParameterNumber(document)
+
       const pgPool = getPool(this.pgPools, settings, this.logger)
       if (pgPool !== undefined) {
         diagnostics = await validateTextDocument(
@@ -247,6 +250,7 @@ export class Handlers {
             isComplete: options.isComplete,
             hasDiagnosticRelatedInformationCapability:
               this.options.hasDiagnosticRelatedInformationCapability,
+            queryParameterNumber,
           },
           this.logger,
         )

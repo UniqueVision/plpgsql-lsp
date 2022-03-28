@@ -53,3 +53,20 @@ Or, if you want to disable only the validation feature, try this
 ```sql
 /* plpgsql-language-server:disable validation */
 ```
+
+## [Experimental Feature] Query Parameters
+
+In the case of a file that defines a query with parameters,
+you can validate it by setting the number of query parameters at the file top.
+
+```sql
+/* plpgsql-language-server:query-parameter-number 2 */
+
+SELECT
+  id,
+  name
+FROM
+  users
+WHERE
+  id = $1 AND name = ANY($2);
+```

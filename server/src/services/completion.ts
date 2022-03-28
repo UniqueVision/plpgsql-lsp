@@ -32,7 +32,7 @@ export async function getCompletionItems(
   logger: Logger,
 ): Promise<CompletionItem[] | undefined> {
   if (isFirstCommentLine(document, params.position)) {
-    return getDisableCommentCompletionItems()
+    return getLanguageServerCommentCompletionItems()
   }
 
   const wordRange = getWordRangeAtPosition(document, params.position)
@@ -79,7 +79,7 @@ function findSchema(
   }
 }
 
-export function getDisableCommentCompletionItems(): CompletionItem[] {
+export function getLanguageServerCommentCompletionItems(): CompletionItem[] {
   return [
     {
       label: "plpgsql-language-server:disable",
@@ -92,6 +92,12 @@ export function getDisableCommentCompletionItems(): CompletionItem[] {
       kind: CompletionItemKind.Text,
       data: 0,
       detail: "Disable validation feature only.",
+    },
+    {
+      label: "plpgsql-language-server:query-parameter-number 1",
+      kind: CompletionItemKind.Text,
+      data: 0,
+      detail: "Sets the number of query parameters.",
     },
   ]
 }

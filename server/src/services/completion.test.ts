@@ -8,7 +8,7 @@ import { SettingsBuilder } from "@/__tests__/helpers/settings"
 import { TestTextDocuments } from "@/__tests__/helpers/textDocuments"
 import { Server } from "@/server/server"
 
-import { getDisableCommentCompletionItems } from "./completion"
+import { getLanguageServerCommentCompletionItems } from "./completion"
 
 
 describe("Completion Tests", () => {
@@ -67,7 +67,7 @@ describe("Completion Tests", () => {
 
       validateCompletionItems(
         completions,
-        getDisableCommentCompletionItems(),
+        getLanguageServerCommentCompletionItems(),
       )
     })
 
@@ -78,7 +78,7 @@ describe("Completion Tests", () => {
 
       validateCompletionItems(
         completions,
-        getDisableCommentCompletionItems(),
+        getLanguageServerCommentCompletionItems(),
       )
     })
 

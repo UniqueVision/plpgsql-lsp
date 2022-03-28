@@ -135,6 +135,14 @@ describe("Validate Tests", () => {
       validateDiagnostics(diagnostics, [])
     })
 
+    it("Correct query with parameters", async () => {
+      const diagnostics = await validateQuery(
+        "correct_query_with_parameters.pgsql",
+      )
+
+      validateDiagnostics(diagnostics, [])
+    })
+
     it("Syntax error query", async () => {
       const diagnostics = await validateQuery(
         "syntax_error_query_with_language_server_disable_comment.pgsql",

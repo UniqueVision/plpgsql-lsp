@@ -1,5 +1,5 @@
 import { DatabaseError } from "pg"
-import { Logger, Range } from "vscode-languageserver"
+import { Logger, Range, uinteger } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { PostgresPool } from "@/postgres/pool"
@@ -11,10 +11,15 @@ export interface SyntaxError {
   message: string
 }
 
+export type SyntaxAnalysisOptions = {
+  isComplete: boolean,
+  queryParameterNumber: uinteger | null,
+}
+
 export async function queryFileSyntaxAnalysis(
   pgPool: PostgresPool,
   document: TextDocument,
-  isComplete = false,
+  options: SyntaxAnalysisOptions,
   logger: Logger,
 ): Promise<SyntaxError[] | undefined> {
   const fileText = document.getText()
@@ -22,13 +27,16 @@ export async function queryFileSyntaxAnalysis(
   const pgClient = await pgPool.connect()
   try {
     await pgClient.query("BEGIN")
-    await pgClient.query(fileText)
+    await pgClient.query(
+      fileText,
+      Array(options.queryParameterNumber || 0).fill(null),
+    )
   }
   catch (error: unknown) {
     const databaseError = error as DatabaseError
     const message = databaseError.toString()
 
-    if (isComplete) {
+    if (options.isComplete) {
       logger.error(`SyntaxError code: ${databaseError.code || "unknown"}, ${error}`)
     }
 

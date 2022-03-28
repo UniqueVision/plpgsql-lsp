@@ -26,11 +26,16 @@ export interface StaticAnalysisError {
   message: string
 }
 
+export type StaticAnalysisOptions = {
+  isComplete: boolean,
+  queryParameterNumber: uinteger | null
+}
+
 export async function queryFileStaticAnalysis(
   pgPool: PostgresPool,
   document: TextDocument,
   functionInfos: FunctionInfo[],
-  isComplete = false,
+  options: StaticAnalysisOptions,
   logger: Logger,
 ): Promise<StaticAnalysisError[] | undefined> {
   const analysisInfos: StaticAnalysisError[] = []
@@ -39,7 +44,10 @@ export async function queryFileStaticAnalysis(
   const pgClient = await pgPool.connect()
   try {
     await pgClient.query("BEGIN")
-    await pgClient.query(fileText)
+    await pgClient.query(
+      fileText,
+      Array(options.queryParameterNumber || 0).fill(null),
+    )
     const extensionCheck = await pgClient.query(`
       SELECT
         extname
@@ -98,7 +106,7 @@ export async function queryFileStaticAnalysis(
     }
   }
   catch (error: unknown) {
-    if (isComplete) {
+    if (options.isComplete) {
       logger.error(`StaticAnalysisError: ${(error as Error).toString()}`)
     }
 
