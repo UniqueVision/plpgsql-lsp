@@ -6,9 +6,7 @@ current_dir=$(pwd)
 cd "$(dirname "$0")"
 
 # shellcheck source=/dev/null
-if ! "$CI_MODE"; then
-    source ".env"
-fi
+source ".env"
 
 cd "$current_dir"
 
