@@ -1,4 +1,4 @@
-/* plpgsql-language-server:query-parameter-number 2 */
+/* plpgsql-language-server:use-positional-query-parameter */
 
 SELECT
   id,

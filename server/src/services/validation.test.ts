@@ -137,7 +137,15 @@ describe("Validate Tests", () => {
 
     it("Correct query with parameters", async () => {
       const diagnostics = await validateQuery(
-        "correct_query_with_parameters.pgsql",
+        "correct_query_with_positional_parameter.pgsql",
+      )
+
+      validateDiagnostics(diagnostics, [])
+    })
+
+    it("Correct query with arbitory parameters", async () => {
+      const diagnostics = await validateQuery(
+        "correct_query_with_arbitory_positional_parameter.pgsql",
       )
 
       validateDiagnostics(diagnostics, [])

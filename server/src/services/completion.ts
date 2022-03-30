@@ -94,10 +94,10 @@ export function getLanguageServerCommentCompletionItems(): CompletionItem[] {
       detail: "Disable validation feature only.",
     },
     {
-      label: "plpgsql-language-server:query-parameter-number 1",
+      label: "plpgsql-language-server:use-positional-query-parameter",
       kind: CompletionItemKind.Text,
       data: 0,
-      detail: "Sets the number of query parameters.",
+      detail: "Use positional query parameter.",
     },
   ]
 }

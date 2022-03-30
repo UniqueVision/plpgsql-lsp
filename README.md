@@ -60,11 +60,27 @@ In the case of a file that defines a query with parameters,
 you can validate it by setting the number of query parameters at the file top.
 
 ```sql
-/* plpgsql-language-server:query-parameter-number 2 */
+/* plpgsql-language-server:use-positional-query-parameter */
 
 SELECT
   id,
   name
+FROM
+  users
+WHERE
+  id = $1 AND name = ANY($2);
+```
+
+This tool counts the number of parameters with a simple regular expression,
+so complex queries require the number to be specified explicitly in the comment.
+
+```sql
+/* plpgsql-language-server:use-positional-query-parameter number=2 */
+
+SELECT
+  id,
+  name,
+  'This text contains "$3" :('
 FROM
   users
 WHERE

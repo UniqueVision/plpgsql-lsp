@@ -1,7 +1,8 @@
 import { DatabaseError } from "pg"
-import { Logger, Range, uinteger } from "vscode-languageserver"
+import { Logger, Range } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
+import { QueryParameterInfo } from "@/postgres/parameters"
 import { PostgresPool } from "@/postgres/pool"
 import { getNonSpaceCharacter, getTextAllRange } from "@/utilities/text"
 
@@ -13,7 +14,7 @@ export interface SyntaxError {
 
 export type SyntaxAnalysisOptions = {
   isComplete: boolean,
-  queryParameterNumber: uinteger | null,
+  queryParameterInfo: QueryParameterInfo | null,
 }
 
 export async function queryFileSyntaxAnalysis(
@@ -29,7 +30,7 @@ export async function queryFileSyntaxAnalysis(
     await pgClient.query("BEGIN")
     await pgClient.query(
       fileText,
-      Array(options.queryParameterNumber || 0).fill(null),
+      Array(options.queryParameterInfo?.parameterNumber || 0).fill(null),
     )
   }
   catch (error: unknown) {

@@ -1,6 +1,7 @@
-import { Diagnostic, DiagnosticSeverity, Logger, uinteger } from "vscode-languageserver"
+import { Diagnostic, DiagnosticSeverity, Logger } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
+import { QueryParameterInfo } from "@/postgres/parameters"
 import { getFunctions } from "@/postgres/parsers/getFunctions"
 import { PostgresPool } from "@/postgres/pool"
 import {
@@ -13,7 +14,7 @@ import {
 type ValidateTextDocumentOptions = {
   isComplete: boolean,
   hasDiagnosticRelatedInformationCapability: boolean,
-  queryParameterNumber: uinteger | null,
+  queryParameterInfo: QueryParameterInfo | null,
 }
 
 export async function validateTextDocument(
@@ -52,7 +53,7 @@ async function checkSyntaxAnalysis(
     document,
     {
       isComplete: options.isComplete,
-      queryParameterNumber: options.queryParameterNumber,
+      queryParameterInfo: options.queryParameterInfo,
     },
     logger,
   )
@@ -96,7 +97,7 @@ async function checkStaticAnalysis(
     await getFunctions(document.uri),
     {
       isComplete: options.isComplete,
-      queryParameterNumber: options.queryParameterNumber,
+      queryParameterInfo: options.queryParameterInfo,
     },
     logger,
   )

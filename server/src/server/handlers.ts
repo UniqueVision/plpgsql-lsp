@@ -16,6 +16,7 @@ import {
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
+import { getQueryParameterInfo } from "@/postgres/parameters"
 import { getPool, PostgresPoolMap } from "@/postgres/pool"
 import { DefinitionsManager } from "@/server/definitionsManager"
 import { SettingsManager } from "@/server/settingsManager"
@@ -28,7 +29,6 @@ import { validateTextDocument } from "@/services/validation"
 import {
   disableLanguageServer, disableValidation,
 } from "@/utilities/disableLanguageServer"
-import { getQueryParameterNumber } from "@/utilities/getQueryParameterNumber"
 
 export type HandlersOptions = {
   hasDiagnosticRelatedInformationCapability: boolean
@@ -239,7 +239,7 @@ export class Handlers {
     if (!disableValidation(document)) {
       const settings = await this.settingsManager.get(document.uri)
 
-      const queryParameterNumber = getQueryParameterNumber(document)
+      const queryParameterInfo = getQueryParameterInfo(document)
 
       const pgPool = getPool(this.pgPools, settings, this.logger)
       if (pgPool !== undefined) {
@@ -250,7 +250,7 @@ export class Handlers {
             isComplete: options.isComplete,
             hasDiagnosticRelatedInformationCapability:
               this.options.hasDiagnosticRelatedInformationCapability,
-            queryParameterNumber,
+            queryParameterInfo,
           },
           this.logger,
         )
