@@ -57,7 +57,7 @@ Or, if you want to disable only the validation feature, try this
 ## [Experimental Feature] Query Parameters
 
 In the case of a file that defines a query with parameters,
-you can validate it by setting the number of query parameters at the file top.
+you can validate it by adding the positional query parameter comment at the file top.
 
 ```sql
 /* plpgsql-language-server:use-positional-query-parameter */
