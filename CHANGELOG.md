@@ -2,6 +2,9 @@
 
 ## Unreleased - TDB
 
+## v2.1.0 - 2022/03/30
+- Support positional query parameter comment. [#2](https://github.com/UniqueVision/plpgsql-lsp/issues/2)
+
 ## v2.0.0 - 2022/03/19
 - Migrate from GitLab to GitHub and publish the repository.
 - Add the feature to disable language server services
