@@ -16,6 +16,7 @@ import {
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
+import { getQueryParameterInfo } from "@/postgres/parameters"
 import { getPool, PostgresPoolMap } from "@/postgres/pool"
 import { DefinitionsManager } from "@/server/definitionsManager"
 import { SettingsManager } from "@/server/settingsManager"
@@ -238,6 +239,8 @@ export class Handlers {
     if (!disableValidation(document)) {
       const settings = await this.settingsManager.get(document.uri)
 
+      const queryParameterInfo = getQueryParameterInfo(document)
+
       const pgPool = getPool(this.pgPools, settings, this.logger)
       if (pgPool !== undefined) {
         diagnostics = await validateTextDocument(
@@ -247,6 +250,7 @@ export class Handlers {
             isComplete: options.isComplete,
             hasDiagnosticRelatedInformationCapability:
               this.options.hasDiagnosticRelatedInformationCapability,
+            queryParameterInfo,
           },
           this.logger,
         )

@@ -1,10 +1,10 @@
 import { Logger, Range, uinteger } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
+import { QueryParameterInfo } from "@/postgres/parameters"
+import { FunctionInfo } from "@/postgres/parsers/getFunctions"
 import { PostgresPool } from "@/postgres/pool"
 import { getLineRangeFromBuffer, getTextAllRange } from "@/utilities/text"
-
-import { FunctionInfo } from "../parsers/getFunctions"
 
 export interface StaticAnalysisErrorRow {
   procedure: string
@@ -26,11 +26,16 @@ export interface StaticAnalysisError {
   message: string
 }
 
+export type StaticAnalysisOptions = {
+  isComplete: boolean,
+  queryParameterInfo: QueryParameterInfo | null
+}
+
 export async function queryFileStaticAnalysis(
   pgPool: PostgresPool,
   document: TextDocument,
   functionInfos: FunctionInfo[],
-  isComplete = false,
+  options: StaticAnalysisOptions,
   logger: Logger,
 ): Promise<StaticAnalysisError[] | undefined> {
   const analysisInfos: StaticAnalysisError[] = []
@@ -39,7 +44,10 @@ export async function queryFileStaticAnalysis(
   const pgClient = await pgPool.connect()
   try {
     await pgClient.query("BEGIN")
-    await pgClient.query(fileText)
+    await pgClient.query(
+      fileText,
+      Array(options.queryParameterInfo?.parameterNumber || 0).fill(null),
+    )
     const extensionCheck = await pgClient.query(`
       SELECT
         extname
@@ -98,7 +106,7 @@ export async function queryFileStaticAnalysis(
     }
   }
   catch (error: unknown) {
-    if (isComplete) {
+    if (options.isComplete) {
       logger.error(`StaticAnalysisError: ${(error as Error).toString()}`)
     }
 

@@ -1,6 +1,7 @@
 import { Diagnostic, DiagnosticSeverity, Logger } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
+import { QueryParameterInfo } from "@/postgres/parameters"
 import { getFunctions } from "@/postgres/parsers/getFunctions"
 import { PostgresPool } from "@/postgres/pool"
 import {
@@ -13,6 +14,7 @@ import {
 type ValidateTextDocumentOptions = {
   isComplete: boolean,
   hasDiagnosticRelatedInformationCapability: boolean,
+  queryParameterInfo: QueryParameterInfo | null,
 }
 
 export async function validateTextDocument(
@@ -49,7 +51,10 @@ async function checkSyntaxAnalysis(
   const errors = await queryFileSyntaxAnalysis(
     pgPool,
     document,
-    options.isComplete,
+    {
+      isComplete: options.isComplete,
+      queryParameterInfo: options.queryParameterInfo,
+    },
     logger,
   )
 
@@ -90,7 +95,10 @@ async function checkStaticAnalysis(
     pgPool,
     document,
     await getFunctions(document.uri),
-    options.isComplete,
+    {
+      isComplete: options.isComplete,
+      queryParameterInfo: options.queryParameterInfo,
+    },
     logger,
   )
 
