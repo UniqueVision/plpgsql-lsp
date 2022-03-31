@@ -10,6 +10,7 @@ import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
 import { TestTextDocuments } from "@/__tests__/helpers/textDocuments"
 import { Server } from "@/server/server"
+import { neverReach } from "@/utilities/neverReach"
 import { readTextDocumentFromUri } from "@/utilities/text"
 
 
@@ -56,7 +57,7 @@ describe("Definition Tests", () => {
     expectedDefinitions: DefinitionLink[],
   ) {
     expect(definitoins).toBeDefined()
-    if (definitoins === undefined) return
+    if (definitoins === undefined) neverReach()
 
     assert.deepEqual(definitoins, expectedDefinitions)
   }
