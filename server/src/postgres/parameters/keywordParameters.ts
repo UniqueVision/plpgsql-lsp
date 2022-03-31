@@ -27,8 +27,8 @@ export function getKeywordQueryParameterInfo(
 ): KeywordQueryParametersInfo | null {
   const firstLine = getFirstLine(document)
   for (const pattern of [
-    /^ *-- +plpgsql-language-server:use-keyword-query-parameter( +keywords=\[ *([A-Za-z][A-Za-z0-9_]*)?((, *([A-Za-z][A-Za-z0-9_]*))*),? *\])? *$/, // eslint-disable-line max-len
-    /^ *\/\* +plpgsql-language-server:use-keyword-query-parameter( +keywords=\[ *([A-Za-z][A-Za-z0-9_]*)?((, *([A-Za-z][A-Za-z0-9_]*))*),? *\])? +\*\/$/, // eslint-disable-line max-len
+    /^ *-- +plpgsql-language-server:use-keyword-query-parameter( +keywords=\[ *([A-Za-z_][A-Za-z0-9_]*)?((, *([A-Za-z_][A-Za-z0-9_]*))*),? *\])? *$/, // eslint-disable-line max-len
+    /^ *\/\* +plpgsql-language-server:use-keyword-query-parameter( +keywords=\[ *([A-Za-z_][A-Za-z0-9_]*)?((, *([A-Za-z_][A-Za-z0-9_]*))*),? *\])? +\*\/$/, // eslint-disable-line max-len
   ]) {
     const found = firstLine.match(pattern)
 
@@ -45,7 +45,7 @@ export function getKeywordQueryParameterInfo(
         // auto calculation.
         const keywordPattern = new RegExp(
           keywordQueryParameterPattern
-            .replace("{keyword}", "[A-Za-z][A-Za-z0-9_]*"),
+            .replace("{keyword}", "[A-Za-z_][A-Za-z0-9_]*"),
           "g",
         )
         keywordParams = Array.from(
