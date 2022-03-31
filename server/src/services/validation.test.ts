@@ -211,6 +211,40 @@ describe("Validate Tests", () => {
     )
   })
 
+  describe("Default Positional Query Parameter File Validation", function () {
+    beforeEach(() => {
+      const settings = new SettingsBuilder()
+        .build()
+      server = setupTestServer(settings)
+    })
+
+    it("Correct query with default positional parameters", async () => {
+      const diagnostics = await validateQuery(
+        "correct_query_with_default_positional_parameter.pgsql",
+      )
+
+      validateDiagnostics(diagnostics, [])
+    })
+  })
+
+  describe("Default Keyword Query Parameter File Validation", function () {
+    beforeEach(() => {
+      const settings = new SettingsBuilder()
+        .withQueryParameterPattern(/:[A-Za-z_][A-Za-z0-9_]*/)
+        .build()
+      server = setupTestServer(settings)
+    })
+
+    it("Correct query with default keyword parameters", async () => {
+      const diagnostics = await validateQuery(
+        "correct_query_with_default_keyword_parameter.pgsql",
+        { skipDisableComment: true },
+      )
+
+      validateDiagnostics(diagnostics, [])
+    })
+  })
+
   describe("Positional Query Parameter File Validation", function () {
     beforeEach(() => {
       const settings = new SettingsBuilder().build()

@@ -1,9 +1,8 @@
-import { Logger } from "vscode-languageserver-protocol/node"
+import { Logger, uinteger } from "vscode-languageserver-protocol/node"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { PostgresClient } from "@/postgres/pool"
 import { escapeRegex } from "@/utilities/regex"
-import { getFirstLine } from "@/utilities/text"
+import { getFirstLine, getTextAfterFirstLine } from "@/utilities/text"
 
 export type KeywordQueryParametersInfo = {
   type: "keyword",
@@ -69,7 +68,8 @@ export function getKeywordQueryParameterInfo(
         )
         keywordParameters = Array.from(
           new Set(
-            [...document.getText().matchAll(keywordRegExp)].map((found) => found[0]),
+            [...getTextAfterFirstLine(document) .matchAll(keywordRegExp)]
+              .map((found) => found[0]),
           ),
         )
       }
@@ -85,12 +85,11 @@ export function getKeywordQueryParameterInfo(
   return null
 }
 
-export async function executeFileWithKeywordQueryParameters(
-  pgClient: PostgresClient,
+export function sanitizeFileWithKeywordQueryParameters(
   fileText: string,
   queryParameterInfo: KeywordQueryParametersInfo,
   _logger: Logger,
-) {
+) : [string, uinteger] {
   const keywordParameters = new Set(queryParameterInfo.keywordParameters)
   for (
     const [index, keywordParameter] of Array.from(keywordParameters.values()).entries()
@@ -101,8 +100,5 @@ export async function executeFileWithKeywordQueryParameters(
     )
   }
 
-  await pgClient.query(
-    fileText,
-    Array(keywordParameters.size || 0).fill(null),
-  )
+  return [fileText, keywordParameters.size]
 }

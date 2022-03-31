@@ -3,7 +3,7 @@ import { Logger, Range } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import {
-  executeFileWithQueryParameters, QueryParameterInfo,
+  QueryParameterInfo, sanitizeFileWithQueryParameters,
 } from "@/postgres/parameters"
 import { PostgresPool } from "@/postgres/pool"
 import { getNonSpaceCharacter, getTextAllRange } from "@/utilities/text"
@@ -25,13 +25,15 @@ export async function queryFileSyntaxAnalysis(
   options: SyntaxAnalysisOptions,
   logger: Logger,
 ): Promise<SyntaxError[] | undefined> {
-  const fileText = document.getText()
+  const [fileText, parameterNumber] = await sanitizeFileWithQueryParameters(
+    document.getText(), options.queryParameterInfo, logger,
+  )
 
   const pgClient = await pgPool.connect()
   try {
     await pgClient.query("BEGIN")
-    await executeFileWithQueryParameters(
-      pgClient, fileText, options.queryParameterInfo, logger,
+    await pgClient.query(
+      fileText, Array(parameterNumber).fill(null),
     )
   }
   catch (error: unknown) {

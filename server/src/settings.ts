@@ -6,6 +6,7 @@ export interface Settings {
   password?: string;
   definitionFiles: string[];
   defaultSchema: string;
+  queryParameterPattern: string
   keywordQueryParameterPattern?: string
 }
 
@@ -20,5 +21,6 @@ export const DEFAULT_SETTINGS: Settings = {
     "**/*.pgsql",
   ],
   defaultSchema: "public",
+  queryParameterPattern: /\$[1-9][0-9]*/.source,
   keywordQueryParameterPattern: undefined,
 }
