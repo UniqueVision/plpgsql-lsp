@@ -1,7 +1,9 @@
 import { Logger, Range, uinteger } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { QueryParameterInfo } from "@/postgres/parameters"
+import {
+  executeFileWithQueryParameters, QueryParameterInfo,
+} from "@/postgres/parameters"
 import { FunctionInfo } from "@/postgres/parsers/getFunctions"
 import { PostgresPool } from "@/postgres/pool"
 import { getLineRangeFromBuffer, getTextAllRange } from "@/utilities/text"
@@ -44,9 +46,8 @@ export async function queryFileStaticAnalysis(
   const pgClient = await pgPool.connect()
   try {
     await pgClient.query("BEGIN")
-    await pgClient.query(
-      fileText,
-      Array(options.queryParameterInfo?.parameterNumber || 0).fill(null),
+    await executeFileWithQueryParameters(
+      pgClient, fileText, options.queryParameterInfo, logger,
     )
     const extensionCheck = await pgClient.query(`
       SELECT

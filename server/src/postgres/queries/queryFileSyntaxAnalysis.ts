@@ -2,7 +2,9 @@ import { DatabaseError } from "pg"
 import { Logger, Range } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { QueryParameterInfo } from "@/postgres/parameters"
+import {
+  executeFileWithQueryParameters, QueryParameterInfo,
+} from "@/postgres/parameters"
 import { PostgresPool } from "@/postgres/pool"
 import { getNonSpaceCharacter, getTextAllRange } from "@/utilities/text"
 
@@ -28,9 +30,8 @@ export async function queryFileSyntaxAnalysis(
   const pgClient = await pgPool.connect()
   try {
     await pgClient.query("BEGIN")
-    await pgClient.query(
-      fileText,
-      Array(options.queryParameterInfo?.parameterNumber || 0).fill(null),
+    await executeFileWithQueryParameters(
+      pgClient, fileText, options.queryParameterInfo, logger,
     )
   }
   catch (error: unknown) {

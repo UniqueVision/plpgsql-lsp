@@ -55,4 +55,12 @@ export class SettingsBuilder {
 
     return this
   }
+
+  withKeywordQueryParameterPattern(
+    keywordQueryParameterPattern: string,
+  ): SettingsBuilder {
+    this.settings.keywordQueryParameterPattern = keywordQueryParameterPattern
+
+    return this
+  }
 }

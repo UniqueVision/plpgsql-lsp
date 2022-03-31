@@ -113,6 +113,11 @@
           "type": "string",
           "default": "public",
           "description": "default schema name."
+        },
+        "plpgsqlLanguageServer.keywordQueryParameterPattern": {
+          "scope": "resource",
+          "type": "string",
+          "description": "keyword query paramter pattern. the pattern must include \"{keyword}\", as in \"@{keyword}\"."
         }
       },
       "required": [

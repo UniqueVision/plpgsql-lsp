@@ -239,21 +239,28 @@ export class Handlers {
     if (!disableValidation(document)) {
       const settings = await this.settingsManager.get(document.uri)
 
-      const queryParameterInfo = getQueryParameterInfo(document)
+      const queryParameterInfo = getQueryParameterInfo(
+        document, await this.settingsManager.get(document.uri), this.logger,
+      )
 
-      const pgPool = getPool(this.pgPools, settings, this.logger)
-      if (pgPool !== undefined) {
-        diagnostics = await validateTextDocument(
-          pgPool,
-          document,
-          {
-            isComplete: options.isComplete,
-            hasDiagnosticRelatedInformationCapability:
-              this.options.hasDiagnosticRelatedInformationCapability,
-            queryParameterInfo,
-          },
-          this.logger,
-        )
+      if (queryParameterInfo === null || "type" in queryParameterInfo) {
+        const pgPool = getPool(this.pgPools, settings, this.logger)
+        if (pgPool !== undefined) {
+          diagnostics = await validateTextDocument(
+            pgPool,
+            document,
+            {
+              isComplete: options.isComplete,
+              hasDiagnosticRelatedInformationCapability:
+                this.options.hasDiagnosticRelatedInformationCapability,
+              queryParameterInfo,
+            },
+            this.logger,
+          )
+        }
+      }
+      else {
+        diagnostics = [queryParameterInfo]
       }
     }
 

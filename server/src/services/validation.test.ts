@@ -13,16 +13,14 @@ import {
 import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
 import { TestTextDocuments } from "@/__tests__/helpers/textDocuments"
+import {
+  KeywordQueryParameterPatternNotDefinedError,
+} from "@/postgres/parameters/keywordParameters"
 import { Server } from "@/server/server"
 
 
 describe("Validate Tests", () => {
   let server: Server
-
-  beforeEach(() => {
-    const settings = new SettingsBuilder().build()
-    server = setupTestServer(settings)
-  })
 
   afterEach(async () => {
     for (const pgPool of server.pgPools.values()) {
@@ -89,7 +87,12 @@ describe("Validate Tests", () => {
     )
   }
 
-  describe("Validate", function () {
+  describe("File Validation", function () {
+    beforeEach(() => {
+      const settings = new SettingsBuilder().build()
+      server = setupTestServer(settings)
+    })
+
     it("Correct function", async () => {
       const diagnostics = await validateDefinition(
         "stored/function_correct.pgsql",
@@ -130,22 +133,6 @@ describe("Validate Tests", () => {
     it("Correct query", async () => {
       const diagnostics = await validateQuery(
         "correct_query.pgsql",
-      )
-
-      validateDiagnostics(diagnostics, [])
-    })
-
-    it("Correct query with parameters", async () => {
-      const diagnostics = await validateQuery(
-        "correct_query_with_positional_parameter.pgsql",
-      )
-
-      validateDiagnostics(diagnostics, [])
-    })
-
-    it("Correct query with arbitory parameters", async () => {
-      const diagnostics = await validateQuery(
-        "correct_query_with_arbitory_positional_parameter.pgsql",
       )
 
       validateDiagnostics(diagnostics, [])
@@ -204,5 +191,70 @@ describe("Validate Tests", () => {
         expect(diagnostics).toBeUndefined()
       },
     )
+
+    it(
+      "Raise KeywordQueryParameterPatternNotDefinedError.",
+      async () => {
+        const diagnostics = await validateQuery(
+          "correct_query_with_keyword_parameter.pgsql",
+        )
+
+        validateDiagnostics(diagnostics, [
+          {
+            severity: DiagnosticSeverity.Error,
+            message: new KeywordQueryParameterPatternNotDefinedError().message,
+            range: Range.create(0, 0, 8, 34),
+          },
+        ])
+      },
+    )
+  })
+
+  describe("Positional Query Parameter File Validation", function () {
+    beforeEach(() => {
+      const settings = new SettingsBuilder().build()
+      server = setupTestServer(settings)
+    })
+
+    it("Correct query with positional parameters", async () => {
+      const diagnostics = await validateQuery(
+        "correct_query_with_positional_parameter.pgsql",
+      )
+
+      validateDiagnostics(diagnostics, [])
+    })
+
+    it("Correct query with arbitory positional parameters", async () => {
+      const diagnostics = await validateQuery(
+        "correct_query_with_arbitory_positional_parameter.pgsql",
+      )
+
+      validateDiagnostics(diagnostics, [])
+    })
+  })
+
+  describe("Keyword Query Parameter File Validation", function () {
+    beforeEach(() => {
+      const settings = new SettingsBuilder()
+        .withKeywordQueryParameterPattern("@{keyword}")
+        .build()
+      server = setupTestServer(settings)
+    })
+
+    it("Correct query with keyword parameters", async () => {
+      const diagnostics = await validateQuery(
+        "correct_query_with_keyword_parameter.pgsql",
+      )
+
+      validateDiagnostics(diagnostics, [])
+    })
+
+    it("Correct query with arbitory keyword parameters", async () => {
+      const diagnostics = await validateQuery(
+        "correct_query_with_arbitory_keyword_parameter.pgsql",
+      )
+
+      validateDiagnostics(diagnostics, [])
+    })
   })
 })
