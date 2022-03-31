@@ -7,6 +7,7 @@ import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
 import { TestTextDocuments } from "@/__tests__/helpers/textDocuments"
 import { Server } from "@/server/server"
+import { neverReach } from "@/utilities/neverReach"
 
 import { getLanguageServerCommentCompletionItems } from "./completion"
 
@@ -47,7 +48,7 @@ describe("Completion Tests", () => {
     expected: CompletionItem[],
   ) {
     expect(definitoins).toBeDefined()
-    if (definitoins === undefined) return
+    if (definitoins === undefined) neverReach("")
 
     assert.deepEqual(definitoins, expected)
   }

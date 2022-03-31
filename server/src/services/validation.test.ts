@@ -17,6 +17,7 @@ import {
   KeywordQueryParameterPatternNotDefinedError,
 } from "@/postgres/parameters/keywordParameters"
 import { Server } from "@/server/server"
+import { neverReach } from "@/utilities/neverReach"
 
 
 describe("Validate Tests", () => {
@@ -79,7 +80,7 @@ describe("Validate Tests", () => {
     expectedDiagnostics: Diagnostic[],
   ) {
     expect(diagnostics).toBeDefined()
-    if (diagnostics === undefined) return
+    if (diagnostics === undefined) neverReach()
 
     assert.deepEqual(
       diagnostics,
