@@ -56,8 +56,9 @@ Or, if you want to disable only the validation feature, try this
 
 ## [Experimental Feature] Query Parameters
 
-In the case of a file that defines a query with parameters,
-you can validate it by adding the positional query parameter comment at the file top.
+### Positional Query Parameters
+In the case of a file that defines a query with positional parameters,
+You can validate it by adding the positional query parameter comment at the file top.
 
 ```sql
 /* plpgsql-language-server:use-positional-query-parameter */
@@ -72,7 +73,7 @@ WHERE
 ```
 
 This tool counts the number of parameters with a simple regular expression,
-so complex queries require the number to be specified explicitly in the comment.
+so complex queries file require the number to be specified explicitly in the comment.
 
 ```sql
 /* plpgsql-language-server:use-positional-query-parameter number=2 */
@@ -85,4 +86,45 @@ FROM
   users
 WHERE
   id = $1 AND name = ANY($2);
+```
+
+### Keyword Query Parameters
+Support query with keyword parameters, same as positional parameters.
+
+However, the format of the keyword parameter varies from library to library,
+so must be indicated in the settings file.
+
+```jsonc
+{
+  "plpgsqlLanguageServer.keywordQueryParameterPattern": "@{keyword}"
+}
+```
+
+You have finished setting, you can validate it like this.
+
+```sql
+-- plpgsql-language-server:use-keyword-query-parameter
+
+SELECT
+  id,
+  name
+FROM
+  users
+WHERE
+  id = @id AND name = ANY(@names);
+```
+
+The complex queries file require the keywords to be specified explicitly in the comment.
+
+```sql
+-- plpgsql-language-server:use-keyword-query-parameter keywords=[id, names]
+
+SELECT
+  id,
+  name,
+  'This text contains "@tags" :('
+FROM
+  users
+WHERE
+  id = @id AND name = ANY(@names);
 ```
