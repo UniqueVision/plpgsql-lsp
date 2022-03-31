@@ -41,20 +41,7 @@ export function getKeywordQueryParameterInfo(
       let keywordParams = []
       const headWord = found[2]
       const tailWords = found[3]
-      if (headWord === undefined) {
-        // auto calculation.
-        const keywordPattern = new RegExp(
-          keywordQueryParameterPattern
-            .replace("{keyword}", "[A-Za-z_][A-Za-z0-9_]*"),
-          "g",
-        )
-        keywordParams = Array.from(
-          new Set(
-            [...document.getText().matchAll(keywordPattern)].map((found) => found[0]),
-          ),
-        )
-      }
-      else {
+      if (headWord !== undefined) {
         keywordParams.push(keywordQueryParameterPattern.replace("{keyword}", headWord))
 
         if (tailWords !== "") {
@@ -68,6 +55,19 @@ export function getKeywordQueryParameterInfo(
               )
             })
         }
+      }
+      else {
+        // auto calculation.
+        const keywordPattern = new RegExp(
+          keywordQueryParameterPattern
+            .replace("{keyword}", "[A-Za-z_][A-Za-z0-9_]*"),
+          "g",
+        )
+        keywordParams = Array.from(
+          new Set(
+            [...document.getText().matchAll(keywordPattern)].map((found) => found[0]),
+          ),
+        )
       }
 
       return {
