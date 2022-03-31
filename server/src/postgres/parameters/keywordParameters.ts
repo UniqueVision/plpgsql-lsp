@@ -2,11 +2,12 @@ import { Logger } from "vscode-languageserver-protocol/node"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { PostgresClient } from "@/postgres/pool"
+import { escapeRegex } from "@/utilities/regex"
 import { getFirstLine } from "@/utilities/text"
 
 export type KeywordQueryParametersInfo = {
   type: "keyword",
-  keywordParams: string[],
+  keywordParameters: string[],
   keywordQueryParameterPattern: string
 }
 
@@ -38,11 +39,14 @@ export function getKeywordQueryParameterInfo(
         throw new KeywordQueryParameterPatternNotDefinedError()
       }
 
-      let keywordParams = []
+      let keywordParameters = []
       const headWord = found[2]
       const tailWords = found[3]
+
       if (headWord !== undefined) {
-        keywordParams.push(keywordQueryParameterPattern.replace("{keyword}", headWord))
+        keywordParameters.push(
+          keywordQueryParameterPattern.replace("{keyword}", headWord),
+        )
 
         if (tailWords !== "") {
           tailWords
@@ -50,7 +54,7 @@ export function getKeywordQueryParameterInfo(
             .map(word => word.trim())
             .filter(word => word !== "")
             .forEach(word => {
-              keywordParams.push(
+              keywordParameters.push(
                 keywordQueryParameterPattern.replace("{keyword}", word),
               )
             })
@@ -58,21 +62,21 @@ export function getKeywordQueryParameterInfo(
       }
       else {
         // auto calculation.
-        const keywordPattern = new RegExp(
+        const keywordRegExp = new RegExp(
           keywordQueryParameterPattern
             .replace("{keyword}", "[A-Za-z_][A-Za-z0-9_]*"),
           "g",
         )
-        keywordParams = Array.from(
+        keywordParameters = Array.from(
           new Set(
-            [...document.getText().matchAll(keywordPattern)].map((found) => found[0]),
+            [...document.getText().matchAll(keywordRegExp)].map((found) => found[0]),
           ),
         )
       }
 
       return {
         type: "keyword",
-        keywordParams,
+        keywordParameters,
         keywordQueryParameterPattern,
       }
     }
@@ -87,17 +91,18 @@ export async function executeFileWithKeywordQueryParameters(
   queryParameterInfo: KeywordQueryParametersInfo,
   _logger: Logger,
 ) {
-  const keywordParams = new Set(queryParameterInfo.keywordParams)
-
-  for (const [index, keywordParam] of Array.from(keywordParams.values()).entries()) {
+  const keywordParameters = new Set(queryParameterInfo.keywordParameters)
+  for (
+    const [index, keywordParameter] of Array.from(keywordParameters.values()).entries()
+  ) {
     fileText = fileText.replace(
-      keywordParam,
+      new RegExp(escapeRegex(keywordParameter), "g"),
       `$${index + 1}`,
     )
   }
 
   await pgClient.query(
     fileText,
-    Array(keywordParams.size || 0).fill(null),
+    Array(keywordParameters.size || 0).fill(null),
   )
 }
