@@ -146,7 +146,7 @@ export class Handlers {
 
     const settings = await this.settingsManager.get(params.textDocument.uri)
 
-    const pgPool = getPool(this.pgPools, settings, this.logger)
+    const pgPool = await getPool(this.pgPools, settings, this.logger)
     if (pgPool === undefined) {
       return undefined
     }
@@ -179,7 +179,7 @@ export class Handlers {
   async onDidChangeConfiguration(
     params: DidChangeConfigurationParams,
   ): Promise<void> {
-    this.settingsManager.reset(params.settings.plpgsqlLanguageServer)
+    this.settingsManager.reset(params.settings?.plpgsqlLanguageServer)
     for (const document of this.documents.all()) {
 
       await this.validate(document)
@@ -216,7 +216,7 @@ export class Handlers {
 
     const settings = await this.settingsManager.get(params.textDocument.uri)
 
-    const pgPool = getPool(this.pgPools, settings, this.logger)
+    const pgPool = await getPool(this.pgPools, settings, this.logger)
     if (pgPool === undefined) {
       return undefined
     }
@@ -244,7 +244,7 @@ export class Handlers {
       )
 
       if (queryParameterInfo === null || "type" in queryParameterInfo) {
-        const pgPool = getPool(this.pgPools, settings, this.logger)
+        const pgPool = await getPool(this.pgPools, settings, this.logger)
         if (pgPool !== undefined) {
           diagnostics = await validateTextDocument(
             pgPool,
