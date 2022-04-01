@@ -1,6 +1,10 @@
 # Change Log
 
 ## Unreleased - TDB
+
+## v2.2.1 - 2022/04/01
+- Fix first connection bug. [#11](https://github.com/UniqueVision/plpgsql-lsp/pull/11)
+
 ## v2.2.0 - 2022/04/01
 - Support full query parameter.  [#7](https://github.com/UniqueVision/plpgsql-lsp/pull/7) [#8](https://github.com/UniqueVision/plpgsql-lsp/pull/8)
 
