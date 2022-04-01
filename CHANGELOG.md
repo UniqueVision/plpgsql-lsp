@@ -1,9 +1,11 @@
 # Change Log
 
 ## Unreleased - TDB
+## v2.2.0 - 2022/04/01
+- Support full query parameter.  [#7](https://github.com/UniqueVision/plpgsql-lsp/pull/7) [#8](https://github.com/UniqueVision/plpgsql-lsp/pull/8)
 
 ## v2.1.0 - 2022/03/30
-- Support positional query parameter comment. [#2](https://github.com/UniqueVision/plpgsql-lsp/issues/2)
+- Support positional query parameter comment. [#6](https://github.com/UniqueVision/plpgsql-lsp/pull/6)
 
 ## v2.0.0 - 2022/03/19
 - Migrate from GitLab to GitHub and publish the repository.
