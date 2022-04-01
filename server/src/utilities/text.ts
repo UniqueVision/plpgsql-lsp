@@ -126,6 +126,16 @@ export function getFirstLine(document: TextDocument): string {
   return document.getText(Range.create(0, 0, 1, 0)).split("\n")[0]
 }
 
+export function getTextAfterFirstLine(document: TextDocument): string {
+  return document.getText(
+    Range.create(
+      Position.create(1, 0),
+      document.positionAt(document.getText().length - 1),
+    ),
+  )
+}
+
+
 export function isFirstCommentLine(
   document: TextDocument,
   position: Position,

@@ -56,6 +56,14 @@ export class SettingsBuilder {
     return this
   }
 
+  withQueryParameterPattern(
+    queryParameterPattern: RegExp,
+  ): SettingsBuilder {
+    this.settings.queryParameterPattern = queryParameterPattern.source
+
+    return this
+  }
+
   withKeywordQueryParameterPattern(
     keywordQueryParameterPattern: string,
   ): SettingsBuilder {

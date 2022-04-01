@@ -55,10 +55,46 @@ Or, if you want to disable only the validation feature, try this
 ```
 
 ## [Experimental Feature] Query Parameters
+In the case of a file that defines a query with parameters,
+You can validate it by adding the query parameter comment at the file top.
+
+```sql
+/* plpgsql-language-server:use-query-parameter */
+
+SELECT
+  id,
+  name
+FROM
+  users
+WHERE
+  id = $1 AND name = ANY($2);
+```
+
+If you want to use keyword query parameter,
+need to set the parameter pattern in the settings file.
+
+```jsonc
+{
+  "plpgsqlLanguageServer.queryParameterPattern": ":[A-Za-z_][A-Za-z0-9_]*"
+}
+```
+
+```sql
+/* plpgsql-language-server:use-query-parameter */
+
+SELECT
+  id,
+  name
+FROM
+  users
+WHERE
+  id = :id AND name = ANY(:names);
+```
+
 
 ### Positional Query Parameters
-In the case of a file that defines a query with positional parameters,
-You can validate it by adding the positional query parameter comment at the file top.
+To more explicitly indicate that it is a positional parameter,
+the following comment can be given.
 
 ```sql
 /* plpgsql-language-server:use-positional-query-parameter */

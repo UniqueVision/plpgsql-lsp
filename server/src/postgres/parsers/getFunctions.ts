@@ -1,6 +1,9 @@
 import { parseQuery } from "libpg-query"
-import { URI } from "vscode-languageserver"
+import { Logger, URI } from "vscode-languageserver"
 
+import {
+  QueryParameterInfo, sanitizeFileWithQueryParameters,
+} from "@/postgres/parameters"
 import { Statement } from "@/postgres/parsers/statement"
 import { asyncFlatMap } from "@/utilities/functool"
 import { readFileFromUri } from "@/utilities/text"
@@ -12,8 +15,12 @@ export interface FunctionInfo {
 
 export async function getFunctions(
   uri: URI,
+  queryParameterInfo: QueryParameterInfo | null,
+  logger: Logger,
 ): Promise<FunctionInfo[]> {
-  const fileText = readFileFromUri(uri)
+  const [fileText] = await sanitizeFileWithQueryParameters(
+    readFileFromUri(uri), queryParameterInfo, logger,
+  )
   const query = await parseQuery(fileText)
 
   const statements: Statement[] | undefined = query?.["stmts"]

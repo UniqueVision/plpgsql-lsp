@@ -1,9 +1,8 @@
 import { Logger, Range, uinteger } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import {
-  executeFileWithQueryParameters, QueryParameterInfo,
-} from "@/postgres/parameters"
+import { QueryParameterInfo,
+  sanitizeFileWithQueryParameters } from "@/postgres/parameters"
 import { FunctionInfo } from "@/postgres/parsers/getFunctions"
 import { PostgresPool } from "@/postgres/pool"
 import { getLineRangeFromBuffer, getTextAllRange } from "@/utilities/text"
@@ -41,13 +40,15 @@ export async function queryFileStaticAnalysis(
   logger: Logger,
 ): Promise<StaticAnalysisError[] | undefined> {
   const analysisInfos: StaticAnalysisError[] = []
-  const fileText = document.getText()
+  const [fileText, parameterNumber] = await sanitizeFileWithQueryParameters(
+    document.getText(), options.queryParameterInfo, logger,
+  )
 
   const pgClient = await pgPool.connect()
   try {
     await pgClient.query("BEGIN")
-    await executeFileWithQueryParameters(
-      pgClient, fileText, options.queryParameterInfo, logger,
+    await pgClient.query(
+      fileText, Array(parameterNumber).fill(null),
     )
     const extensionCheck = await pgClient.query(`
       SELECT

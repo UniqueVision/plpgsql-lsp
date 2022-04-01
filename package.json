@@ -114,6 +114,12 @@
           "default": "public",
           "description": "default schema name."
         },
+        "plpgsqlLanguageServer.queryParameterPattern": {
+          "scope": "resource",
+          "type": "string",
+          "default": "\\$[1-9][0-9]*",
+          "description": "query paramter pattern. the pattern is described by regular expression."
+        },
         "plpgsqlLanguageServer.keywordQueryParameterPattern": {
           "scope": "resource",
           "type": "string",

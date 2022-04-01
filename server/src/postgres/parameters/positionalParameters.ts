@@ -1,7 +1,6 @@
 import { Logger, uinteger } from "vscode-languageserver-protocol/node"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { PostgresClient } from "@/postgres/pool"
 import { getFirstLine } from "@/utilities/text"
 
 export type PositionalQueryParametersInfo = {
@@ -43,14 +42,10 @@ export function getPositionalQueryParameterInfo(
   return null
 }
 
-export async function executeFileWithPositionalQueryParameters(
-  pgClient: PostgresClient,
+export function sanitizeFileWithPositionalQueryParameters(
   fileText: string,
   queryParameterInfo: PositionalQueryParametersInfo,
   _logger: Logger,
-) {
-  await pgClient.query(
-    fileText,
-    Array(queryParameterInfo.parameterNumber || 0).fill(null),
-  )
+): [string, uinteger] {
+  return [fileText, queryParameterInfo.parameterNumber]
 }

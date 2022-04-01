@@ -1,25 +1,32 @@
-import { Diagnostic, DiagnosticSeverity, Logger } from "vscode-languageserver"
+import { Diagnostic, DiagnosticSeverity, Logger, uinteger } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { Settings } from "@/settings"
 import { neverReach } from "@/utilities/neverReach"
 import { getTextAllRange } from "@/utilities/text"
 
-import { PostgresClient } from "../pool"
 import {
-  executeFileWithKeywordQueryParameters,
+  DefaultQueryParametersInfo,
+  getDefaultQueryParameterInfo,
+  sanitizeFileWithDefaultQueryParameters,
+} from "./defaultParameters"
+import {
   getKeywordQueryParameterInfo,
   KeywordQueryParameterPatternNotDefinedError,
   KeywordQueryParametersInfo,
+  sanitizeFileWithKeywordQueryParameters,
 } from "./keywordParameters"
 import {
-  executeFileWithPositionalQueryParameters,
   getPositionalQueryParameterInfo,
   PositionalQueryParametersInfo,
+  sanitizeFileWithPositionalQueryParameters,
 } from "./positionalParameters"
 
-export type QueryParameterInfo =
-  PositionalQueryParametersInfo | KeywordQueryParametersInfo
+export type QueryParameterInfo = (
+  DefaultQueryParametersInfo
+  | PositionalQueryParametersInfo
+  | KeywordQueryParametersInfo
+)
 
 export function getQueryParameterInfo(
   document: TextDocument,
@@ -27,6 +34,14 @@ export function getQueryParameterInfo(
   logger: Logger,
 ): QueryParameterInfo | Diagnostic | null {
   let queryParameterInfo
+
+  // default query parameter
+  queryParameterInfo = getDefaultQueryParameterInfo(
+    document, settings.queryParameterPattern, logger,
+  )
+  if (queryParameterInfo !== null) {
+    return queryParameterInfo
+  }
 
   // positional query parameter.
   queryParameterInfo = getPositionalQueryParameterInfo(document, logger)
@@ -56,25 +71,30 @@ export function getQueryParameterInfo(
   return null
 }
 
-export async function executeFileWithQueryParameters(
-  pgClient: PostgresClient,
+export function sanitizeFileWithQueryParameters(
   fileText: string,
   queryParameterInfo: QueryParameterInfo | null,
   logger: Logger,
-) {
+): [string, uinteger] {
   if (queryParameterInfo === null) {
-    await pgClient.query(fileText)
+    return [fileText, 0]
+  }
+  else if (queryParameterInfo.type === "default") {
+    return sanitizeFileWithDefaultQueryParameters(
+      fileText, queryParameterInfo, logger,
+    )
   }
   else if(queryParameterInfo.type === "position") {
-    await executeFileWithPositionalQueryParameters(
-      pgClient, fileText, queryParameterInfo, logger,
+    return sanitizeFileWithPositionalQueryParameters(
+      fileText, queryParameterInfo, logger,
     )
   }
   else if (queryParameterInfo.type === "keyword") {
-    await executeFileWithKeywordQueryParameters(
-      pgClient, fileText, queryParameterInfo, logger,
+    return sanitizeFileWithKeywordQueryParameters(
+      fileText, queryParameterInfo, logger,
     )
-  } else {
+  }
+  else {
     neverReach("Unknown \"queryParameterInfo.type\".")
   }
 }

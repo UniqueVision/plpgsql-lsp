@@ -94,7 +94,7 @@ async function checkStaticAnalysis(
   const errors = await queryFileStaticAnalysis(
     pgPool,
     document,
-    await getFunctions(document.uri),
+    await getFunctions(document.uri, options.queryParameterInfo, logger),
     {
       isComplete: options.isComplete,
       queryParameterInfo: options.queryParameterInfo,
