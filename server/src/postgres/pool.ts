@@ -15,11 +15,11 @@ export type PostgresClient = PoolClient
 
 export type PostgresPoolMap = Map<PostgresConfig, PostgresPool>
 
-export function getPool(
+export async function getPool(
   pgPools: PostgresPoolMap,
   settings: Settings,
   logger: Logger,
-): PostgresPool | undefined {
+): Promise<PostgresPool | undefined> {
   if (
     settings.database === undefined
     || settings.user === undefined
@@ -40,6 +40,9 @@ export function getPool(
   if (pgPool === undefined) {
     try {
       pgPool = new Pool(pgConfig)
+
+      // Try connection.
+      await (await pgPool.connect()).release()
     }
     catch (error: unknown) {
       logger.error((error as Error).toString())
