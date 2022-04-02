@@ -1,8 +1,10 @@
 import { Logger, Range, uinteger } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { QueryParameterInfo,
-  sanitizeFileWithQueryParameters } from "@/postgres/parameters"
+import {
+  QueryParameterInfo,
+  sanitizeFileWithQueryParameters,
+} from "@/postgres/parameters"
 import { FunctionInfo } from "@/postgres/parsers/getFunctions"
 import { PostgresPool } from "@/postgres/pool"
 import { getLineRangeFromBuffer, getTextAllRange } from "@/utilities/text"
@@ -38,9 +40,9 @@ export async function queryFileStaticAnalysis(
   functionInfos: FunctionInfo[],
   options: StaticAnalysisOptions,
   logger: Logger,
-): Promise<StaticAnalysisError[] | undefined> {
-  const analysisInfos: StaticAnalysisError[] = []
-  const [fileText, parameterNumber] = await sanitizeFileWithQueryParameters(
+): Promise<StaticAnalysisError[]> {
+  const errors: StaticAnalysisError[] = []
+  const [fileText, parameterNumber] = sanitizeFileWithQueryParameters(
     document.getText(), options.queryParameterInfo, logger,
   )
 
@@ -60,7 +62,7 @@ export async function queryFileStaticAnalysis(
     `)
 
     if (extensionCheck.rowCount === 0) {
-      return undefined
+      return []
     }
 
     for (const { functionName, location } of functionInfos) {
@@ -100,7 +102,7 @@ export async function queryFileStaticAnalysis(
             ) || getTextAllRange(document)
           }
 
-          analysisInfos.push({
+          errors.push({
             level: row.level, range, message: row.message,
           })
         },
@@ -109,15 +111,13 @@ export async function queryFileStaticAnalysis(
   }
   catch (error: unknown) {
     if (options.isComplete) {
-      logger.error(`StaticAnalysisError: ${(error as Error).toString()}`)
+      logger.error(`StaticAnalysisError: ${(error as Error).message}`)
     }
-
-    return undefined
   }
   finally {
     await pgClient.query("ROLLBACK")
     pgClient.release()
   }
 
-  return analysisInfos
+  return errors
 }

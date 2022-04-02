@@ -21,7 +21,7 @@ export async function querySchemas(
     schemas = results.rows.map(row => `${row["schema_name"]}`)
   }
   catch (error: unknown) {
-    logger.error(`${(error as Error).toString()}`)
+    logger.error(`${(error as Error).message}`)
   }
   finally {
     pgClient.release()

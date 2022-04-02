@@ -24,8 +24,9 @@ export async function queryFileSyntaxAnalysis(
   document: TextDocument,
   options: SyntaxAnalysisOptions,
   logger: Logger,
-): Promise<SyntaxError[] | undefined> {
-  const [fileText, parameterNumber] = await sanitizeFileWithQueryParameters(
+): Promise<SyntaxError[]> {
+  const errors = []
+  const [fileText, parameterNumber] = sanitizeFileWithQueryParameters(
     document.getText(), options.queryParameterInfo, logger,
   )
 
@@ -38,7 +39,7 @@ export async function queryFileSyntaxAnalysis(
   }
   catch (error: unknown) {
     const databaseError = error as DatabaseError
-    const message = databaseError.toString()
+    const message = databaseError.message
 
     if (options.isComplete) {
       logger.error(`SyntaxError code: ${databaseError.code || "unknown"}, ${error}`)
@@ -59,17 +60,12 @@ export async function queryFileSyntaxAnalysis(
       range = getTextAllRange(document)
     }
 
-    return [
-      {
-        range,
-        message,
-      },
-    ]
+    errors.push({ range, message })
   }
   finally {
     await pgClient.query("ROLLBACK")
     pgClient.release()
   }
 
-  return undefined
+  return errors
 }
