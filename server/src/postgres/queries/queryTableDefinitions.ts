@@ -73,7 +73,7 @@ export async function queryTableDefinitions(
     )
   }
   catch (error: unknown) {
-    logger.error(`${(error as Error).toString()}`)
+    logger.error(`${(error as Error).message}`)
   }
   finally {
     pgClient.release()

@@ -83,7 +83,7 @@ export class DefinitionsManager {
       catch (error: unknown) {
         logger.error(
           `The definitions of "${documentUri}" cannot load.`
-          + ` ${(error as Error).toString()}`,
+          + ` ${(error as Error).message}`,
         )
       }
     }

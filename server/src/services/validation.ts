@@ -22,15 +22,16 @@ export async function validateTextDocument(
   document: TextDocument,
   options: ValidateTextDocumentOptions,
   logger: Logger,
-): Promise<Diagnostic[] | undefined> {
-  let diagnostics = await checkSyntaxAnalysis(
+): Promise<Diagnostic[]> {
+  let diagnostics: Diagnostic[] = []
+  diagnostics = await checkSyntaxAnalysis(
     pgPool,
     document,
     options,
     logger,
   )
 
-  if (diagnostics === undefined) {
+  if (diagnostics.length === 0) {
     diagnostics = await checkStaticAnalysis(
       pgPool,
       document,
@@ -47,7 +48,7 @@ async function checkSyntaxAnalysis(
   document: TextDocument,
   options: ValidateTextDocumentOptions,
   logger: Logger,
-): Promise<Diagnostic[] | undefined> {
+): Promise<Diagnostic[]> {
   const errors = await queryFileSyntaxAnalysis(
     pgPool,
     document,
@@ -57,10 +58,6 @@ async function checkSyntaxAnalysis(
     },
     logger,
   )
-
-  if (errors === undefined) {
-    return undefined
-  }
 
   return errors.map(({ range, message }) => {
     const diagnostic: Diagnostic = {
@@ -90,7 +87,7 @@ async function checkStaticAnalysis(
   document: TextDocument,
   options: ValidateTextDocumentOptions,
   logger: Logger,
-): Promise<Diagnostic[] | undefined> {
+): Promise<Diagnostic[]> {
   const errors = await queryFileStaticAnalysis(
     pgPool,
     document,
@@ -101,10 +98,6 @@ async function checkStaticAnalysis(
     },
     logger,
   )
-
-  if (errors === undefined) {
-    return undefined
-  }
 
   return errors.flatMap(
     ({ level, range, message }) => {

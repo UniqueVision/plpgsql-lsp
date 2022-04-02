@@ -5,7 +5,6 @@ import {
   QueryParameterInfo, sanitizeFileWithQueryParameters,
 } from "@/postgres/parameters"
 import { Statement } from "@/postgres/parsers/statement"
-import { asyncFlatMap } from "@/utilities/functool"
 import { readFileFromUri } from "@/utilities/text"
 
 export interface FunctionInfo {
@@ -18,21 +17,23 @@ export async function getFunctions(
   queryParameterInfo: QueryParameterInfo | null,
   logger: Logger,
 ): Promise<FunctionInfo[]> {
-  const [fileText] = await sanitizeFileWithQueryParameters(
+  let statements: Statement[] = []
+  const [fileText] = sanitizeFileWithQueryParameters(
     readFileFromUri(uri), queryParameterInfo, logger,
   )
-  const query = await parseQuery(fileText)
 
-  const statements: Statement[] | undefined = query?.["stmts"]
-  if (statements === undefined) {
+  try {
+    const query = await parseQuery(fileText)
+    statements = query?.["stmts"] || []
+  }
+  catch (error: unknown) {
     return []
   }
 
-  return asyncFlatMap(
-    statements,
-    async (statement) => {
+  return statements.flatMap(
+    (statement) => {
       if (statement?.stmt?.CreateFunctionStmt !== undefined) {
-        return await getCreateFunctions(statement)
+        return getCreateFunctions(statement)
       }
       else {
         return []
@@ -41,9 +42,9 @@ export async function getFunctions(
   )
 }
 
-async function getCreateFunctions(
+function getCreateFunctions(
   statement: Statement,
-): Promise<FunctionInfo[]> {
+): FunctionInfo[] {
   const createFunctionStmt = statement?.stmt?.CreateFunctionStmt
   if (createFunctionStmt === undefined) {
     return []

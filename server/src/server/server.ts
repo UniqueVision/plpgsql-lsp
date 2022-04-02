@@ -126,7 +126,7 @@ export class Server {
       catch (error: unknown) {
         this.logger.error(
           "DidChangeConfigurationNotification cannot register."
-          + ` ${(error as Error).toString()}`,
+          + ` ${(error as Error).message}`,
         )
       }
     }

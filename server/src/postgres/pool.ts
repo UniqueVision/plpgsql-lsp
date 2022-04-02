@@ -42,10 +42,10 @@ export async function getPool(
       pgPool = new Pool(pgConfig)
 
       // Try connection.
-      await (await pgPool.connect()).release()
+      await pgPool.query("SELECT 1")
     }
     catch (error: unknown) {
-      logger.error((error as Error).toString())
+      logger.error((error as Error).message)
 
       return undefined
     }
