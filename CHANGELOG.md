@@ -2,6 +2,9 @@
 
 ## Unreleased - TDB
 
+## [v2.2.2](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.2.2) - 2022/04/03
+- Fix error handling bug. [#14](https://github.com/UniqueVision/plpgsql-lsp/pull/14)
+
 ## [v2.2.1](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.2.1) - 2022/04/01
 - Fix first connection bug. [#11](https://github.com/UniqueVision/plpgsql-lsp/pull/11)
 
