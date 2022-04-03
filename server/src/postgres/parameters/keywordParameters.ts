@@ -4,6 +4,8 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 import { escapeRegex } from "@/utilities/regex"
 import { getFirstLine, getTextAfterFirstLine } from "@/utilities/text"
 
+import { makePositionalParamter } from "./helpers"
+
 export type KeywordQueryParametersInfo = {
   type: "keyword",
   keywordParameters: string[],
@@ -14,7 +16,7 @@ export class KeywordQueryParameterPatternNotDefinedError extends Error {
   constructor() {
     super(
       "'plpgsqlLanguageServer.keywordQueryParameterPattern'"
-      +" does not set in the settings.",
+      + " does not set in the settings.",
     )
     this.name = "KeywordQueryParameterPatternNotDefinedError"
   }
@@ -68,7 +70,7 @@ export function getKeywordQueryParameterInfo(
         )
         keywordParameters = Array.from(
           new Set(
-            [...getTextAfterFirstLine(document) .matchAll(keywordRegExp)]
+            [...getTextAfterFirstLine(document).matchAll(keywordRegExp)]
               .map((found) => found[0]),
           ),
         )
@@ -89,14 +91,14 @@ export function sanitizeFileWithKeywordQueryParameters(
   fileText: string,
   queryParameterInfo: KeywordQueryParametersInfo,
   _logger: Logger,
-) : [string, uinteger] {
+): [string, uinteger] {
   const keywordParameters = new Set(queryParameterInfo.keywordParameters)
   for (
     const [index, keywordParameter] of Array.from(keywordParameters.values()).entries()
   ) {
     fileText = fileText.replace(
       new RegExp(escapeRegex(keywordParameter), "g"),
-      `$${index + 1}`,
+      makePositionalParamter(index, keywordParameter),
     )
   }
 

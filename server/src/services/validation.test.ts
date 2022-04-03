@@ -1,24 +1,18 @@
 import * as assert from "assert"
 import { Diagnostic, DiagnosticSeverity, Range } from "vscode-languageserver"
-import { TextDocument } from "vscode-languageserver-textdocument"
 
-import {
-  DEFAULT_LOAD_FILE_OPTIONS,
-  getDefinitionFileResource,
-  getQueryFileResource,
-  loadDefinitionFile,
-  LoadFileOptions,
-  loadQueryFile,
-} from "@/__tests__/helpers/file"
+import { DEFAULT_LOAD_FILE_OPTIONS, LoadFileOptions } from "@/__tests__/helpers/file"
 import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
-import { TestTextDocuments } from "@/__tests__/helpers/textDocuments"
+import {
+  makeSampleTextDocument,
+  TestTextDocuments,
+} from "@/__tests__/helpers/textDocuments"
 import {
   KeywordQueryParameterPatternNotDefinedError,
 } from "@/postgres/parameters/keywordParameters"
 import { Server } from "@/server"
 import { neverReach } from "@/utilities/neverReach"
-
 
 describe("Validate Tests", () => {
   let server: Server
@@ -29,41 +23,13 @@ describe("Validate Tests", () => {
     }
   })
 
-  async function validateDefinition(
-    file: string,
-    options: { ignoreDesableFlag: boolean } = { ignoreDesableFlag: false },
-  ): Promise<Diagnostic[] | undefined> {
-    let context = loadDefinitionFile(file)
-
-    if (options.ignoreDesableFlag) {
-      context = context.split("\n").slice(1).join("\n")
-    }
-
-    const document = TextDocument.create(
-      getDefinitionFileResource(file),
-      "postgres",
-      0,
-      context,
-    );
-
-    (server.documents as TestTextDocuments).set(document)
-
-    if (server.handlers === undefined) {
-      throw new Error("handlers is undefined")
-    }
-
-    return server.handlers.validate(document)
-  }
-
-  async function validateQuery(
+  async function validateSampleFile(
     file: string,
     options: LoadFileOptions = DEFAULT_LOAD_FILE_OPTIONS,
   ): Promise<Diagnostic[] | undefined> {
-    const document = TextDocument.create(
-      getQueryFileResource(file),
-      "postgres",
-      0,
-      loadQueryFile(file, options),
+    const document = makeSampleTextDocument(
+      file,
+      options,
     );
 
     (server.documents as TestTextDocuments).set(document)
@@ -95,16 +61,16 @@ describe("Validate Tests", () => {
     })
 
     it("Correct function", async () => {
-      const diagnostics = await validateDefinition(
-        "stored/function_correct.pgsql",
+      const diagnostics = await validateSampleFile(
+        "definitions/stored/function_correct.pgsql",
       )
 
       validateDiagnostics(diagnostics, [])
     })
 
     it("Function has unused variable", async () => {
-      const diagnostics = await validateDefinition(
-        "stored/static_analysis_warning_function_unused_variable.pgsql",
+      const diagnostics = await validateSampleFile(
+        "definitions/stored/static_analysis_warning_function_unused_variable.pgsql",
       )
 
       validateDiagnostics(diagnostics, [
@@ -117,9 +83,9 @@ describe("Validate Tests", () => {
     })
 
     it("Function column does not exists", async () => {
-      const diagnostics = await validateDefinition(
-        "stored/syntax_error_function_column_does_not_exist.pgsql",
-        { ignoreDesableFlag: true },
+      const diagnostics = await validateSampleFile(
+        "definitions/stored/syntax_error_function_column_does_not_exist.pgsql",
+        { skipDisableComment: true },
       )
 
       validateDiagnostics(diagnostics, [
@@ -132,16 +98,16 @@ describe("Validate Tests", () => {
     })
 
     it("Correct query", async () => {
-      const diagnostics = await validateQuery(
-        "correct_query.pgsql",
+      const diagnostics = await validateSampleFile(
+        "queries/correct_query.pgsql",
       )
 
       validateDiagnostics(diagnostics, [])
     })
 
     it("Syntax error query", async () => {
-      const diagnostics = await validateQuery(
-        "syntax_error_query_with_language_server_disable_comment.pgsql",
+      const diagnostics = await validateSampleFile(
+        "queries/syntax_error_query_with_language_server_disable_comment.pgsql",
         { skipDisableComment: true },
       )
 
@@ -155,16 +121,16 @@ describe("Validate Tests", () => {
     })
 
     it("Syntax error query with language server disable comment.", async () => {
-      const diagnostics = await validateQuery(
-        "syntax_error_query_with_language_server_disable_comment.pgsql",
+      const diagnostics = await validateSampleFile(
+        "queries/syntax_error_query_with_language_server_disable_comment.pgsql",
       )
 
       expect(diagnostics).toBeUndefined()
     })
 
     it("Syntax error query with language server disable block comment.", async () => {
-      const diagnostics = await validateQuery(
-        "syntax_error_query_with_language_server_disable_block_comment.pgsql",
+      const diagnostics = await validateSampleFile(
+        "queries/syntax_error_query_with_language_server_disable_block_comment.pgsql",
       )
 
       expect(diagnostics).toBeUndefined()
@@ -173,8 +139,9 @@ describe("Validate Tests", () => {
     it(
       "Syntax error query with language server validation disable comment.",
       async () => {
-        const diagnostics = await validateQuery(
-          "syntax_error_query_with_language_server_validation_disable_comment.pgsql",
+        const diagnostics = await validateSampleFile(
+          "queries/"
+          + "syntax_error_query_with_language_server_validation_disable_comment.pgsql",
         )
 
         expect(diagnostics).toBeUndefined()
@@ -184,8 +151,8 @@ describe("Validate Tests", () => {
     it(
       "Syntax error query with language server validation disable block comment.",
       async () => {
-        const diagnostics = await validateQuery(
-          "syntax_error_query"
+        const diagnostics = await validateSampleFile(
+          "queries/syntax_error_query"
           + "_with_language_server_validation_disable_block_comment.pgsql",
         )
 
@@ -196,8 +163,8 @@ describe("Validate Tests", () => {
     it(
       "Raise KeywordQueryParameterPatternNotDefinedError.",
       async () => {
-        const diagnostics = await validateQuery(
-          "correct_query_with_keyword_parameter.pgsql",
+        const diagnostics = await validateSampleFile(
+          "queries/correct_query_with_keyword_parameter.pgsql",
         )
 
         validateDiagnostics(diagnostics, [
@@ -219,8 +186,8 @@ describe("Validate Tests", () => {
     })
 
     it("Correct query with default positional parameters", async () => {
-      const diagnostics = await validateQuery(
-        "correct_query_with_default_positional_parameter.pgsql",
+      const diagnostics = await validateSampleFile(
+        "queries/correct_query_with_default_positional_parameter.pgsql",
       )
 
       validateDiagnostics(diagnostics, [])
@@ -236,8 +203,8 @@ describe("Validate Tests", () => {
     })
 
     it("Correct query with default keyword parameters", async () => {
-      const diagnostics = await validateQuery(
-        "correct_query_with_default_keyword_parameter.pgsql",
+      const diagnostics = await validateSampleFile(
+        "queries/correct_query_with_default_keyword_parameter.pgsql",
         { skipDisableComment: true },
       )
 
@@ -252,16 +219,16 @@ describe("Validate Tests", () => {
     })
 
     it("Correct query with positional parameters", async () => {
-      const diagnostics = await validateQuery(
-        "correct_query_with_positional_parameter.pgsql",
+      const diagnostics = await validateSampleFile(
+        "queries/correct_query_with_positional_parameter.pgsql",
       )
 
       validateDiagnostics(diagnostics, [])
     })
 
     it("Correct query with arbitory positional parameters", async () => {
-      const diagnostics = await validateQuery(
-        "correct_query_with_arbitory_positional_parameter.pgsql",
+      const diagnostics = await validateSampleFile(
+        "queries/correct_query_with_arbitory_positional_parameter.pgsql",
       )
 
       validateDiagnostics(diagnostics, [])
@@ -277,16 +244,16 @@ describe("Validate Tests", () => {
     })
 
     it("Correct query with keyword parameters", async () => {
-      const diagnostics = await validateQuery(
-        "correct_query_with_keyword_parameter.pgsql",
+      const diagnostics = await validateSampleFile(
+        "queries/correct_query_with_keyword_parameter.pgsql",
       )
 
       validateDiagnostics(diagnostics, [])
     })
 
     it("Correct query with arbitory keyword parameters", async () => {
-      const diagnostics = await validateQuery(
-        "correct_query_with_arbitory_keyword_parameter.pgsql",
+      const diagnostics = await validateSampleFile(
+        "queries/correct_query_with_arbitory_keyword_parameter.pgsql",
       )
 
       validateDiagnostics(diagnostics, [])
