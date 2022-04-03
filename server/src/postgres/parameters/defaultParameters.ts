@@ -4,6 +4,8 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 import { escapeRegex } from "@/utilities/regex"
 import { getFirstLine, getTextAfterFirstLine } from "@/utilities/text"
 
+import { makePositionalParamter } from "./helpers"
+
 export type DefaultQueryParametersInfo = {
   type: "default",
   queryParameters: string[],
@@ -52,7 +54,7 @@ export function sanitizeFileWithDefaultQueryParameters(
   for (const [index, parameter] of Array.from(queryParameters.values()).entries()) {
     fileText = fileText.replace(
       new RegExp(escapeRegex(parameter), "g"),
-      `$${index + 1}`,
+      makePositionalParamter(index, parameter),
     )
   }
 
