@@ -1,7 +1,9 @@
 import { TextDocuments, URI } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { getSampleFileResource, loadSampleFile } from "./file"
+import {
+  DEFAULT_LOAD_FILE_OPTIONS, getSampleFileResource, LoadFileOptions, loadSampleFile,
+} from "./file"
 
 
 export class TestTextDocuments extends TextDocuments<TextDocument> {
@@ -20,13 +22,13 @@ export class TestTextDocuments extends TextDocuments<TextDocument> {
   }
 }
 
-export function makeTextDocument(
+export function makeSampleTextDocument(
   file: string,
-  options: { ignoreDesableFlag: boolean } = { ignoreDesableFlag: false },
+  options: LoadFileOptions = DEFAULT_LOAD_FILE_OPTIONS,
 ): TextDocument {
   let context = loadSampleFile(file)
 
-  if (options.ignoreDesableFlag) {
+  if (options.skipDisableComment) {
     context = context.split("\n").slice(1).join("\n")
   }
 

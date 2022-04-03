@@ -1,7 +1,7 @@
 import { parseQuery } from "libpg-query"
 import { Range, uinteger } from "vscode-languageserver"
 
-import { loadDefinitionFile } from "@/__tests__/helpers/file"
+import { loadSampleFile } from "@/__tests__/helpers/file"
 
 import {
   getFunctionDefinitions,
@@ -13,21 +13,21 @@ import { Statement } from "./statement"
 
 test.each([
   [
-    "tables/companies.pgsql",
+    "definitions/tables/companies.pgsql",
     Array(2).fill(Range.create(2, 13, 2, 22)),
   ],
   [
-    "tables/public_users.pgsql",
+    "definitions/tables/public_users.pgsql",
     Array(2).fill(Range.create(2, 13, 2, 25)),
   ],
   [
-    "tables/campaign_participants.pgsql",
+    "definitions/tables/campaign_participants.pgsql",
     [Range.create(2, 13, 2, 34)],
   ],
 ])(
   'getTableDefinitions <- "%s"',
   async (file, expected) => {
-    const fileText = loadDefinitionFile(file)
+    const fileText = loadSampleFile(file)
     const statements = getTableDefinitions(
       fileText, await getStmtement(fileText, 1), `file://${file}`, "public",
     )
@@ -42,20 +42,20 @@ test.each([
 
 test.each([
   [
-    "views/deleted_users.pgsql",
+    "definitions/views/deleted_users.pgsql",
     Array(2).fill(Range.create(2, 12, 2, 25)),
   ],
   [
-    "views/public_deleted_users.pgsql",
+    "definitions/views/public_deleted_users.pgsql",
     Array(2).fill(Range.create(2, 12, 2, 32)),
   ],
   [
-    "views/campaign_deleted_participants.pgsql",
+    "definitions/views/campaign_deleted_participants.pgsql",
     [Range.create(2, 12, 2, 41)],
   ],
 ])(
   'getViewDefinitions <- "%s"', async (file, expected) => {
-    const fileText = loadDefinitionFile(file)
+    const fileText = loadSampleFile(file)
     const statements = getViewDefinitions(
       fileText, await getStmtement(fileText, 1), `file://${file}`, "public",
     )
@@ -70,12 +70,12 @@ test.each([
 
 test.each([
   [
-    "types/type_user.pgsql",
+    "definitions/types/type_user.pgsql",
     Array(2).fill(Range.create(2, 12, 2, 21)),
   ],
 ])(
   'getTypeDefinitions <- "%s"', async (file, expected) => {
-    const fileText = loadDefinitionFile(file)
+    const fileText = loadSampleFile(file)
     const statements = getTypeDefinitions(
       fileText, await getStmtement(fileText, 1), `file://${file}`, "public",
     )
@@ -90,13 +90,13 @@ test.each([
 
 test.each([
   [
-    "stored/function_correct.pgsql",
+    "definitions/stored/function_correct.pgsql",
     Array(2).fill(Range.create(2, 16, 2, 32)),
   ],
 ])(
   'getFunctionDefinitions <- "%s"',
   async (file, expected) => {
-    const fileText = loadDefinitionFile(file)
+    const fileText = loadSampleFile(file)
     const statements = getFunctionDefinitions(
       fileText, await getStmtement(fileText, 1), `file://${file}`, "public",
     )

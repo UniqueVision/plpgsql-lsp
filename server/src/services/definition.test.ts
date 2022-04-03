@@ -5,7 +5,7 @@ import {
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { getDefinitionFileResource } from "@/__tests__/helpers/file"
+import { getSampleFileResource } from "@/__tests__/helpers/file"
 import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
 import { TestTextDocuments } from "@/__tests__/helpers/textDocuments"
@@ -64,7 +64,7 @@ describe("Definition Tests", () => {
 
   describe("Definition", function () {
     it("Definition on table", async () => {
-      const documentUri = getDefinitionFileResource("tables/companies.pgsql")
+      const documentUri = getSampleFileResource("definitions/tables/companies.pgsql")
       const definition = await onDefinition(documentUri, "companies")
 
       validateDefinitionLinks(definition, [
@@ -77,7 +77,7 @@ describe("Definition Tests", () => {
     })
 
     it("Definition on table with default schema", async () => {
-      const documentUri = getDefinitionFileResource("tables/public_users.pgsql")
+      const documentUri = getSampleFileResource("definitions/tables/public_users.pgsql")
       const definition = await onDefinition(documentUri, "public.users")
 
       validateDefinitionLinks(definition, [
@@ -90,8 +90,8 @@ describe("Definition Tests", () => {
     })
 
     it("Definition on table with non-default schema", async () => {
-      const documentUri = getDefinitionFileResource(
-        "tables/campaign_participants.pgsql",
+      const documentUri = getSampleFileResource(
+        "definitions/tables/campaign_participants.pgsql",
       )
       const definition = await onDefinition(documentUri, "campaign.participants")
 
@@ -105,7 +105,7 @@ describe("Definition Tests", () => {
     })
 
     it("Definition on view", async () => {
-      const documentUri = getDefinitionFileResource("views/deleted_users.pgsql")
+      const documentUri = getSampleFileResource("definitions/views/deleted_users.pgsql")
       const definition = await onDefinition(documentUri, "deleted_users")
 
       validateDefinitionLinks(definition, [
@@ -118,7 +118,7 @@ describe("Definition Tests", () => {
     })
 
     it("Definition with language server disable comment", async () => {
-      const documentUri = getDefinitionFileResource("tables/companies.pgsql")
+      const documentUri = getSampleFileResource("definitions/tables/companies.pgsql")
       const definition = await onDefinition(
         documentUri,
         dedent`
@@ -133,7 +133,7 @@ describe("Definition Tests", () => {
     })
 
     it("Definition with language server disable block comment", async () => {
-      const documentUri = getDefinitionFileResource("tables/companies.pgsql")
+      const documentUri = getSampleFileResource("definitions/tables/companies.pgsql")
       const definition = await onDefinition(
         documentUri,
         dedent`
