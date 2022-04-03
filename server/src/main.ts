@@ -4,7 +4,7 @@ import {
   ProposedFeatures,
 } from "vscode-languageserver/node"
 
-import { Server } from "@/server/server"
+import { Server } from "@/server"
 import { ConsoleLogger } from "@/utilities/logger"
 
 

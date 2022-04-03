@@ -16,7 +16,7 @@ import { TestTextDocuments } from "@/__tests__/helpers/textDocuments"
 import {
   KeywordQueryParameterPatternNotDefinedError,
 } from "@/postgres/parameters/keywordParameters"
-import { Server } from "@/server/server"
+import { Server } from "@/server"
 import { neverReach } from "@/utilities/neverReach"
 
 

@@ -6,7 +6,7 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
 import { TestTextDocuments } from "@/__tests__/helpers/textDocuments"
-import { Server } from "@/server/server"
+import { Server } from "@/server"
 import { neverReach } from "@/utilities/neverReach"
 import { makePostgresCodeMarkdown } from "@/utilities/text"
 

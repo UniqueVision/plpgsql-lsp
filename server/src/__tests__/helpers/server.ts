@@ -1,6 +1,6 @@
 import { createConnection } from "vscode-languageserver/node"
 
-import { Server } from "@/server/server"
+import { Server } from "@/server"
 import { SettingsManager } from "@/server/settingsManager"
 import { Settings } from "@/settings"
 import { ConsoleLogger } from "@/utilities/logger"
