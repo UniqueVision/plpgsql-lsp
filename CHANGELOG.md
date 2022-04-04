@@ -1,6 +1,7 @@
 # Change Log
 
 ## Unreleased - TDB
+- Enhanced display colors. [#17](https://github.com/UniqueVision/plpgsql-lsp/pull/17)
 
 ## [v2.2.3](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.2.3) - 2022/04/04
 - Fix error handling. [#16](https://github.com/UniqueVision/plpgsql-lsp/pull/16)
