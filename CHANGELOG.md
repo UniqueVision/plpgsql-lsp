@@ -1,6 +1,9 @@
 # Change Log
 
 ## Unreleased - TDB
+
+## [v2.2.3](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.2.3) - 2022/04/04
+- Fix error handling. [#16](https://github.com/UniqueVision/plpgsql-lsp/pull/16)
 - Fix the length of sanitized query using keyword parameters. [#15](https://github.com/UniqueVision/plpgsql-lsp/pull/15)
 
 ## [v2.2.2](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.2.2) - 2022/04/03
