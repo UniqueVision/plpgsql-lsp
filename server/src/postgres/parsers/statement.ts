@@ -1,3 +1,4 @@
+import { parseQuery } from "libpg-query"
 import { uinteger } from "vscode-languageserver"
 
 export interface Statement {
@@ -87,4 +88,14 @@ export interface CreateFunctionStmtOptionsDefElemArgListItem {
 
 export interface CreateFunctionStmtOptionsDefElemArgListItemString {
   str: string
+}
+
+
+export async function getStmtements(query: string): Promise<Statement[] | undefined> {
+  try {
+    return (await parseQuery(query))?.["stmts"]
+  }
+  catch (error: unknown) {
+    return undefined
+  }
 }
