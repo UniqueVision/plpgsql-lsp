@@ -1,4 +1,3 @@
-import { parseQuery } from "libpg-query"
 import { Range, uinteger } from "vscode-languageserver"
 
 import { loadSampleFile } from "@/__tests__/helpers/file"
@@ -9,7 +8,7 @@ import {
   getTypeDefinitions,
   getViewDefinitions,
 } from "./getDefinitions"
-import { Statement } from "./statement"
+import { getStmtements, Statement } from "./statement"
 
 test.each([
   [
@@ -111,5 +110,5 @@ test.each([
 
 
 async function getStmtement(fileText: string, index: uinteger): Promise<Statement> {
-  return (await parseQuery(fileText))["stmts"][index]
+  return ((await getStmtements(fileText)) || [])[index]
 }

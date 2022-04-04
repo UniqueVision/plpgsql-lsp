@@ -1,10 +1,9 @@
 import { sync as glob } from "glob"
-import { parseQuery } from "libpg-query"
 import { DefinitionLink, Logger, URI, WorkspaceFolder } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { getDefinitions } from "@/postgres/parsers/getDefinitions"
-import { Statement } from "@/postgres/parsers/statement"
+import { getStmtements } from "@/postgres/parsers/statement"
 import { Settings } from "@/settings"
 import { disableLanguageServer } from "@/utilities/disableLanguageServer"
 import { readTextDocumentFromUri } from "@/utilities/text"
@@ -38,9 +37,7 @@ export class DefinitionsManager {
   ): Promise<DefinitionCandidate[] | undefined> {
     const fileText = document.getText()
 
-    const query = await parseQuery(fileText)
-
-    const statements: Statement[] | undefined = query?.["stmts"]
+    const statements = await getStmtements(fileText)
     if (statements === undefined) {
       return undefined
     }
