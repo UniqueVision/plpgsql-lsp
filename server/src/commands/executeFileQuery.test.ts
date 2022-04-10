@@ -123,7 +123,7 @@ describe("CommandExecuter.executeFileQuery Tests", () => {
         .withDatabase("NonExistentDatabase")
         .withEnableExecuteFileQueryCommand(true)
         .build()
-      console.log(settings.enableExecuteFileQueryCommand)
+
       server = setupTestServer(settings)
     })
 

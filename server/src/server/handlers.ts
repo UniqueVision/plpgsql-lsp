@@ -137,7 +137,7 @@ export class Handlers {
     ) {
       const settings = await this.settingsManager.get(document.uri)
 
-      console.log("The file definitions are updating...")
+      this.logger.log("The file definitions are updating...")
 
       const candidates = await this.definitionsManager.updateFileDefinitions(
         document, settings.defaultSchema,
@@ -146,7 +146,7 @@ export class Handlers {
       if (candidates !== undefined) {
         const definitions = candidates.map(candidate => candidate.definition)
 
-        console.log(
+        this.logger.log(
           `The file definitions have been updated!! 😎 ${JSON.stringify(definitions)}`,
         )
       }
