@@ -181,8 +181,8 @@ export class Handlers {
       (pgPool, document, settings) =>
         getCompletionItems(
           pgPool,
-          params,
           document,
+          params.position,
           settings.defaultSchema,
           this.logger,
         ),
@@ -199,8 +199,8 @@ export class Handlers {
 
     return await getDefinitionLinks(
       this.definitionsManager,
-      params,
       document,
+      params.position,
       this.logger,
     )
   }
@@ -255,8 +255,8 @@ export class Handlers {
       (pgPool, document, settings) =>
         getHover(
           pgPool,
-          params,
           document,
+          params.position,
           settings.defaultSchema,
           this.logger,
         ),

@@ -1,8 +1,8 @@
 import {
   CompletionItem,
   CompletionItemKind,
-  CompletionParams,
   Logger,
+  Position,
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
@@ -26,16 +26,16 @@ import { getWordRangeAtPosition, isFirstCommentLine } from "@/utilities/text"
 
 export async function getCompletionItems(
   pgPool: PostgresPool,
-  params: CompletionParams,
   document: TextDocument,
+  position: Position,
   defaultSchema: string,
   logger: Logger,
 ): Promise<CompletionItem[] | undefined> {
-  if (isFirstCommentLine(document, params.position)) {
+  if (isFirstCommentLine(document, position)) {
     return getLanguageServerCommentCompletionItems()
   }
 
-  const wordRange = getWordRangeAtPosition(document, params.position)
+  const wordRange = getWordRangeAtPosition(document, position)
   if (wordRange === undefined) {
     return undefined
   }
