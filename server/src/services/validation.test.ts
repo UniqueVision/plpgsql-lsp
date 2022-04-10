@@ -141,7 +141,7 @@ describe("Validate Tests", () => {
       async () => {
         const diagnostics = await validateSampleFile(
           "queries/"
-          + "syntax_error_query_with_language_server_validation_disable_comment.pgsql",
+          + "syntax_error_query_with_language_server_disable_validation_comment.pgsql",
         )
 
         expect(diagnostics).toBeUndefined()
@@ -153,7 +153,7 @@ describe("Validate Tests", () => {
       async () => {
         const diagnostics = await validateSampleFile(
           "queries/syntax_error_query"
-          + "_with_language_server_validation_disable_block_comment.pgsql",
+          + "_with_language_server_disable_validation_block_comment.pgsql",
         )
 
         expect(diagnostics).toBeUndefined()
