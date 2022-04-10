@@ -21,7 +21,8 @@
     "vscode": "^1.61.0"
   },
   "activationEvents": [
-    "onLanguage:postgres"
+    "onLanguage:postgres",
+    "onCommand:plpgsql-lsp.executeFileQuery"
   ],
   "main": "./client/out/extension",
   "scripts": {
@@ -41,6 +42,20 @@
     "clean": "rimraf client/out && rimraf server/out"
   },
   "contributes": {
+    "commands": [
+      {
+        "command": "plpgsql-lsp.executeFileQuery",
+        "title": "PL/pgSQL: Execute File Query"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "plpgsql-lsp.executeFileQuery",
+          "when": "editorLangId == postgres"
+        }
+      ]
+    },
     "languages": [
       {
         "id": "postgres",
@@ -124,6 +139,12 @@
           "scope": "resource",
           "type": "string",
           "description": "keyword query paramter pattern. the pattern must include \"{keyword}\", as in \"@{keyword}\"."
+        },
+        "plpgsqlLanguageServer.enableExecuteFileQueryCommand": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Enable/Disable \"Execute File Query\" command."
         }
       },
       "required": [

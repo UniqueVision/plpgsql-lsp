@@ -1,4 +1,8 @@
 import {
+  CodeAction,
+  CodeActionParams,
+  CodeLens,
+  CodeLensParams,
   CompletionItem,
   CompletionParams,
   Connection,
@@ -7,6 +11,7 @@ import {
   Diagnostic,
   DidChangeConfigurationParams,
   DidChangeWatchedFilesParams,
+  ExecuteCommandParams,
   FileChangeType,
   Hover,
   HoverParams,
@@ -16,10 +21,13 @@ import {
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
+import { COMMAND_TITLE_MAP } from "@/commands"
 import { getQueryParameterInfo } from "@/postgres/parameters"
 import { getPool, PostgresPoolMap } from "@/postgres/pool"
 import { DefinitionsManager } from "@/server/definitionsManager"
 import { SettingsManager } from "@/server/settingsManager"
+import { getCodeActions } from "@/services/codeAction"
+import { getCodeLenses } from "@/services/codeLens"
 import { getCompletionItems } from "@/services/completion"
 import {
   getDefinitionLinks,
@@ -29,6 +37,9 @@ import { validateTextDocument } from "@/services/validation"
 import {
   disableLanguageServer, disableValidation,
 } from "@/utilities/disableLanguageServer"
+
+import { CommandExecuter } from "./commandExecuter"
+
 
 export type HandlersOptions = {
   hasDiagnosticRelatedInformationCapability: boolean
@@ -41,6 +52,7 @@ export class Handlers {
     private readonly documents: TextDocuments<TextDocument>,
     private readonly settingsManager: SettingsManager,
     private readonly definitionsManager: DefinitionsManager,
+    private readonly commaneExecuter: CommandExecuter,
     private readonly options: HandlersOptions,
     private readonly logger: Logger,
   ) {
@@ -49,6 +61,8 @@ export class Handlers {
     this.documents.onDidOpen((event) => this.onDidOpen(event))
     this.documents.onDidSave((event) => this.onDidSave(event))
 
+    this.connection.onCodeAction((params) => this.onCodeAction(params))
+    this.connection.onCodeLens((params) => this.onCodeLens(params))
     this.connection.onCompletion((params) => this.onCompletion(params))
     this.connection.onDefinition((params) => this.onDefinition(params))
     this.connection.onDidChangeConfiguration(
@@ -57,6 +71,7 @@ export class Handlers {
     this.connection.onDidChangeWatchedFiles(
       (params) => this.onDidChangeWatchedFiles(params),
     )
+    this.connection.onExecuteCommand((params) => this.onExecuteCommand(params))
     this.connection.onHover((params) => this.onHover(params))
   }
 
@@ -136,6 +151,42 @@ export class Handlers {
     }
   }
 
+  async onCodeAction(
+    params: CodeActionParams,
+  ): Promise<CodeAction[] | undefined> {
+    const document = this.documents.get(params.textDocument.uri)
+    const settings = await this.settingsManager.get(params.textDocument.uri)
+
+    const pgPool = await getPool(this.pgPools, settings, this.logger)
+    if (pgPool === undefined) {
+      return undefined
+    }
+
+    if (document === undefined || disableLanguageServer(document)) {
+      return undefined
+    }
+
+    return await getCodeActions(pgPool, document, settings, this.logger)
+  }
+
+  async onCodeLens(
+    params: CodeLensParams,
+  ): Promise<CodeLens[] | undefined> {
+    const document = this.documents.get(params.textDocument.uri)
+    const settings = await this.settingsManager.get(params.textDocument.uri)
+
+    const pgPool = await getPool(this.pgPools, settings, this.logger)
+    if (pgPool === undefined) {
+      return undefined
+    }
+
+    if (document === undefined || disableLanguageServer(document)) {
+      return undefined
+    }
+
+    return await getCodeLenses(pgPool, document, settings, this.logger)
+  }
+
   async onCompletion(
     params: CompletionParams,
   ): Promise<CompletionItem[] | undefined> {
@@ -203,6 +254,18 @@ export class Handlers {
       for (const document of this.documents.all()) {
         await this.validate(document)
       }
+    }
+  }
+
+  async onExecuteCommand(params: ExecuteCommandParams): Promise<void> {
+    try {
+      await this.commaneExecuter.execute(params)
+      this.connection.window.showInformationMessage(
+        COMMAND_TITLE_MAP[params.command],
+      )
+    }
+    catch (error: unknown) {
+      this.connection.window.showErrorMessage("PL/pgSQL: " + (error as Error).message)
     }
   }
 

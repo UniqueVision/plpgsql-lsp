@@ -10,6 +10,7 @@
 - hover type/table/view/function/procedure definition.
 - syntax check.
 - static analysis check (when [plpgsql_check](https://github.com/okbob/plpgsql_check) use) .
+- execute a file query by CodeLens/Command.
 - [Multi-root Workspace](https://code.visualstudio.com/docs/editor/multi-root-workspaces) support.
 
 ## Usage
@@ -41,7 +42,6 @@
 ```
 
 ## Disable Specific File
-
 If you want to disable the extension for a specific file, just add this comment your file top.
 
 ```sql
@@ -52,6 +52,37 @@ Or, if you want to disable only the validation feature, try this
 
 ```sql
 /* plpgsql-language-server:disable validation */
+```
+
+## Execute File Query
+You can execute a file query from VSCode Command.
+
+![preview](images/execute_file_query_command.png)
+
+Also, you can use it by CodeLens when your file is valid.
+
+![preview](images/code_lens.png)
+
+
+If you want to disable this feature, try this
+
+```jsonc 
+{
+  "plpgsqlLanguageServer.enableExecuteFileQueryCommand": false
+}
+```
+
+Shortcuts are not supported by default, 
+but can be configured by adding the following setting to "keybindings.json".
+
+```jsonc
+[
+  {
+    "key": "f5",
+    "command": "plpgsql-lsp.executeFileQuery",
+    "when": "editorLangId == 'postgres'"
+  }
+]
 ```
 
 ## [Experimental Feature] Query Parameters

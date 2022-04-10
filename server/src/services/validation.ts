@@ -43,6 +43,28 @@ export async function validateTextDocument(
   return diagnostics
 }
 
+export async function checkFileValidation(
+  pgPool: PostgresPool,
+  document: TextDocument,
+  logger: Logger,
+) {
+  const diagnostics = await validateTextDocument(
+    pgPool,
+    document,
+    {
+      isComplete: false,
+      queryParameterInfo: null,
+      hasDiagnosticRelatedInformationCapability: false,
+    },
+    logger,
+  )
+
+  // Check file has no validation error.
+  return diagnostics.filter(diagnostic => {
+    return diagnostic.severity === DiagnosticSeverity.Error
+  }).length === 0
+}
+
 async function checkSyntaxAnalysis(
   pgPool: PostgresPool,
   document: TextDocument,

@@ -7,7 +7,8 @@ export interface Settings {
   definitionFiles: string[];
   defaultSchema: string;
   queryParameterPattern: string
-  keywordQueryParameterPattern?: string
+  keywordQueryParameterPattern?: string,
+  enableExecuteFileQueryCommand: boolean,
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -23,4 +24,5 @@ export const DEFAULT_SETTINGS: Settings = {
   defaultSchema: "public",
   queryParameterPattern: /\$[1-9][0-9]*/.source,
   keywordQueryParameterPattern: undefined,
+  enableExecuteFileQueryCommand: true,
 }
