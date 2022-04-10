@@ -1,7 +1,7 @@
 # Change Log
 
 ## Unreleased - TDB
-- Enhanced display colors. [#17](https://github.com/UniqueVision/plpgsql-lsp/pull/17)
+- Enhanced display colors. [#17](https://github.com/UniqueVision/plpgsql-lsp/pull/17) [#19](https://github.com/UniqueVision/plpgsql-lsp/pull/19)
 
 ## [v2.2.3](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.2.3) - 2022/04/04
 - Fix error handling. [#16](https://github.com/UniqueVision/plpgsql-lsp/pull/16)
@@ -14,7 +14,7 @@
 - Fix first connection bug. [#11](https://github.com/UniqueVision/plpgsql-lsp/pull/11)
 
 ## [v2.2.0](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.2.0) - 2022/04/01
-- Support full query parameter.  [#7](https://github.com/UniqueVision/plpgsql-lsp/pull/7) [#8](https://github.com/UniqueVision/plpgsql-lsp/pull/8)
+- Support full query parameter. [#7](https://github.com/UniqueVision/plpgsql-lsp/pull/7) [#8](https://github.com/UniqueVision/plpgsql-lsp/pull/8)
 
 ## [v2.1.0](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.1.0) - 2022/03/30
 - Support positional query parameter comment. [#6](https://github.com/UniqueVision/plpgsql-lsp/pull/6)
