@@ -17,13 +17,14 @@ import {
   HoverParams,
   Logger,
   TextDocumentChangeEvent,
+  TextDocumentIdentifier,
   TextDocuments,
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { COMMAND_TITLE_MAP } from "@/commands"
 import { getQueryParameterInfo } from "@/postgres/parameters"
-import { getPool, PostgresPoolMap } from "@/postgres/pool"
+import { getPool, PostgresPool, PostgresPoolMap } from "@/postgres/pool"
 import { DefinitionsManager } from "@/server/definitionsManager"
 import { SettingsManager } from "@/server/settingsManager"
 import { getCodeActions } from "@/services/codeAction"
@@ -34,6 +35,7 @@ import {
 } from "@/services/definition"
 import { getHover } from "@/services/hover"
 import { validateTextDocument } from "@/services/validation"
+import { Settings } from "@/settings"
 import {
   disableLanguageServer, disableValidation,
 } from "@/utilities/disableLanguageServer"
@@ -154,60 +156,36 @@ export class Handlers {
   async onCodeAction(
     params: CodeActionParams,
   ): Promise<CodeAction[] | undefined> {
-    const document = this.documents.get(params.textDocument.uri)
-    const settings = await this.settingsManager.get(params.textDocument.uri)
-
-    const pgPool = await getPool(this.pgPools, settings, this.logger)
-    if (pgPool === undefined) {
-      return undefined
-    }
-
-    if (document === undefined || disableLanguageServer(document)) {
-      return undefined
-    }
-
-    return await getCodeActions(pgPool, document, settings, this.logger)
+    return this.usePostgresPool(
+      params.textDocument,
+      (pgPool, document, settings) =>
+        getCodeActions(pgPool, document, settings, this.logger),
+    )
   }
 
   async onCodeLens(
     params: CodeLensParams,
   ): Promise<CodeLens[] | undefined> {
-    const document = this.documents.get(params.textDocument.uri)
-    const settings = await this.settingsManager.get(params.textDocument.uri)
-
-    const pgPool = await getPool(this.pgPools, settings, this.logger)
-    if (pgPool === undefined) {
-      return undefined
-    }
-
-    if (document === undefined || disableLanguageServer(document)) {
-      return undefined
-    }
-
-    return await getCodeLenses(pgPool, document, settings, this.logger)
+    return this.usePostgresPool(
+      params.textDocument,
+      (pgPool, document, settings) =>
+        getCodeLenses(pgPool, document, settings, this.logger),
+    )
   }
 
   async onCompletion(
     params: CompletionParams,
   ): Promise<CompletionItem[] | undefined> {
-    const document = this.documents.get(params.textDocument.uri)
-    if (document === undefined || disableLanguageServer(document)) {
-      return undefined
-    }
-
-    const settings = await this.settingsManager.get(params.textDocument.uri)
-
-    const pgPool = await getPool(this.pgPools, settings, this.logger)
-    if (pgPool === undefined) {
-      return undefined
-    }
-
-    return getCompletionItems(
-      pgPool,
-      params,
-      document,
-      settings.defaultSchema,
-      this.logger,
+    return this.usePostgresPool(
+      params.textDocument,
+      (pgPool, document, settings) =>
+        getCompletionItems(
+          pgPool,
+          params,
+          document,
+          settings.defaultSchema,
+          this.logger,
+        ),
     )
   }
 
@@ -272,24 +250,16 @@ export class Handlers {
   async onHover(
     params: HoverParams,
   ): Promise<Hover | undefined> {
-    const document = this.documents.get(params.textDocument.uri)
-    if (document === undefined || disableLanguageServer(document)) {
-      return undefined
-    }
-
-    const settings = await this.settingsManager.get(params.textDocument.uri)
-
-    const pgPool = await getPool(this.pgPools, settings, this.logger)
-    if (pgPool === undefined) {
-      return undefined
-    }
-
-    return await getHover(
-      pgPool,
-      params,
-      document,
-      settings.defaultSchema,
-      this.logger,
+    return this.usePostgresPool(
+      params.textDocument,
+      (pgPool, document, settings) =>
+        getHover(
+          pgPool,
+          params,
+          document,
+          settings.defaultSchema,
+          this.logger,
+        ),
     )
   }
 
@@ -333,5 +303,26 @@ export class Handlers {
     })
 
     return diagnostics
+  }
+
+  private async usePostgresPool<T>(
+    textDocument: TextDocumentIdentifier,
+    service: (
+      pgPool: PostgresPool, document: TextDocument, settings: Settings
+    ) => Promise<T>,
+  ): Promise<T | undefined> {
+    const document = this.documents.get(textDocument.uri)
+    const settings = await this.settingsManager.get(textDocument.uri)
+
+    const pgPool = await getPool(this.pgPools, settings, this.logger)
+    if (pgPool === undefined) {
+      return undefined
+    }
+
+    if (document === undefined || disableLanguageServer(document)) {
+      return undefined
+    }
+
+    return service(pgPool, document, settings)
   }
 }
