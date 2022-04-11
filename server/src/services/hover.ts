@@ -1,8 +1,8 @@
 import {
   Hover,
-  HoverParams,
   Logger,
   MarkupKind,
+  Position,
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
@@ -29,12 +29,12 @@ import { getWordRangeAtPosition, makePostgresCodeMarkdown } from "@/utilities/te
 
 export async function getHover(
   pgPool: PostgresPool,
-  params: HoverParams,
   document: TextDocument,
+  position: Position,
   defaultSchema: string,
   logger: Logger,
 ): Promise<Hover | undefined> {
-  const wordRange = getWordRangeAtPosition(document, params.position)
+  const wordRange = getWordRangeAtPosition(document, position)
   if (wordRange === undefined) {
     return undefined
   }

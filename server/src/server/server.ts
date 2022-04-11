@@ -13,9 +13,11 @@ import {
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
+import { COMMANDS } from "@/commands"
 import { PostgresPoolMap } from "@/postgres/pool"
 
 import { DEFAULT_SETTINGS } from "../settings"
+import { CommandExecuter } from "./commandExecuter"
 import { DefinitionsManager } from "./definitionsManager"
 import { Handlers } from "./handlers"
 import { SettingsManager } from "./settingsManager"
@@ -30,6 +32,7 @@ export class Server {
   settingsManager: SettingsManager
   // PostgresSQL file definitions.
   definitionsManager: DefinitionsManager = new DefinitionsManager()
+  commandExecuter?: CommandExecuter
 
   // Language client configuration
   private capabilities?: ClientCapabilities
@@ -95,7 +98,28 @@ export class Server {
     )
 
     this.initializeSettingsManager()
-    this.registerHandlers()
+
+    this.commandExecuter = new CommandExecuter(
+      this.pgPools,
+      this.documents,
+      this.settingsManager,
+      this.logger,
+    )
+
+    // Register all features that the language server has
+    this.handlers = new Handlers(
+      this.connection,
+      this.pgPools,
+      this.documents,
+      this.settingsManager,
+      this.definitionsManager,
+      this.commandExecuter,
+      {
+        hasDiagnosticRelatedInformationCapability:
+          this.hasDiagnosticRelatedInformationCapability,
+      },
+      this.logger,
+    )
 
     return {
       capabilities: {
@@ -103,6 +127,11 @@ export class Server {
         completionProvider: { resolveProvider: false },
         hoverProvider: true,
         definitionProvider: true,
+        executeCommandProvider: { commands: COMMANDS },
+        codeActionProvider: true,
+        codeLensProvider: {
+          resolveProvider: false,
+        },
         workspace: {
           workspaceFolders: {
             changeNotifications: true,
@@ -140,24 +169,6 @@ export class Server {
         },
       )
     }
-  }
-
-  private registerHandlers(): void {
-    const options = {
-      hasDiagnosticRelatedInformationCapability:
-        this.hasDiagnosticRelatedInformationCapability,
-    }
-
-    // Register all features that the language server has
-    this.handlers = new Handlers(
-      this.connection,
-      this.pgPools,
-      this.documents,
-      this.settingsManager,
-      this.definitionsManager,
-      options,
-      this.logger,
-    )
   }
 
   private initializeSettingsManager(): void {

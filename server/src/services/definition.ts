@@ -1,7 +1,7 @@
 import {
   DefinitionLink,
-  DefinitionParams,
   Logger,
+  Position,
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
@@ -12,11 +12,11 @@ import { getWordRangeAtPosition } from "@/utilities/text"
 
 export async function getDefinitionLinks(
   definitionsManager: DefinitionsManager,
-  params: DefinitionParams,
   document: TextDocument,
+  position: Position,
   _logger: Logger,
 ): Promise<DefinitionLink[] | undefined> {
-  const wordRange = getWordRangeAtPosition(document, params.position)
+  const wordRange = getWordRangeAtPosition(document, position)
   if (wordRange === undefined) {
     return undefined
   }
