@@ -54,9 +54,9 @@ export async function getCompletionItems(
     .concat(await getTableCompletionItems(pgPool, schema, defaultSchema, logger))
     .concat(await getFunctionCompletionItems(pgPool, schema, defaultSchema, logger))
     .concat(await getTypeCompletionItems(pgPool, schema, defaultSchema, logger))
+    .concat(getBuiltinFunctionCompletionItems())
 
   return completionItems
-    .concat(getBuiltinFunctionCompletionItems())
     .concat(getKeywordCompletionItems(
       word, document.getText(), completionItems,
     ))
