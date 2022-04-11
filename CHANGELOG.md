@@ -1,6 +1,7 @@
 # Change Log
 
 ## Unreleased - TDB
+- Change built-in function case to upper. [#22](https://github.com/UniqueVision/plpgsql-lsp/pull/22)
 
 ## [v2.3.0](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.3.0) - 2022/04/12
 - Support snippet format completions. [#21](https://github.com/UniqueVision/plpgsql-lsp/pull/21)
