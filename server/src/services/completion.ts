@@ -1,8 +1,9 @@
+import dedent from "ts-dedent"
 import {
   CompletionItem,
   CompletionItemKind,
-  CompletionParams,
   Logger,
+  Position,
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
@@ -26,16 +27,16 @@ import { getWordRangeAtPosition, isFirstCommentLine } from "@/utilities/text"
 
 export async function getCompletionItems(
   pgPool: PostgresPool,
-  params: CompletionParams,
   document: TextDocument,
+  position: Position,
   defaultSchema: string,
   logger: Logger,
 ): Promise<CompletionItem[] | undefined> {
-  if (isFirstCommentLine(document, params.position)) {
+  if (isFirstCommentLine(document, position)) {
     return getLanguageServerCommentCompletionItems()
   }
 
-  const wordRange = getWordRangeAtPosition(document, params.position)
+  const wordRange = getWordRangeAtPosition(document, position)
   if (wordRange === undefined) {
     return undefined
   }
@@ -54,7 +55,8 @@ export async function getCompletionItems(
     .concat(await getTypeCompletionItems(pgPool, schema, defaultSchema, logger))
 
   return completionItems
-    .concat(await getKeywordCompletionItems(
+    .concat(getBuiltinFunctionCompletionItems())
+    .concat(getKeywordCompletionItems(
       word, document.getText(), completionItems,
     ))
     .map(
@@ -208,9 +210,37 @@ async function getTypeCompletionItems(
     )
 }
 
-async function getKeywordCompletionItems(
+function getBuiltinFunctionCompletionItems(): CompletionItem[] {
+  return ["coalesce", "greatest", "least"]
+    .map(
+      (functionName, index) => ({
+        label: functionName,
+        kind: CompletionItemKind.Value,
+        data: index,
+        detail: dedent`
+          FUNCTION ${functionName}(value [, ...])
+            LANGUAGE built-in
+        `,
+        insertText: `${functionName}(value, ...)`,
+      }),
+    ).concat(["nullif"]
+      .map(
+        (functionName, index) => ({
+          label: functionName,
+          kind: CompletionItemKind.Value,
+          data: index,
+          detail: dedent`
+          FUNCTION ${functionName}(value1, value2)
+            LANGUAGE built-in
+          `,
+          insertText: `${functionName}(value1, value2)`,
+        }),
+      ))
+}
+
+function getKeywordCompletionItems(
   word: string, documentText: string, completionItems: CompletionItem[],
-): Promise<CompletionItem[]> {
+): CompletionItem[] {
   const completionNames = new Set(completionItems.map((item) => item.label))
 
   const keywords = documentText

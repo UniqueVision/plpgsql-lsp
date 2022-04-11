@@ -71,4 +71,12 @@ export class SettingsBuilder {
 
     return this
   }
+
+  withEnableExecuteFileQueryCommand(
+    enableExecuteFileQueryCommand: boolean,
+  ): SettingsBuilder {
+    this.settings.enableExecuteFileQueryCommand = enableExecuteFileQueryCommand
+
+    return this
+  }
 }

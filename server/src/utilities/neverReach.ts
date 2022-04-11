@@ -1,3 +1,5 @@
+import { NeverReachError } from "@/errors"
+
 export function neverReach(message = "never reach."): never {
-  throw new Error(message)
+  throw new NeverReachError(message)
 }

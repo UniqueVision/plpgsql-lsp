@@ -24,7 +24,7 @@ export async function validateTextDocument(
   logger: Logger,
 ): Promise<Diagnostic[]> {
   let diagnostics: Diagnostic[] = []
-  diagnostics = await checkSyntaxAnalysis(
+  diagnostics = await validateSyntaxAnalysis(
     pgPool,
     document,
     options,
@@ -32,7 +32,7 @@ export async function validateTextDocument(
   )
 
   if (diagnostics.length === 0) {
-    diagnostics = await checkStaticAnalysis(
+    diagnostics = await validateStaticAnalysis(
       pgPool,
       document,
       options,
@@ -43,7 +43,29 @@ export async function validateTextDocument(
   return diagnostics
 }
 
-async function checkSyntaxAnalysis(
+export async function isCorrectFileValidation(
+  pgPool: PostgresPool,
+  document: TextDocument,
+  logger: Logger,
+): Promise<boolean> {
+  const diagnostics = await validateTextDocument(
+    pgPool,
+    document,
+    {
+      isComplete: false,
+      queryParameterInfo: null,
+      hasDiagnosticRelatedInformationCapability: false,
+    },
+    logger,
+  )
+
+  // Check file has no validation error.
+  return diagnostics.filter(diagnostic => {
+    return diagnostic.severity === DiagnosticSeverity.Error
+  }).length === 0
+}
+
+async function validateSyntaxAnalysis(
   pgPool: PostgresPool,
   document: TextDocument,
   options: ValidateTextDocumentOptions,
@@ -82,7 +104,7 @@ async function checkSyntaxAnalysis(
   })
 }
 
-async function checkStaticAnalysis(
+async function validateStaticAnalysis(
   pgPool: PostgresPool,
   document: TextDocument,
   options: ValidateTextDocumentOptions,
@@ -102,10 +124,7 @@ async function checkStaticAnalysis(
   return errors.flatMap(
     ({ level, range, message }) => {
       let severity: DiagnosticSeverity | undefined = undefined
-      if (level === "warning") {
-        severity = DiagnosticSeverity.Warning
-      }
-      else if (level === "warning extra") {
+      if (["warning", "warning extra"].includes(level)) {
         severity = DiagnosticSeverity.Warning
       }
       else {

@@ -1,45 +1,14 @@
-import * as path from "path"
-import {
-  ExtensionContext,
-  languages as Languages,
-  OutputChannel,
-  TextDocument,
-  TextEdit,
-  window as Window,
-  workspace as Workspace,
-} from "vscode"
-import {
-  LanguageClient,
-  LanguageClientOptions,
-  ServerOptions,
-  TransportKind,
-} from "vscode-languageclient/node"
+import { ExtensionContext, TextDocument, workspace } from "vscode"
+import { LanguageClient } from "vscode-languageclient/node"
+
+import { createLanguageClient, makeLanguageClientOptions } from "./client"
+import { makeLanguageServerOptions } from "./server"
 
 let defaultClient: LanguageClient
 const clients: Map<string, LanguageClient> = new Map()
 
-const PLPGSQL_LANGUAGE_SERVER_SECTION = "plpgsqlLanguageServer"
-
-function createLanguageClient(
-  serverOptions: ServerOptions, clientOptions: LanguageClientOptions,
-) {
-  return new LanguageClient(
-    PLPGSQL_LANGUAGE_SERVER_SECTION,
-    "PL/pgSQL Language Server",
-    serverOptions,
-    clientOptions,
-  )
-}
 
 export function activate(context: ExtensionContext) {
-  // The server is implemented in node
-  const module = context.asAbsolutePath(
-    path.join("server", "out", "server.js"),
-  )
-  const outputChannel: OutputChannel = Window.createOutputChannel(
-    PLPGSQL_LANGUAGE_SERVER_SECTION,
-  )
-
   function didOpenTextDocument(document: TextDocument): void {
     // We are only interested in language mode text
     if (
@@ -56,34 +25,14 @@ export function activate(context: ExtensionContext) {
     // Untitled files go to a default client.
     if (uri.scheme === "untitled" && !defaultClient) {
       const debugOptions = { execArgv: ["--nolazy", "--inspect=6170"] }
-      const serverOptions: ServerOptions = {
-        run: { module, transport: TransportKind.ipc },
-        debug: {
-          module,
-          transport: TransportKind.ipc,
-          options: debugOptions,
-        },
-      }
-      const clientOptions: LanguageClientOptions = {
-        documentSelector: [
-          {
-            scheme: "untitled",
-            language: "postgres",
-          },
-        ],
-        synchronize: {
-          fileEvents: Workspace
-            .createFileSystemWatcher("**/.clientrc"),
-        },
-        diagnosticCollectionName: PLPGSQL_LANGUAGE_SERVER_SECTION,
-        outputChannel,
-      }
+      const serverOptions = makeLanguageServerOptions(context, debugOptions)
+      const clientOptions = makeLanguageClientOptions()
       defaultClient = createLanguageClient(serverOptions, clientOptions)
       defaultClient.start()
 
       return
     }
-    const folder = Workspace.getWorkspaceFolder(uri)
+    const folder = workspace.getWorkspaceFolder(uri)
     if (!folder) {
       return
     }
@@ -92,39 +41,17 @@ export function activate(context: ExtensionContext) {
       const debugOptions = {
         execArgv: ["--nolazy", `--inspect=${6171 + clients.size}`],
       }
-      const serverOptions = {
-        run: { module, transport: TransportKind.ipc },
-        debug: {
-          module, transport: TransportKind.ipc, options: debugOptions,
-        },
-      }
-      const clientOptions: LanguageClientOptions = {
-        // Register the server for plain text documents
-        documentSelector: [
-          {
-            scheme: "file",
-            language: "postgres",
-            pattern: `${folder.uri.fsPath}/**/*`,
-          },
-        ],
-        synchronize: {
-          fileEvents: Workspace.createFileSystemWatcher(
-            "**/.clientrc",
-          ),
-        },
-        diagnosticCollectionName: PLPGSQL_LANGUAGE_SERVER_SECTION,
-        workspaceFolder: folder,
-        outputChannel,
-      }
+      const serverOptions = makeLanguageServerOptions(context, debugOptions)
+      const clientOptions = makeLanguageClientOptions(folder)
       const client = createLanguageClient(serverOptions, clientOptions)
       client.start()
       clients.set(folder.uri.toString(), client)
     }
   }
 
-  Workspace.onDidOpenTextDocument(didOpenTextDocument)
-  Workspace.textDocuments.forEach(didOpenTextDocument)
-  Workspace.onDidChangeWorkspaceFolders((event) => {
+  workspace.onDidOpenTextDocument(didOpenTextDocument)
+  workspace.textDocuments.forEach(didOpenTextDocument)
+  workspace.onDidChangeWorkspaceFolders((event) => {
     for (const folder of event.removed) {
       const client = clients.get(folder.uri.toString())
       if (client) {
@@ -146,10 +73,3 @@ export function deactivate(): Thenable<void> | undefined {
 
   return Promise.all(promises).then(() => undefined)
 }
-
-
-Languages.registerDocumentFormattingEditProvider("postgres", {
-  provideDocumentFormattingEdits(_document: TextDocument): TextEdit[] {
-    return []
-  },
-})
