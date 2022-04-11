@@ -1,6 +1,7 @@
 # Change Log
 
 ## Unreleased - TDB
+- Change the command name from "Execute File Query" to "Execute the Current File Query". [#23](https://github.com/UniqueVision/plpgsql-lsp/pull/23)
 - Change built-in function case to upper. [#22](https://github.com/UniqueVision/plpgsql-lsp/pull/22)
 
 ## [v2.3.0](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.3.0) - 2022/04/12
