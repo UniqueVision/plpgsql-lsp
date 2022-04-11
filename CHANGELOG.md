@@ -1,6 +1,7 @@
 # Change Log
 
 ## Unreleased - TDB
+- Fix completion logic. [#24](https://github.com/UniqueVision/plpgsql-lsp/pull/24)
 
 ## [v2.3.1](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.3.1) - 2022/04/12
 - Change the command name from "Execute File Query" to "Execute the Current File Query". [#23](https://github.com/UniqueVision/plpgsql-lsp/pull/23)
