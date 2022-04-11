@@ -213,7 +213,7 @@ async function getTypeCompletionItems(
 }
 
 function getBuiltinFunctionCompletionItems(): CompletionItem[] {
-  return ["coalesce", "greatest", "least"]
+  return ["COALESCE", "GREATEST", "LEAST"]
     .map(
       (functionName, index) => ({
         label: functionName,
@@ -226,7 +226,7 @@ function getBuiltinFunctionCompletionItems(): CompletionItem[] {
         insertText: `${functionName}($\{1:value}, $\{2:...})`,
         insertTextFormat: InsertTextFormat.Snippet,
       }),
-    ).concat(["nullif"]
+    ).concat(["NULLIF"]
       .map(
         (functionName, index) => ({
           label: functionName,
