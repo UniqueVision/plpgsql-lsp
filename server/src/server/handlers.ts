@@ -156,7 +156,7 @@ export class Handlers {
   async onCodeAction(
     params: CodeActionParams,
   ): Promise<CodeAction[] | undefined> {
-    return this.usePostgresPool(
+    return this.handlePostgresPool(
       params.textDocument,
       (pgPool, document, settings) =>
         getCodeActions(pgPool, document, settings, this.logger),
@@ -166,7 +166,7 @@ export class Handlers {
   async onCodeLens(
     params: CodeLensParams,
   ): Promise<CodeLens[] | undefined> {
-    return this.usePostgresPool(
+    return this.handlePostgresPool(
       params.textDocument,
       (pgPool, document, settings) =>
         getCodeLenses(pgPool, document, settings, this.logger),
@@ -176,7 +176,7 @@ export class Handlers {
   async onCompletion(
     params: CompletionParams,
   ): Promise<CompletionItem[] | undefined> {
-    return this.usePostgresPool(
+    return this.handlePostgresPool(
       params.textDocument,
       (pgPool, document, settings) =>
         getCompletionItems(
@@ -250,7 +250,7 @@ export class Handlers {
   async onHover(
     params: HoverParams,
   ): Promise<Hover | undefined> {
-    return this.usePostgresPool(
+    return this.handlePostgresPool(
       params.textDocument,
       (pgPool, document, settings) =>
         getHover(
@@ -305,7 +305,7 @@ export class Handlers {
     return diagnostics
   }
 
-  private async usePostgresPool<T>(
+  private async handlePostgresPool<T>(
     textDocument: TextDocumentIdentifier,
     service: (
       pgPool: PostgresPool, document: TextDocument, settings: Settings

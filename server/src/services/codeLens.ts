@@ -7,7 +7,7 @@ import { getQueryParameterInfo } from "@/postgres/parameters"
 import { PostgresPool } from "@/postgres/pool"
 import { Settings } from "@/settings"
 
-import { checkFileValidation } from "./validation"
+import { isCorrectFileValidation } from "./validation"
 
 export async function getCodeLenses(
   pgPool: PostgresPool,
@@ -19,7 +19,7 @@ export async function getCodeLenses(
   if (
     settings.enableExecuteFileQueryCommand
     && getQueryParameterInfo(document, settings, logger) === null
-    && await checkFileValidation(pgPool, document, logger)
+    && await isCorrectFileValidation(pgPool, document, logger)
   ) {
     codeLenses.push(makeExecuteFileQueryCommandCodeLens(document))
   }

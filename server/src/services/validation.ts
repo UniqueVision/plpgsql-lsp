@@ -24,7 +24,7 @@ export async function validateTextDocument(
   logger: Logger,
 ): Promise<Diagnostic[]> {
   let diagnostics: Diagnostic[] = []
-  diagnostics = await checkSyntaxAnalysis(
+  diagnostics = await validateSyntaxAnalysis(
     pgPool,
     document,
     options,
@@ -32,7 +32,7 @@ export async function validateTextDocument(
   )
 
   if (diagnostics.length === 0) {
-    diagnostics = await checkStaticAnalysis(
+    diagnostics = await validateStaticAnalysis(
       pgPool,
       document,
       options,
@@ -43,11 +43,11 @@ export async function validateTextDocument(
   return diagnostics
 }
 
-export async function checkFileValidation(
+export async function isCorrectFileValidation(
   pgPool: PostgresPool,
   document: TextDocument,
   logger: Logger,
-) {
+): Promise<boolean> {
   const diagnostics = await validateTextDocument(
     pgPool,
     document,
@@ -65,7 +65,7 @@ export async function checkFileValidation(
   }).length === 0
 }
 
-async function checkSyntaxAnalysis(
+async function validateSyntaxAnalysis(
   pgPool: PostgresPool,
   document: TextDocument,
   options: ValidateTextDocumentOptions,
@@ -104,7 +104,7 @@ async function checkSyntaxAnalysis(
   })
 }
 
-async function checkStaticAnalysis(
+async function validateStaticAnalysis(
   pgPool: PostgresPool,
   document: TextDocument,
   options: ValidateTextDocumentOptions,
