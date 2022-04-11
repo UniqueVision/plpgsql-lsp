@@ -1,6 +1,11 @@
 # Change Log
 
 ## Unreleased - TDB
+
+## [v2.3.0](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.3.0) - 2022/04/12
+- Support snippet format completions. [#21](https://github.com/UniqueVision/plpgsql-lsp/pull/21)
+- Add built-in function completion. [#20](https://github.com/UniqueVision/plpgsql-lsp/pull/20)
+- Add "Execute File Query" command. [#18](https://github.com/UniqueVision/plpgsql-lsp/pull/18)
 - Enhanced display colors. [#17](https://github.com/UniqueVision/plpgsql-lsp/pull/17) [#19](https://github.com/UniqueVision/plpgsql-lsp/pull/19)
 
 ## [v2.2.3](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.2.3) - 2022/04/04
