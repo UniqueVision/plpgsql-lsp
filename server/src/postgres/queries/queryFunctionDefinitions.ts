@@ -167,15 +167,15 @@ export function makeInsertFunctionText(
   let callArgsString = ""
   if (functionIdentityArgs.length > 0) {
     callArgsString = "\n" + functionIdentityArgs.map(
-      (arg) => {
+      (arg, index) => {
         const splitted = arg.split(" ")
         if (splitted.length === 1 || splitted[1] === '"any"') {
           // argument
-          return `  ${splitted[0]}`
+          return `  $\{${index + 1}:${splitted[0]}}`
         }
         else {
           // keyword argument
-          return `  ${splitted[0]} := ${splitted[0]}`
+          return `  ${splitted[0]} := $\{${index + 1}:${splitted[0]}}`
         }
       },
     ).join(",\n") + "\n"
