@@ -45,7 +45,7 @@
     "commands": [
       {
         "command": "plpgsql-lsp.executeFileQuery",
-        "title": "PL/pgSQL: Execute File Query"
+        "title": "PL/pgSQL: Execute the Current File Query"
       }
     ],
     "menus": {
