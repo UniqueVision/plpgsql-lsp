@@ -1,3 +1,4 @@
+import dedent from "ts-dedent"
 import {
   CompletionItem,
   CompletionItemKind,
@@ -54,7 +55,8 @@ export async function getCompletionItems(
     .concat(await getTypeCompletionItems(pgPool, schema, defaultSchema, logger))
 
   return completionItems
-    .concat(await getKeywordCompletionItems(
+    .concat(getBuiltinFunctionCompletionItems())
+    .concat(getKeywordCompletionItems(
       word, document.getText(), completionItems,
     ))
     .map(
@@ -208,9 +210,37 @@ async function getTypeCompletionItems(
     )
 }
 
-async function getKeywordCompletionItems(
+function getBuiltinFunctionCompletionItems(): CompletionItem[] {
+  return ["coalesce", "greatest", "least"]
+    .map(
+      (functionName, index) => ({
+        label: functionName,
+        kind: CompletionItemKind.Value,
+        data: index,
+        detail: dedent`
+          FUNCTION ${functionName}(value [, ...])
+            LANGUAGE built-in
+        `,
+        insertText: `${functionName}(value, ...)`,
+      }),
+    ).concat(["nullif"]
+      .map(
+        (functionName, index) => ({
+          label: functionName,
+          kind: CompletionItemKind.Value,
+          data: index,
+          detail: dedent`
+          FUNCTION ${functionName}(value1, value2)
+            LANGUAGE built-in
+          `,
+          insertText: `${functionName}(value1, value2)`,
+        }),
+      ))
+}
+
+function getKeywordCompletionItems(
   word: string, documentText: string, completionItems: CompletionItem[],
-): Promise<CompletionItem[]> {
+): CompletionItem[] {
   const completionNames = new Set(completionItems.map((item) => item.label))
 
   const keywords = documentText
