@@ -2,6 +2,7 @@ import dedent from "ts-dedent"
 import {
   CompletionItem,
   CompletionItemKind,
+  InsertTextFormat,
   Logger,
   Position,
 } from "vscode-languageserver"
@@ -185,6 +186,7 @@ async function getFunctionCompletionItems(
         data: index,
         detail: makeFunctionDefinitionText(definition),
         insertText: makeInsertFunctionText(definition),
+        insertTextFormat: InsertTextFormat.Snippet,
       }),
     )
 }
@@ -221,7 +223,8 @@ function getBuiltinFunctionCompletionItems(): CompletionItem[] {
           FUNCTION ${functionName}(value [, ...])
             LANGUAGE built-in
         `,
-        insertText: `${functionName}(value, ...)`,
+        insertText: `${functionName}($\{1:value}, $\{2:...})`,
+        insertTextFormat: InsertTextFormat.Snippet,
       }),
     ).concat(["nullif"]
       .map(
@@ -233,7 +236,8 @@ function getBuiltinFunctionCompletionItems(): CompletionItem[] {
           FUNCTION ${functionName}(value1, value2)
             LANGUAGE built-in
           `,
-          insertText: `${functionName}(value1, value2)`,
+          insertText: `${functionName}($\{1:value1}, $\{2:value2})`,
+          insertTextFormat: InsertTextFormat.Snippet,
         }),
       ))
 }
