@@ -54,8 +54,8 @@ Or, if you want to disable only the validation feature, try this
 /* plpgsql-language-server:disable validation */
 ```
 
-## Execute File Query
-You can execute a file query from VSCode Command.
+## Execute the Current File Query
+You can execute the current file query from VSCode Command.
 
 ![preview](images/execute_file_query_command.png)
 

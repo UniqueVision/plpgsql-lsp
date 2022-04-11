@@ -5,7 +5,7 @@ import { PostgresPool } from "@/postgres/pool"
 
 
 export const FILE_QUERY_COMMAND_INFO = {
-  title: "PL/pgSQL: Execute File Query",
+  title: "PL/pgSQL: Execute the Current File Query",
   command: "plpgsql-lsp.executeFileQuery",
   execute: executeFileQuery,
 } as const
