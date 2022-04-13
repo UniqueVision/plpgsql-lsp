@@ -3,7 +3,7 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { QueryParameterInfo } from "@/postgres/parameters"
 import { getFunctions } from "@/postgres/parsers/getFunctions"
-import { PostgresPool } from "@/postgres/pool"
+import { PostgresPool } from "@/postgres"
 import {
   queryFileStaticAnalysis,
 } from "@/postgres/queries/queryFileStaticAnalysis"

@@ -1,8 +1,8 @@
 import { ExtensionContext, TextDocument, workspace } from "vscode"
 import { LanguageClient } from "vscode-languageclient/node"
 
-import { createLanguageClient, makeLanguageClientOptions } from "./client"
-import { makeLanguageServerOptions } from "./server"
+import { createLanguageClient } from "./client"
+import { makeLanguageClientOptions, makeLanguageServerOptions } from "./options"
 
 let defaultClient: LanguageClient
 const clients: Map<string, LanguageClient> = new Map()

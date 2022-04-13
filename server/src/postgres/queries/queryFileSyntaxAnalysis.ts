@@ -5,7 +5,7 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 import {
   QueryParameterInfo, sanitizeFileWithQueryParameters,
 } from "@/postgres/parameters"
-import { PostgresPool } from "@/postgres/pool"
+import { PostgresPool } from "@/postgres"
 import { getNonSpaceCharacter, getTextAllRange } from "@/utilities/text"
 
 

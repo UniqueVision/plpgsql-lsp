@@ -24,7 +24,7 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { COMMAND_TITLE_MAP } from "@/commands"
 import { getQueryParameterInfo } from "@/postgres/parameters"
-import { getPool, PostgresPool, PostgresPoolMap } from "@/postgres/pool"
+import { getPool, PostgresPool, PostgresPoolMap } from "@/postgres"
 import { DefinitionsManager } from "@/server/definitionsManager"
 import { SettingsManager } from "@/server/settingsManager"
 import { getCodeActions } from "@/services/codeAction"

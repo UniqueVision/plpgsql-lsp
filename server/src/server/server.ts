@@ -14,7 +14,7 @@ import {
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { COMMANDS } from "@/commands"
-import { PostgresPoolMap } from "@/postgres/pool"
+import { PostgresPoolMap } from "@/postgres"
 
 import { DEFAULT_SETTINGS } from "../settings"
 import { CommandExecuter } from "./commandExecuter"

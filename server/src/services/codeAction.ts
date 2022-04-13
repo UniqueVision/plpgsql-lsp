@@ -6,7 +6,7 @@ import { TextDocument } from "vscode-languageserver-textdocument/lib/umd/main"
 
 import { FILE_QUERY_COMMAND_INFO } from "@/commands/executeFileQuery"
 import { getQueryParameterInfo } from "@/postgres/parameters"
-import { PostgresPool } from "@/postgres/pool"
+import { PostgresPool } from "@/postgres"
 import { Settings } from "@/settings"
 
 import { isCorrectFileValidation } from "./validation"

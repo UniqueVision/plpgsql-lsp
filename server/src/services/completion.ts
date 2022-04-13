@@ -8,7 +8,7 @@ import {
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { PostgresPool } from "@/postgres/pool"
+import { PostgresPool } from "@/postgres"
 import {
   makeFunctionDefinitionText,
   makeInsertFunctionText,
