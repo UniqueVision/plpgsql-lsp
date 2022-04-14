@@ -1,6 +1,6 @@
-DROP FUNCTION IF EXISTS function_positional_argument;
+DROP FUNCTION IF EXISTS positional_argument_function;
 
-CREATE FUNCTION function_positional_argument(
+CREATE FUNCTION positional_argument_function(
   integer,
   integer
 )

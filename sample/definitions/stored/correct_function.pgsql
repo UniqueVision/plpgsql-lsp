@@ -1,6 +1,6 @@
-DROP FUNCTION IF EXISTS function_correct;
+DROP FUNCTION IF EXISTS correct_function;
 
-CREATE FUNCTION function_correct(
+CREATE FUNCTION correct_function(
   p_id uuid
 )
 RETURNS SETOF uuid AS $FUNCTION$

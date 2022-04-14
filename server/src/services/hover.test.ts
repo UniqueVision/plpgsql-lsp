@@ -118,10 +118,10 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on positional argument function", async () => {
-      const hover = await onHover("function_positional_argument")
+      const hover = await onHover("positional_argument_function")
 
       validatePostgresCodeMarkdown(hover, dedent`
-        FUNCTION public.function_positional_argument(
+        FUNCTION public.positional_argument_function(
           integer,
           integer
         )
@@ -132,10 +132,10 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on positional argument function with default schema", async () => {
-      const hover = await onHover("public.function_positional_argument")
+      const hover = await onHover("public.positional_argument_function")
 
       validatePostgresCodeMarkdown(hover, dedent`
-        FUNCTION public.function_positional_argument(
+        FUNCTION public.positional_argument_function(
           integer,
           integer
         )
@@ -146,10 +146,10 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on keyword argument function", async () => {
-      const hover = await onHover("function_keyword_argument")
+      const hover = await onHover("keyword_argument_function")
 
       validatePostgresCodeMarkdown(hover, dedent`
-        FUNCTION public.function_keyword_argument(
+        FUNCTION public.keyword_argument_function(
           i integer
         )
           RETURNS int4
@@ -177,10 +177,10 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on proceduren", async () => {
-      const hover = await onHover("procedure_correct")
+      const hover = await onHover("correct_procedure")
 
       validatePostgresCodeMarkdown(hover, dedent`
-        FUNCTION public.procedure_correct(
+        FUNCTION public.correct_procedure(
           INOUT p1 text
         )
           RETURNS record
