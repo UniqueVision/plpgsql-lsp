@@ -1,14 +1,14 @@
 import { ExtensionContext } from "vscode"
 
-import { Client } from "./client"
+import { Extension } from "./extension"
 
 
-const client = new Client()
+const extension = new Extension()
 
 export function activate(context: ExtensionContext) {
-  client.activate(context)
+  return extension.activate(context)
 }
 
 export function deactivate(): Thenable<void> | undefined {
-  return client.deactivate()
+  return extension.deactivate()
 }

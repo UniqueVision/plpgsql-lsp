@@ -1,6 +1,6 @@
 import { LanguageClient, URI } from "vscode-languageclient/node"
 
-export class Session {
+export class ClientManager {
   default?: LanguageClient
   workspace: Map<URI, LanguageClient> = new Map()
 
