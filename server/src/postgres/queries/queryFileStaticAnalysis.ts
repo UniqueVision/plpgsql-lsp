@@ -1,12 +1,12 @@
 import { Logger, Range, uinteger } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
+import { PostgresPool } from "@/postgres"
 import {
   QueryParameterInfo,
   sanitizeFileWithQueryParameters,
 } from "@/postgres/parameters"
 import { FunctionInfo } from "@/postgres/parsers/getFunctions"
-import { PostgresPool } from "@/postgres"
 import { getLineRangeFromBuffer, getTextAllRange } from "@/utilities/text"
 
 export interface StaticAnalysisErrorRow {

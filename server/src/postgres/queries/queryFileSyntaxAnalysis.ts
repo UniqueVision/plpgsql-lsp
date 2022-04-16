@@ -2,10 +2,10 @@ import { DatabaseError } from "pg"
 import { Logger, Range } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
+import { PostgresPool } from "@/postgres"
 import {
   QueryParameterInfo, sanitizeFileWithQueryParameters,
 } from "@/postgres/parameters"
-import { PostgresPool } from "@/postgres"
 import { getNonSpaceCharacter, getTextAllRange } from "@/utilities/text"
 
 
