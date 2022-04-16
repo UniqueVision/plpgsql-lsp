@@ -42,6 +42,7 @@ export class Handlers {
     // Untitled files go to a default client.
     if (uri.scheme === "untitled" && this.session.default === undefined) {
       client = createLanguageClient(this.context, 6170)
+      client.start()
       this.session.default = client
     }
     // Workspace folder files go to client Map.
@@ -59,10 +60,9 @@ export class Handlers {
       client = createLanguageClient(
         this.context, 6171 + this.session.workspace.size, workspaceFolder,
       )
+      client.start()
       this.session.workspace.set(workspaceFolderUri, client)
     }
-
-    client.start()
   }
 
   onDidChangeWorkspaceFolders(event: WorkspaceFoldersChangeEvent): void {
