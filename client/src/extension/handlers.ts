@@ -14,12 +14,12 @@ import {
   PLPGSQL_LANGUAGE_SERVER_SECTION,
 } from "../options/clientOptions"
 import { makeLanguageServerOptions } from "../options/serverOptions"
-import { Session } from "./session"
+import { ClientManager } from "./clientManager"
 
 export class Handlers {
   constructor(
     private context: ExtensionContext,
-    private session: Session,
+    private clientManager: ClientManager,
   ) {
     workspace.onDidOpenTextDocument((event) => this.onDidOpenTextDocument(event))
     workspace.textDocuments.forEach((event) => this.onDidOpenTextDocument(event))
@@ -40,10 +40,10 @@ export class Handlers {
 
     const uri = document.uri
     // Untitled files go to a default client.
-    if (uri.scheme === "untitled" && this.session.default === undefined) {
+    if (uri.scheme === "untitled" && this.clientManager.default === undefined) {
       client = createLanguageClient(this.context, 6170)
       client.start()
-      this.session.default = client
+      this.clientManager.default = client
     }
     // Workspace folder files go to client Map.
     else {
@@ -53,23 +53,23 @@ export class Handlers {
       }
 
       const workspaceFolderUri = workspaceFolder.uri.toString()
-      if (this.session.workspace.has(workspaceFolderUri)) {
+      if (this.clientManager.workspace.has(workspaceFolderUri)) {
         return
       }
 
       client = createLanguageClient(
-        this.context, 6171 + this.session.workspace.size, workspaceFolder,
+        this.context, 6171 + this.clientManager.workspace.size, workspaceFolder,
       )
       client.start()
-      this.session.workspace.set(workspaceFolderUri, client)
+      this.clientManager.workspace.set(workspaceFolderUri, client)
     }
   }
 
   onDidChangeWorkspaceFolders(event: WorkspaceFoldersChangeEvent): void {
     for (const folder of event.removed) {
-      const client = this.session.workspace.get(folder.uri.toString())
+      const client = this.clientManager.workspace.get(folder.uri.toString())
       if (client) {
-        this.session.workspace.delete(folder.uri.toString())
+        this.clientManager.workspace.delete(folder.uri.toString())
         client.stop()
       }
     }

@@ -8,7 +8,7 @@ const path = require("path")
 module.exports = withDefaults({
   context: __dirname,
   entry: {
-    extension: "./src/extension.ts",
+    extension: "./src/main.ts",
   },
   output: {
     filename: "extension.js",
