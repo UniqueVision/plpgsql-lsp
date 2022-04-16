@@ -1,13 +1,14 @@
 import * as path from "path"
 import { ExtensionContext } from "vscode"
 import {
+  ForkOptions,
   ServerOptions,
   TransportKind,
 } from "vscode-languageclient/node"
 
 
 export function makeLanguageServerOptions(
-  context: ExtensionContext, debugOptions,
+  context: ExtensionContext, debugOptions: ForkOptions,
 ): ServerOptions {
   // The server is implemented in node
   const module = context.asAbsolutePath(

@@ -1,6 +1,6 @@
-DROP PROCEDURE IF EXISTS procedure_correct;
+DROP PROCEDURE IF EXISTS correct_procedure;
 
-CREATE PROCEDURE procedure_correct(
+CREATE PROCEDURE correct_procedure(
   INOUT p1 text
 )
 AS $$

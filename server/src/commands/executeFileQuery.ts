@@ -1,7 +1,7 @@
 import { Logger } from "vscode-jsonrpc/node"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { PostgresPool } from "@/postgres/pool"
+import { PostgresPool } from "@/postgres"
 
 
 export const FILE_QUERY_COMMAND_INFO = {

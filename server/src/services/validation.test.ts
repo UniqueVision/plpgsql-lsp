@@ -62,7 +62,7 @@ describe("Validate Tests", () => {
 
     it("Correct function", async () => {
       const diagnostics = await validateSampleFile(
-        "definitions/stored/function_correct.pgsql",
+        "definitions/stored/correct_function.pgsql",
       )
 
       validateDiagnostics(diagnostics, [])

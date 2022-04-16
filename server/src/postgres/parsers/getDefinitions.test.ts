@@ -89,7 +89,7 @@ test.each([
 
 test.each([
   [
-    "definitions/stored/function_correct.pgsql",
+    "definitions/stored/correct_function.pgsql",
     Array(2).fill(Range.create(2, 16, 2, 32)),
   ],
 ])(

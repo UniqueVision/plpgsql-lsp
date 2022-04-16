@@ -5,8 +5,8 @@ import {
 import { TextDocument } from "vscode-languageserver-textdocument/lib/umd/main"
 
 import { FILE_QUERY_COMMAND_INFO } from "@/commands/executeFileQuery"
+import { PostgresPool } from "@/postgres"
 import { getQueryParameterInfo } from "@/postgres/parameters"
-import { PostgresPool } from "@/postgres/pool"
 import { Settings } from "@/settings"
 
 import { isCorrectFileValidation } from "./validation"

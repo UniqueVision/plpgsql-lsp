@@ -23,8 +23,8 @@ import {
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { COMMAND_TITLE_MAP } from "@/commands"
+import { getPool, PostgresPool, PostgresPoolMap } from "@/postgres"
 import { getQueryParameterInfo } from "@/postgres/parameters"
-import { getPool, PostgresPool, PostgresPoolMap } from "@/postgres/pool"
 import { DefinitionsManager } from "@/server/definitionsManager"
 import { SettingsManager } from "@/server/settingsManager"
 import { getCodeActions } from "@/services/codeAction"

@@ -14,8 +14,8 @@ import {
   PostgresPoolNotFoundError,
   WrongCommandArgumentsError,
 } from "@/errors"
+import { getPool, PostgresPoolMap } from "@/postgres"
 import { getQueryParameterInfo } from "@/postgres/parameters"
-import { getPool, PostgresPoolMap } from "@/postgres/pool"
 import { disableLanguageServer } from "@/utilities/disableLanguageServer"
 
 import { SettingsManager } from "./settingsManager"

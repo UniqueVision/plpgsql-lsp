@@ -1,9 +1,9 @@
 import { Diagnostic, DiagnosticSeverity, Logger } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
+import { PostgresPool } from "@/postgres"
 import { QueryParameterInfo } from "@/postgres/parameters"
 import { getFunctions } from "@/postgres/parsers/getFunctions"
-import { PostgresPool } from "@/postgres/pool"
 import {
   queryFileStaticAnalysis,
 } from "@/postgres/queries/queryFileStaticAnalysis"

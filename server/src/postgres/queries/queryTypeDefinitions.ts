@@ -1,6 +1,6 @@
 import { Logger } from "vscode-languageserver"
 
-import { PostgresPool } from "@/postgres/pool"
+import { PostgresPool } from "@/postgres"
 
 interface TypeDefinition {
   schema: string
