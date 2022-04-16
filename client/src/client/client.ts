@@ -1,17 +1,17 @@
-import {
-  LanguageClient, LanguageClientOptions, ServerOptions,
-} from "vscode-languageclient/node"
+import { ExtensionContext } from "vscode"
 
-import { PLPGSQL_LANGUAGE_SERVER_SECTION } from "../options"
+import { Handlers } from "./handlers"
+import { Session } from "./session"
 
+export class Client {
+  private handlers?: Handlers = undefined
+  private session: Session = new Session()
 
-export function createLanguageClient(
-  serverOptions: ServerOptions, clientOptions: LanguageClientOptions,
-) {
-  return new LanguageClient(
-    PLPGSQL_LANGUAGE_SERVER_SECTION,
-    "PL/pgSQL Language Server",
-    serverOptions,
-    clientOptions,
-  )
+  activate(context: ExtensionContext): void {
+    this.handlers = new Handlers(context, this.session)
+  }
+
+  deactivate(): Thenable<void> {
+    return this.session.stop()
+  }
 }

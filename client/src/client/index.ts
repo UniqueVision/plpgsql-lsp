@@ -1,1 +1,1 @@
-export { createLanguageClient } from "./client"
+export { Client } from "./client"

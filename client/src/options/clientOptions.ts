@@ -15,7 +15,7 @@ export function makeLanguageClientOptions(
   workspaceFolder?: WorkspaceFolder,
 ): LanguageClientOptions {
   let documentSelector
-  if (workspaceFolder === null) {
+  if (workspaceFolder === undefined) {
     documentSelector = [{ scheme: "untitled", language: "postgres" }]
   }
   else {
@@ -46,7 +46,10 @@ async function executeCommand(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   command: string, args: any[], next: ExecuteCommandSignature,
 ): Promise<void> {
-  if (command === "plpgsql-lsp.executeFileQuery") {
+  if (
+    window.activeTextEditor !== undefined
+    && command === "plpgsql-lsp.executeFileQuery"
+  ) {
     args.push(window.activeTextEditor.document.uri.toString())
     next(command, args)
   }
