@@ -8,6 +8,8 @@ interface TableDefinition {
   fields: {
     columnName: string,
     dataType: string,
+    isNullable: boolean,
+    columnDefault?: string
   }[]
 }
 
@@ -20,7 +22,7 @@ export async function queryTableDefinitions(
 ): Promise<TableDefinition[]> {
   let definitions: TableDefinition[] = []
 
-  let schemaCondition = ""
+  let schemaCondition = "TRUE"
   if (schema === undefined) {
     schemaCondition = `t_columns.table_schema in ('${defaultSchema}', 'pg_catalog')`
   }
@@ -28,9 +30,9 @@ export async function queryTableDefinitions(
     schemaCondition = `t_columns.table_schema = '${schema.toLowerCase()}'`
   }
 
-  let tableNameCondition = ""
+  let tableNameCondition = "TRUE"
   if (tableName !== undefined) {
-    tableNameCondition = `AND t_columns.table_name = '${tableName.toLowerCase()}'`
+    tableNameCondition = `t_columns.table_name = '${tableName.toLowerCase()}'`
   }
 
   const pgClient = await pgPool.connect()
@@ -42,20 +44,21 @@ export async function queryTableDefinitions(
         json_agg(
           json_build_object(
             'columnName', t_columns.column_name,
-            'dataType', t_columns.data_type
+            'dataType', t_columns.data_type,
+            'isNullable', t_columns.is_nullable = 'YES',
+            'columnDefault', t_columns.column_default
           )
           ORDER BY
             t_columns.ordinal_position
         ) AS fields
       FROM
         information_schema.columns AS t_columns
-        INNER JOIN information_schema.tables AS t_tables
-        ON t_columns.table_schema = t_tables.table_schema
-        AND t_columns.table_name = t_tables.table_name
-        AND t_tables.table_type = 'BASE TABLE'
-      WHERE
-        ${schemaCondition}
-        ${tableNameCondition}
+        INNER JOIN information_schema.tables AS t_tables ON
+          t_columns.table_schema = t_tables.table_schema
+          AND t_columns.table_name = t_tables.table_name
+          AND t_tables.table_type = 'BASE TABLE'
+          AND ${schemaCondition}
+          AND ${tableNameCondition}
       GROUP BY
         t_columns.table_schema,
         t_columns.table_name
@@ -68,7 +71,12 @@ export async function queryTableDefinitions(
       (row) => ({
         schema: row.schema,
         tableName: row.table_name,
-        fields: row.fields as { columnName: string, dataType: string }[],
+        fields: row.fields as {
+          columnName: string,
+          dataType: string,
+          isNullable: boolean,
+          columnDefault?: string
+        }[],
       }),
     )
   }
@@ -91,9 +99,18 @@ export function makeTableDefinitionText(definition: TableDefinition): string {
   let fieldsString = ""
   if (fields.length > 0) {
     fieldsString = "\n" + fields.map(
-      ({ columnName, dataType }) => `  ${columnName} ${dataType}`,
+      ({ columnName, dataType, isNullable, columnDefault }) => {
+        return "  " + [
+          columnName,
+          dataType,
+          isNullable ? null : "not null",
+          columnDefault ? `default ${columnDefault}` : null,
+        ]
+          .filter(elem => elem !== null)
+          .join(" ")
+      },
     ).join(",\n") + "\n"
   }
 
-  return `TABLE ${schema}.${tableName}(${fieldsString})`
+  return `Table ${schema}.${tableName}(${fieldsString})`
 }

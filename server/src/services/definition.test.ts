@@ -83,7 +83,7 @@ describe("Definition Tests", () => {
       validateDefinitionLinks(definition, [
         LocationLink.create(
           documentUri,
-          Range.create(0, 42, 6, 1),
+          Range.create(0, 42, 8, 1),
           Range.create(2, 13, 2, 25),
         ),
       ])
@@ -98,7 +98,7 @@ describe("Definition Tests", () => {
       validateDefinitionLinks(definition, [
         LocationLink.create(
           documentUri,
-          Range.create(0, 51, 6, 1),
+          Range.create(0, 51, 8, 24),
           Range.create(2, 13, 2, 34),
         ),
       ])

@@ -66,5 +66,5 @@ export async function queryViewDefinitions(
 export function makeViewDefinitionText(definition: ViewDefinition): string {
   const { schema, viewName } = definition
 
-  return `VIEW ${schema}.${viewName}`
+  return `View ${schema}.${viewName}`
 }

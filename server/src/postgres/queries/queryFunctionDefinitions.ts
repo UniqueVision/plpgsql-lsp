@@ -137,7 +137,7 @@ export function makeFunctionDefinitionText(definition: FunctionDefinition): stri
   }
 
   let definitionText = [
-    `FUNCTION ${schema}.${functionName}(${argsString})`,
+    `Function ${schema}.${functionName}(${argsString})`,
     `  RETURNS ${returnString}`,
     `  LANGUAGE ${languageName}`,
   ].join("\n")

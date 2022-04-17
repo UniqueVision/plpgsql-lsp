@@ -158,5 +158,5 @@ export function makeTypeDefinitionText(definition: TypeDefinition): string {
     ).join(",\n") + "\n"
   }
 
-  return `TYPE ${schema}.${typeName}(${fieldsString})`
+  return `Type ${schema}.${typeName}(${fieldsString})`
 }

@@ -62,10 +62,14 @@ describe("Hover Tests", () => {
       const hover = await onHover("companies")
 
       validatePostgresCodeMarkdown(hover, dedent`
-        TABLE public.companies(
-          id integer,
-          name character varying
+        Table public.companies(
+          id integer not null,
+          name character varying not null
         )
+
+        Indexes:
+          "companies_pkey" PRIMARY KEY, btree (id)
+          "companies_name_key" UNIQUE, btree (name)
       `)
     })
 
@@ -73,11 +77,39 @@ describe("Hover Tests", () => {
       const hover = await onHover("public.users")
 
       validatePostgresCodeMarkdown(hover, dedent`
-        TABLE public.users(
-          id integer,
-          name character varying,
+        Table public.users(
+          id integer not null,
+          name character varying not null,
+          company_id integer not null,
+          created_at timestamp with time zone not null default now(),
           deleted_at timestamp with time zone
         )
+
+        Indexes:
+          "users_pkey" PRIMARY KEY, btree (id)
+          "users_id_name_index" btree (id, name)
+
+        Check constraints:
+          "users_check" CHECK (deleted_at > created_at)
+
+        Foreign key constraints:
+          "users_company_id_fkey" FOREIGN KEY (company_id) REFERENCES companies(id)
+      `)
+    })
+
+    it("Hover on table with exclude index", async () => {
+      const hover = await onHover("schedule")
+
+      validatePostgresCodeMarkdown(hover, dedent`
+        Table public.schedule(
+          id integer not null default nextval('schedule_id_seq'::regclass),
+          room_name text not null,
+          reservation_time tsrange not null
+        )
+
+        Indexes:
+          "schedule_pkey" PRIMARY KEY, btree (id)
+          "schedule_reservation_time_excl" EXCLUDE USING gist (reservation_time)
       `)
     })
 
@@ -85,11 +117,16 @@ describe("Hover Tests", () => {
       const hover = await onHover("campaign.participants")
 
       validatePostgresCodeMarkdown(hover, dedent`
-        TABLE campaign.participants(
-          id integer,
-          name character varying,
+        Table campaign.participants(
+          id integer not null,
+          name character varying not null,
+          created_at timestamp with time zone not null default now(),
           deleted_at timestamp with time zone
         )
+          PARTITION BY HASH (id)
+
+        Check constraints:
+          "participants_check" CHECK (deleted_at > created_at)
       `)
     })
 
@@ -97,7 +134,7 @@ describe("Hover Tests", () => {
       const hover = await onHover("deleted_users")
 
       validatePostgresCodeMarkdown(hover, dedent`
-        VIEW public.deleted_users
+        View public.deleted_users
       `)
     })
 
@@ -105,7 +142,7 @@ describe("Hover Tests", () => {
       const hover = await onHover("public.deleted_users")
 
       validatePostgresCodeMarkdown(hover, dedent`
-        VIEW public.deleted_users
+        View public.deleted_users
       `)
     })
 
@@ -113,7 +150,7 @@ describe("Hover Tests", () => {
       const hover = await onHover("campaign.deleted_participants")
 
       validatePostgresCodeMarkdown(hover, dedent`
-        VIEW campaign.deleted_participants
+        View campaign.deleted_participants
       `)
     })
 
@@ -121,7 +158,7 @@ describe("Hover Tests", () => {
       const hover = await onHover("positional_argument_function")
 
       validatePostgresCodeMarkdown(hover, dedent`
-        FUNCTION public.positional_argument_function(
+        Function public.positional_argument_function(
           integer,
           integer
         )
@@ -135,7 +172,7 @@ describe("Hover Tests", () => {
       const hover = await onHover("public.positional_argument_function")
 
       validatePostgresCodeMarkdown(hover, dedent`
-        FUNCTION public.positional_argument_function(
+        Function public.positional_argument_function(
           integer,
           integer
         )
@@ -149,7 +186,7 @@ describe("Hover Tests", () => {
       const hover = await onHover("keyword_argument_function")
 
       validatePostgresCodeMarkdown(hover, dedent`
-        FUNCTION public.keyword_argument_function(
+        Function public.keyword_argument_function(
           i integer
         )
           RETURNS int4
@@ -162,12 +199,12 @@ describe("Hover Tests", () => {
       const hover = await onHover("jsonb_build_object")
 
       validatePostgresCodeMarkdown(hover, dedent`
-        FUNCTION pg_catalog.jsonb_build_object()
+        Function pg_catalog.jsonb_build_object()
           RETURNS jsonb
           LANGUAGE internal
           STABLE PARALLEL SAFE
 
-        FUNCTION pg_catalog.jsonb_build_object(
+        Function pg_catalog.jsonb_build_object(
           VARIADIC "any"
         )
           RETURNS jsonb
@@ -180,7 +217,7 @@ describe("Hover Tests", () => {
       const hover = await onHover("correct_procedure")
 
       validatePostgresCodeMarkdown(hover, dedent`
-        FUNCTION public.correct_procedure(
+        Function public.correct_procedure(
           INOUT p1 text
         )
           RETURNS record
@@ -193,7 +230,7 @@ describe("Hover Tests", () => {
       const hover = await onHover("type_user")
 
       validatePostgresCodeMarkdown(hover, dedent`
-        TYPE public.type_user(
+        Type public.type_user(
           id uuid
         )
       `)
@@ -203,7 +240,7 @@ describe("Hover Tests", () => {
       const hover = await onHover("public.type_user")
 
       validatePostgresCodeMarkdown(hover, dedent`
-        TYPE public.type_user(
+        Type public.type_user(
           id uuid
         )
       `)
