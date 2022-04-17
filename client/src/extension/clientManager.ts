@@ -1,15 +1,18 @@
 import { LanguageClient, URI } from "vscode-languageclient/node"
 
 export class ClientManager {
-  default?: LanguageClient
-  workspace: Map<URI, LanguageClient> = new Map()
+  global?: LanguageClient
+  workspaces: Map<URI, LanguageClient> = new Map()
 
   stop(): Thenable<void> {
     const promises: Thenable<void>[] = []
-    if (this.default !== undefined) {
-      promises.push(this.default.stop())
+
+    // stop global client.
+    if (this.global !== undefined) {
+      promises.push(this.global.stop())
     }
-    for (const client of this.workspace.values()) {
+    // stop workspace clients.
+    for (const client of this.workspaces.values()) {
       promises.push(client.stop())
     }
 
