@@ -1,3 +1,4 @@
+import dedent from "ts-dedent"
 import {
   Hover,
   Logger,
@@ -12,9 +13,21 @@ import {
   queryFunctionDefinitions,
 } from "@/postgres/queries/queryFunctionDefinitions"
 import {
+  makeTableConastaintText,
+  queryTableConstraints,
+} from "@/postgres/queries/queryTableConstraints"
+import {
   makeTableDefinitionText,
   queryTableDefinitions,
 } from "@/postgres/queries/queryTableDefinitions"
+import {
+  makeTableIndexText,
+  queryTableIndexes,
+} from "@/postgres/queries/queryTableIndexes"
+import {
+  makeTablePartitionKeyDefinitionText,
+  queryTablePartitionKeyDefinition,
+} from "@/postgres/queries/queryTablePartition"
 import {
   makeTypeDefinitionText,
   queryTypeDefinitions,
@@ -23,6 +36,7 @@ import {
   makeViewDefinitionText,
   queryViewDefinitions,
 } from "@/postgres/queries/queryViewDefinitions"
+import { asyncFlatMap } from "@/utilities/functool"
 import { sanitizeWordCandidates } from "@/utilities/sanitizeWord"
 import { separateSchemaFromCandidate } from "@/utilities/schema"
 import { getWordRangeAtPosition, makePostgresCodeMarkdown } from "@/utilities/text"
@@ -96,11 +110,71 @@ async function getTableHover(
     pgPool, schema, defaultSchema, logger, tableName,
   )
 
-  return await makeHover(
-    definitions.map(
-      (definition) => makeTableDefinitionText(definition),
-    ),
-  )
+  const definitionsWithIndex = await asyncFlatMap(definitions,
+    async (definition) => {
+      // Table definition
+      let tableDefinitionText = makeTableDefinitionText(definition)
+
+      // Partition
+      const tablePartitionKeyDefinition = await queryTablePartitionKeyDefinition(
+        pgPool, schema, tableName, defaultSchema, logger,
+      )
+      if (tablePartitionKeyDefinition !== null) {
+        tableDefinitionText += `\n  ${makeTablePartitionKeyDefinitionText(
+          tablePartitionKeyDefinition,
+        )}`
+      }
+
+      // Indexes
+      let tableIndexesText
+      const tableIndexes = await queryTableIndexes(
+        pgPool, schema, tableName, defaultSchema, logger,
+      )
+      if (tableIndexes.length !== 0) {
+        tableIndexesText = dedent`
+          Indexes:
+            ${tableIndexes.map(makeTableIndexText).join("\n")}
+        `
+      }
+
+      // Constraints
+      const tableConstraints = await queryTableConstraints(
+        pgPool, schema, tableName, defaultSchema, logger,
+      )
+
+      // Check constraints
+      let tableCheckConstraintsText
+      const tableCheckConstraints = tableConstraints
+        .filter(constraint => constraint.type === "check")
+      if (tableCheckConstraints.length !== 0) {
+        tableCheckConstraintsText = dedent`
+          Check constraints:
+            ${tableCheckConstraints.map(makeTableConastaintText).join("\n")}
+        `
+      }
+
+      // Foreign key constraints
+      let tableForeignKeyConstraintsText
+      const tableForeignKeyConstraints = tableConstraints
+        .filter(constraint => constraint.type === "foreign_key")
+      if (tableForeignKeyConstraints.length !== 0) {
+        tableForeignKeyConstraintsText = dedent`
+          Foreign key constraints:
+            ${tableForeignKeyConstraints.map(makeTableConastaintText).join("\n")}
+        `
+      }
+
+      return [
+        tableDefinitionText,
+        tableIndexesText,
+        tableCheckConstraintsText,
+        tableForeignKeyConstraintsText,
+      ]
+        .filter(elem => elem !== undefined)
+        .join("\n\n")
+    })
+
+  return makeHover(definitionsWithIndex)
 }
 
 async function getViewHover(
