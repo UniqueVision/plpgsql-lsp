@@ -1,7 +1,11 @@
 # Change Log
 
 ## Unreleased - TDB
+
+## [v2.4.0](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.4.0) - 2022/04/18
+- Enhanced the table hover. [#28](https://github.com/UniqueVision/plpgsql-lsp/pull/28)
 - Fix completion logic. [#24](https://github.com/UniqueVision/plpgsql-lsp/pull/24)
+- Refactor the code. [#25](https://github.com/UniqueVision/plpgsql-lsp/pull/25) [#26](https://github.com/UniqueVision/plpgsql-lsp/pull/26) [#27](https://github.com/UniqueVision/plpgsql-lsp/pull/27)
 
 ## [v2.3.1](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.3.1) - 2022/04/12
 - Change the command name from "Execute File Query" to "Execute the Current File Query". [#23](https://github.com/UniqueVision/plpgsql-lsp/pull/23)
