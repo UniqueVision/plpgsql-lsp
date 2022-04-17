@@ -40,10 +40,10 @@ export class Handlers {
 
     const uri = document.uri
     // Untitled files go to a default client.
-    if (uri.scheme === "untitled" && this.clientManager.default === undefined) {
+    if (uri.scheme === "untitled" && this.clientManager.global === undefined) {
       client = createLanguageClient(this.context, 6170)
       client.start()
-      this.clientManager.default = client
+      this.clientManager.global = client
     }
     // Workspace folder files go to client Map.
     else {
@@ -53,23 +53,23 @@ export class Handlers {
       }
 
       const workspaceFolderUri = workspaceFolder.uri.toString()
-      if (this.clientManager.workspace.has(workspaceFolderUri)) {
+      if (this.clientManager.workspaces.has(workspaceFolderUri)) {
         return
       }
 
       client = createLanguageClient(
-        this.context, 6171 + this.clientManager.workspace.size, workspaceFolder,
+        this.context, 6171 + this.clientManager.workspaces.size, workspaceFolder,
       )
       client.start()
-      this.clientManager.workspace.set(workspaceFolderUri, client)
+      this.clientManager.workspaces.set(workspaceFolderUri, client)
     }
   }
 
   onDidChangeWorkspaceFolders(event: WorkspaceFoldersChangeEvent): void {
     for (const folder of event.removed) {
-      const client = this.clientManager.workspace.get(folder.uri.toString())
+      const client = this.clientManager.workspaces.get(folder.uri.toString())
       if (client) {
-        this.clientManager.workspace.delete(folder.uri.toString())
+        this.clientManager.workspaces.delete(folder.uri.toString())
         client.stop()
       }
     }
