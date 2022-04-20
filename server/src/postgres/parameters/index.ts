@@ -79,22 +79,28 @@ export function sanitizeFileWithQueryParameters(
   if (queryParameterInfo === null) {
     return [fileText, 0]
   }
-  else if (queryParameterInfo.type === "default") {
-    return sanitizeFileWithDefaultQueryParameters(
-      fileText, queryParameterInfo, logger,
-    )
-  }
-  else if(queryParameterInfo.type === "position") {
-    return sanitizeFileWithPositionalQueryParameters(
-      fileText, queryParameterInfo, logger,
-    )
-  }
-  else if (queryParameterInfo.type === "keyword") {
-    return sanitizeFileWithKeywordQueryParameters(
-      fileText, queryParameterInfo, logger,
-    )
-  }
   else {
-    neverReach("Unknown \"queryParameterInfo.type\".")
+    const parameterInfoType = queryParameterInfo.type
+    switch (parameterInfoType) {
+      case "default": {
+        return sanitizeFileWithDefaultQueryParameters(
+          fileText, queryParameterInfo, logger,
+        )
+      }
+      case "position": {
+        return sanitizeFileWithPositionalQueryParameters(
+          fileText, queryParameterInfo, logger,
+        )
+      }
+      case "keyword": {
+        return sanitizeFileWithKeywordQueryParameters(
+          fileText, queryParameterInfo, logger,
+        )
+      }
+      default: {
+        const unknwonType: never = parameterInfoType
+        neverReach( `"${unknwonType}" is unknown "queryParameterInfo.type".` )
+      }
+    }
   }
 }
