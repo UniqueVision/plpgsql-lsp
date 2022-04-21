@@ -144,7 +144,7 @@
           "scope": "resource",
           "type": "boolean",
           "default": true,
-          "description": "Enable/Disable \"Execute File Query\" command."
+          "description": "Enable/Disable \"Execute the Current File Query\" command."
         }
       },
       "required": [
