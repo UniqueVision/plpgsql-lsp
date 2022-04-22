@@ -22,7 +22,7 @@ export async function queryTableDefinitions(
 ): Promise<TableDefinition[]> {
   let definitions: TableDefinition[] = []
 
-  let schemaCondition = "TRUE"
+  let schemaCondition
   if (schema === undefined) {
     schemaCondition = `t_columns.table_schema in ('${defaultSchema}', 'pg_catalog')`
   }
