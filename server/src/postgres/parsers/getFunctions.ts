@@ -16,11 +16,16 @@ export async function getFunctions(
   queryParameterInfo: QueryParameterInfo | null,
   logger: Logger,
 ): Promise<FunctionInfo[]> {
-  const [fileText] = sanitizeFileWithQueryParameters(
-    readFileFromUri(uri), queryParameterInfo, logger,
+  const fileText = readFileFromUri(uri)
+  if (fileText === null) {
+    return []
+  }
+
+  const [sanitizedFileText] = sanitizeFileWithQueryParameters(
+    fileText, queryParameterInfo, logger,
   )
 
-  const stmtements = await getStmtements(fileText)
+  const stmtements = await getStmtements(sanitizedFileText)
   if (stmtements === undefined) {
     return []
   }
