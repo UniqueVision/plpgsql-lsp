@@ -226,6 +226,17 @@ describe("Hover Tests", () => {
       `)
     })
 
+    it("Hover on constant function", async () => {
+      const hover = await onHover("constant_function")
+
+      validatePostgresCodeMarkdown(hover, dedent`
+        Function public.constant_function()
+          RETURNS text
+          LANGUAGE plpgsql
+          IMMUTABLE PARALLEL SAFE
+      `)
+    })
+
     it("Hover on type", async () => {
       const hover = await onHover("type_user")
 
