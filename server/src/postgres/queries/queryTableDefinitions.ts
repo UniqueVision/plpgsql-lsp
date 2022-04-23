@@ -10,7 +10,7 @@ interface TableDefinition {
     columnName: string,
     dataType: string,
     isNullable: boolean,
-    columnDefault?: string
+    columnDefault: string | null
   }[]
 }
 
@@ -66,7 +66,7 @@ export async function queryTableDefinitions(
           columnName: string,
           dataType: string,
           isNullable: boolean,
-          columnDefault?: string
+          columnDefault: string | null
         }[],
       }),
     )

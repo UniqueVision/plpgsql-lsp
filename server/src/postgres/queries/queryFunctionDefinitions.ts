@@ -12,8 +12,8 @@ interface FunctionDefinition {
   isSetOf: boolean
   returnType: string
   languageName: string
-  volatile?: string
-  parallel?: string
+  volatile: string | null
+  parallel: string | null
 }
 
 export async function queryFunctionDefinitions(
@@ -122,29 +122,14 @@ export function makeFunctionDefinitionText(definition: FunctionDefinition): stri
     argsString = `\n  ${functionArgs.join(",\n  ")}\n`
   }
 
-  let returnString = returnType
-  if (isSetOf) {
-    returnString = `SETOF ${returnType}`
-  }
-
-  let definitionText = dedent`
-  Function ${schema}.${functionName}(${argsString})
-    RETURNS ${returnString}
-    LANGUAGE ${languageName}
+  const definitionText = dedent`
+    Function ${schema}.${functionName}(${argsString})
+      RETURNS ${isSetOf ? "SETOF " + returnType : returnType}
+      LANGUAGE ${languageName}
+      ${[volatile, parallel].filter(x => x !== null).join(" ")}
   `
 
-  const functionInfos = []
-  if (volatile !== undefined) {
-    functionInfos.push(volatile)
-  }
-  if (parallel !== undefined) {
-    functionInfos.push(parallel)
-  }
-  if (functionInfos.length !== 0) {
-    definitionText += `\n  ${functionInfos.join(" ")}`
-  }
-
-  return definitionText
+  return definitionText.trim()
 }
 
 export function makeInsertFunctionText(
@@ -155,22 +140,28 @@ export function makeInsertFunctionText(
     functionIdentityArgs,
   } = definition
 
-  let callArgsString = ""
-  if (functionIdentityArgs.length > 0) {
-    callArgsString = "\n" + functionIdentityArgs.map(
+  if (functionIdentityArgs.length === 0) {
+    return `${functionName}()`
+  }
+  else {
+    const callArgs = functionIdentityArgs.map(
       (arg, index) => {
         const splitted = arg.split(" ")
+        // positional argument
         if (splitted.length === 1 || splitted[1] === '"any"') {
-          // argument
-          return `  $\{${index + 1}:${splitted[0]}}`
+          return `$\{${index + 1}:${splitted[0]}}`
         }
+        // keyword argument
         else {
-          // keyword argument
-          return `  ${splitted[0]} := $\{${index + 1}:${splitted[0]}}`
+          return `${splitted[0]} := $\{${index + 1}:${splitted[0]}}`
         }
       },
-    ).join(",\n") + "\n"
-  }
+    )
 
-  return `${functionName}(${callArgsString})`
+    return dedent`
+      ${functionName}(
+        ${callArgs.join(",\n")}
+      )
+    `
+  }
 }
