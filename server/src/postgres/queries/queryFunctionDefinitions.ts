@@ -1,3 +1,4 @@
+import dedent from "ts-dedent/dist"
 import { Logger } from "vscode-languageserver"
 
 import { PostgresPool } from "@/postgres"
@@ -23,7 +24,7 @@ export async function queryFunctionDefinitions(
 ): Promise<FunctionDefinition[]> {
   let definitions: FunctionDefinition[] = []
 
-  let schemaCondition = ""
+  let schemaCondition
   if (schema === undefined) {
     schemaCondition = `ns.nspname in ('${defaultSchema}', 'pg_catalog')`
   }
@@ -31,9 +32,12 @@ export async function queryFunctionDefinitions(
     schemaCondition = `ns.nspname = '${schema.toLowerCase()}'`
   }
 
-  let functionNameCondition = ""
-  if (functionName !== undefined) {
-    functionNameCondition = `AND p.proname = '${functionName.toLowerCase()}'`
+  let functionNameCondition
+  if (functionName === undefined) {
+    functionNameCondition = "TRUE"
+  }
+  else{
+    functionNameCondition = `p.proname = '${functionName.toLowerCase()}'`
   }
 
   const pgClient = await pgPool.connect()
@@ -78,13 +82,12 @@ export async function queryFunctionDefinitions(
         pg_proc p
         INNER JOIN pg_namespace ns ON
           p.pronamespace = ns.oid
+          AND ${schemaCondition}
+          AND ${functionNameCondition}
         INNER JOIN pg_type t ON
           p.prorettype = t.oid
         INNER JOIN pg_language l ON
           p.prolang = l.oid
-      WHERE
-        ${schemaCondition}
-        ${functionNameCondition}
       ORDER BY
         ns.nspname,
         p.proname
@@ -128,7 +131,7 @@ export function makeFunctionDefinitionText(definition: FunctionDefinition): stri
 
   let argsString = ""
   if (functionArgs.length > 0) {
-    argsString = "\n  " + functionArgs.join(",\n  ") + "\n"
+    argsString = `\n  ${functionArgs.join(",\n  ")}\n`
   }
 
   let returnString = returnType
@@ -136,11 +139,11 @@ export function makeFunctionDefinitionText(definition: FunctionDefinition): stri
     returnString = `SETOF ${returnType}`
   }
 
-  let definitionText = [
-    `Function ${schema}.${functionName}(${argsString})`,
-    `  RETURNS ${returnString}`,
-    `  LANGUAGE ${languageName}`,
-  ].join("\n")
+  let definitionText = dedent`
+  Function ${schema}.${functionName}(${argsString})
+    RETURNS ${returnString}
+    LANGUAGE ${languageName}
+  `
 
   const functionInfos = []
   if (volatile !== undefined) {

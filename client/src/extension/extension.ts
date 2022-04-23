@@ -4,7 +4,7 @@ import { ClientManager } from "./clientManager"
 import { Handlers } from "./handlers"
 
 export class Extension {
-  private handlers?: Handlers = undefined
+  private handlers?: Handlers
   private clientManager: ClientManager = new ClientManager()
 
   activate(context: ExtensionContext): void {

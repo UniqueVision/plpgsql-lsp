@@ -1,5 +1,6 @@
 DROP TYPE IF EXISTS type_user CASCADE;
 
 CREATE TYPE type_user AS (
-  id uuid
+  id uuid,
+  name text
 );

@@ -5,7 +5,7 @@ import { Extension } from "./extension"
 
 const extension = new Extension()
 
-export function activate(context: ExtensionContext) {
+export function activate(context: ExtensionContext): void {
   return extension.activate(context)
 }
 

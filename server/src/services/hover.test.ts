@@ -231,6 +231,17 @@ describe("Hover Tests", () => {
 
       validatePostgresCodeMarkdown(hover, dedent`
         Type public.type_user(
+          id uuid,
+          name text
+        )
+      `)
+    })
+
+    it("Hover on the single field type", async () => {
+      const hover = await onHover("type_single_field")
+
+      validatePostgresCodeMarkdown(hover, dedent`
+        Type public.type_single_field(
           id uuid
         )
       `)
@@ -241,7 +252,8 @@ describe("Hover Tests", () => {
 
       validatePostgresCodeMarkdown(hover, dedent`
         Type public.type_user(
-          id uuid
+          id uuid,
+          name text
         )
       `)
     })
