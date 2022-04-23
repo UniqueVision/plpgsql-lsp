@@ -130,6 +130,14 @@ describe("Hover Tests", () => {
       `)
     })
 
+    it("Hover on table with empty column", async () => {
+      const hover = await onHover("empty_table")
+
+      validatePostgresCodeMarkdown(hover, dedent`
+        Table public.empty_table()
+      `)
+    })
+
     it("Hover on view", async () => {
       const hover = await onHover("deleted_users")
 
@@ -266,6 +274,14 @@ describe("Hover Tests", () => {
           id uuid,
           name text
         )
+      `)
+    })
+
+    it("Hover on type with empty column", async () => {
+      const hover = await onHover("public.type_empty")
+
+      validatePostgresCodeMarkdown(hover, dedent`
+        Type public.type_empty()
       `)
     })
 
