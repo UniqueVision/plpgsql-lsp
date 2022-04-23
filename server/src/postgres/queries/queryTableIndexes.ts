@@ -22,7 +22,8 @@ export async function queryTableIndexes(
 
   const pgClient = await pgPool.connect()
   try {
-    const results = await pgClient.query(`
+    const results = await pgClient.query(
+      `
       WITH t_table_indexes AS (
         SELECT
           DISTINCT
@@ -36,14 +37,14 @@ export async function queryTableIndexes(
           pg_class AS index_class
           JOIN pg_namespace ON
             index_class.relnamespace = pg_namespace.oid
-            AND pg_namespace.nspname = '${schema || defaultSchema}'
+            AND pg_namespace.nspname = $1
           JOIN pg_index ON
             index_class.oid = pg_index.indexrelid
             AND index_class.relkind = 'i'
             AND index_class.relname NOT LIKE 'pg_%'
           JOIN pg_class AS table_class ON
             table_class.oid = pg_index.indrelid
-            AND table_class.relname = '${tableName.toLowerCase()}'
+            AND table_class.relname = $2
           JOIN pg_am ON
             pg_am.oid=index_class.relam
           LEFT JOIN pg_attribute ON
@@ -63,7 +64,9 @@ export async function queryTableIndexes(
       ORDER BY
         is_primary_key DESC,
         index_name
-    `)
+      `,
+      [schema || defaultSchema, tableName.toLowerCase()],
+    )
 
     tableIndexes = results.rows.map(
       (row) => ({

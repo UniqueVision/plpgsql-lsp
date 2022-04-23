@@ -2,6 +2,7 @@ import dedent from "ts-dedent/dist"
 import { Logger } from "vscode-languageserver"
 
 import { PostgresPool } from "@/postgres"
+import { makeSchemas } from "@/utilities/schema"
 
 interface FunctionDefinition {
   schema: string
@@ -24,26 +25,11 @@ export async function queryFunctionDefinitions(
 ): Promise<FunctionDefinition[]> {
   let definitions: FunctionDefinition[] = []
 
-  let schemaCondition
-  if (schema === undefined) {
-    schemaCondition = `ns.nspname in ('${defaultSchema}', 'pg_catalog')`
-  }
-  else {
-    schemaCondition = `ns.nspname = '${schema.toLowerCase()}'`
-  }
-
-  let functionNameCondition
-  if (functionName === undefined) {
-    functionNameCondition = "TRUE"
-  }
-  else{
-    functionNameCondition = `p.proname = '${functionName.toLowerCase()}'`
-  }
-
   const pgClient = await pgPool.connect()
   try {
     // https://dataedo.com/kb/query/postgresql/list-stored-procedures
-    const results = await pgClient.query(`
+    const results = await pgClient.query(
+      `
       SELECT
         ns.nspname AS schema,
         p.proname AS function_name,
@@ -82,8 +68,8 @@ export async function queryFunctionDefinitions(
         pg_proc p
         INNER JOIN pg_namespace ns ON
           p.pronamespace = ns.oid
-          AND ${schemaCondition}
-          AND ${functionNameCondition}
+          AND ns.nspname = ANY($1)
+          AND ($2::text IS NULL OR p.proname = $2::text)
         INNER JOIN pg_type t ON
           p.prorettype = t.oid
         INNER JOIN pg_language l ON
@@ -91,7 +77,9 @@ export async function queryFunctionDefinitions(
       ORDER BY
         ns.nspname,
         p.proname
-    `)
+      `,
+      [makeSchemas(schema, defaultSchema), functionName?.toLowerCase()],
+    )
 
     definitions = results.rows.map(
       (row) => ({

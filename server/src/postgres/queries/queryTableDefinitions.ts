@@ -1,6 +1,7 @@
 import { Logger } from "vscode-languageserver"
 
 import { PostgresPool } from "@/postgres"
+import { makeSchemas } from "@/utilities/schema"
 
 interface TableDefinition {
   schema: string
@@ -22,22 +23,10 @@ export async function queryTableDefinitions(
 ): Promise<TableDefinition[]> {
   let definitions: TableDefinition[] = []
 
-  let schemaCondition
-  if (schema === undefined) {
-    schemaCondition = `t_columns.table_schema in ('${defaultSchema}', 'pg_catalog')`
-  }
-  else {
-    schemaCondition = `t_columns.table_schema = '${schema.toLowerCase()}'`
-  }
-
-  let tableNameCondition = "TRUE"
-  if (tableName !== undefined) {
-    tableNameCondition = `t_columns.table_name = '${tableName.toLowerCase()}'`
-  }
-
   const pgClient = await pgPool.connect()
   try {
-    const results = await pgClient.query(`
+    const results = await pgClient.query(
+      `
       SELECT
         t_columns.table_schema as schema,
         t_columns.table_name as table_name,
@@ -57,15 +46,17 @@ export async function queryTableDefinitions(
           t_columns.table_schema = t_tables.table_schema
           AND t_columns.table_name = t_tables.table_name
           AND t_tables.table_type = 'BASE TABLE'
-          AND ${schemaCondition}
-          AND ${tableNameCondition}
+          AND t_columns.table_schema = ANY($1)
+          AND ($2::text IS NULL OR t_columns.table_name = $2::text)
       GROUP BY
         t_columns.table_schema,
         t_columns.table_name
       ORDER BY
         t_columns.table_schema,
         t_columns.table_name
-    `)
+      `,
+      [makeSchemas(schema, defaultSchema), tableName?.toLowerCase()],
+    )
 
     definitions = results.rows.map(
       (row) => ({

@@ -1,6 +1,7 @@
 import { Logger } from "vscode-languageserver"
 
 import { PostgresPool } from "@/postgres"
+import { makeSchemas } from "@/utilities/schema"
 
 interface ViewDefinition {
   schema: string
@@ -16,34 +17,24 @@ export async function queryViewDefinitions(
 ): Promise<ViewDefinition[]> {
   let definitions: ViewDefinition[] = []
 
-  let schemaCondition = ""
-  if (schema === undefined) {
-    schemaCondition = `table_schema in ('${defaultSchema}', 'pg_catalog')`
-  }
-  else {
-    schemaCondition = `table_schema = '${schema.toLowerCase()}'`
-  }
-
-  let viewNameCondition = ""
-  if (viewName !== undefined) {
-    viewNameCondition = `AND table_name = '${viewName.toLowerCase()}'`
-  }
-
   const pgClient = await pgPool.connect()
   try {
-    const results = await pgClient.query(`
+    const results = await pgClient.query(
+      `
       SELECT
         table_schema as schema,
         table_name
       FROM
         information_schema.views
       WHERE
-        ${schemaCondition}
-        ${viewNameCondition}
+        table_schema = ANY($1)
+        AND ($2::text IS NULL OR table_name = $2::text)
       ORDER BY
         table_schema,
         table_name
-    `)
+      `,
+      [makeSchemas(schema, defaultSchema), viewName?.toLowerCase()],
+    )
 
     definitions = results.rows.map(
       (row) => ({
