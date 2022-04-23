@@ -1,6 +1,7 @@
 import { Logger } from "vscode-languageserver"
 
 import { PostgresPool } from "@/postgres"
+import { makeSchemas } from "@/utilities/schema"
 
 interface TypeDefinition {
   schema: string
@@ -20,24 +21,11 @@ export async function queryTypeDefinitions(
 ): Promise<TypeDefinition[]> {
   let definitions: TypeDefinition[] = []
 
-  let schemaCondition = ""
-  if (schema === undefined) {
-    schemaCondition = `n.nspname::text in ('${defaultSchema}', 'pg_catalog')`
-  }
-  else {
-    schemaCondition = `n.nspname::text = '${schema.toLowerCase()}'`
-  }
-
-  let typeNameCondition = ""
-  if (typeName !== undefined) {
-    typeNameCondition =
-      `AND pg_catalog.format_type(t.oid, NULL) = '${typeName.toLowerCase()}'`
-  }
-
   const pgClient = await pgPool.connect()
   try {
     // https://stackoverflow.com/questions/3660787/how-to-list-custom-types-using-postgres-information-schema
-    const results = await pgClient.query(`
+    const results = await pgClient.query(
+      `
       WITH types AS (
         SELECT
           n.nspname,
@@ -101,8 +89,8 @@ export async function queryTypeDefinitions(
         WHERE
           a.attnum > 0
           AND NOT a.attisdropped
-          AND ${schemaCondition}
-          ${typeNameCondition}
+          AND n.nspname::text = ANY($1)
+          AND ($2::text IS NULL OR pg_catalog.format_type(t.oid, NULL) = $2::text)
       )
       SELECT
         cols.schema,
@@ -123,7 +111,9 @@ export async function queryTypeDefinitions(
       ORDER BY
         cols.schema,
         cols.type_name
-    `)
+      `,
+      [makeSchemas(schema, defaultSchema), typeName?.toLowerCase()],
+    )
 
     definitions = results.rows.map(
       (row) => ({

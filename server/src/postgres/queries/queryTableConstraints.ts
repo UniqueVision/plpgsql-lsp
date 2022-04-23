@@ -19,7 +19,8 @@ export async function queryTableConstraints(
 
   const pgClient = await pgPool.connect()
   try {
-    const results = await pgClient.query(`
+    const results = await pgClient.query(
+      `
       WITH t_table_constraints AS (
         SELECT
           DISTINCT
@@ -36,10 +37,10 @@ export async function queryTableConstraints(
           INNER JOIN pg_namespace ON
             pg_namespace.oid = pg_constraint.connamespace
             AND pg_constraint.contype IN ('f', 'c')
-            AND pg_namespace.nspname = '${schema || defaultSchema}'
+            AND pg_namespace.nspname = $1
           JOIN pg_class ON
             pg_constraint.conrelid = pg_class.oid
-            AND pg_class.relname = '${tableName.toLowerCase()}'
+            AND pg_class.relname = $2
           LEFT JOIN information_schema.constraint_column_usage ON
             pg_constraint.conname = constraint_column_usage.constraint_name
             AND pg_namespace.nspname = constraint_column_usage.constraint_schema
@@ -51,8 +52,9 @@ export async function queryTableConstraints(
       ORDER BY
         type,
         name
-      ;
-    `)
+      `,
+      [schema || defaultSchema, tableName.toLowerCase()],
+    )
 
     tableConstraints = results.rows.map(
       (row) => ({

@@ -66,7 +66,8 @@ export async function queryFileStaticAnalysis(
     }
 
     for (const { functionName, location } of functionInfos) {
-      const result = await pgClient.query(`
+      const result = await pgClient.query(
+        `
         SELECT
           (pcf).functionid::regprocedure AS procedure,
           (pcf).lineno AS lineno,
@@ -80,8 +81,10 @@ export async function queryFileStaticAnalysis(
           (pcf).query AS query,
           (pcf).context AS context
         FROM
-          plpgsql_check_function_tb('${functionName}') AS pcf
-      `)
+          plpgsql_check_function_tb($1) AS pcf
+        `,
+        [functionName],
+      )
 
       const rows: StaticAnalysisErrorRow[] = result.rows
       if (rows.length === 0) {

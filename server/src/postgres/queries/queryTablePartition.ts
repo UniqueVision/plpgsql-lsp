@@ -14,17 +14,20 @@ export async function queryTablePartitionKeyDefinition(
   const pgClient = await pgPool.connect()
   let partitionKeyDefinition = null
   try {
-    const results = await pgClient.query(`
+    const results = await pgClient.query(
+      `
       SELECT
         pg_get_partkeydef(pg_class.oid) AS partition_key_definition
       FROM
         pg_class
         JOIN pg_namespace ON
           pg_class.relnamespace = pg_namespace.oid
-          AND pg_namespace.nspname = '${schema || defaultSchema}'
-          AND pg_class.relname = '${tableName.toLowerCase()}'
+          AND pg_namespace.nspname = $1
+          AND pg_class.relname = $2
       LIMIT 1
-    `)
+      `,
+      [schema || defaultSchema, tableName.toLowerCase()],
+    )
 
     partitionKeyDefinition = results.rows[0].partition_key_definition
   }

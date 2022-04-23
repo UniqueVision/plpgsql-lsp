@@ -2,6 +2,17 @@ export interface SchemaCandidate {
   schema?: string, candidate: string
 }
 
+export function makeSchemas(
+  schema: string | undefined, defaultSchema: string,
+): string[] {
+  if (schema === undefined) {
+    return [defaultSchema, "pg_catalog"]
+  }
+  else {
+    return [schema.toLowerCase()]
+  }
+}
+
 export function separateSchemaFromCandidate(
   candidate: string,
 ): SchemaCandidate | undefined {
