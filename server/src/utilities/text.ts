@@ -1,4 +1,4 @@
-import { readFileSync } from "fs"
+import { existsSync, readFileSync } from "fs"
 import { Position, Range, uinteger, URI } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
@@ -154,12 +154,18 @@ export function isFirstCommentLine(
   )
 }
 
-export function readFileFromUri(uri: URI): string {
-  return readFileSync(uri.replace(/^file:\/\//, "")).toString()
+export function readFileFromUri(uri: URI): string | null {
+  const filePath = uri.replace(/^file:\/\//, "")
+  if (existsSync(filePath)) {
+    return readFileSync(filePath).toString()
+  }
+  else {
+    return null
+  }
 }
 
 export function readTextDocumentFromUri(uri: URI): TextDocument {
   return TextDocument.create(
-    uri, "postgres", 1, readFileFromUri(uri),
+    uri, "postgres", 1, readFileFromUri(uri) || "",
   )
 }
