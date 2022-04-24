@@ -1,6 +1,11 @@
 import * as assert from "assert"
 import dedent from "ts-dedent"
-import { CompletionItem, Position } from "vscode-languageserver"
+import {
+  CompletionItem,
+  CompletionItemKind,
+  InsertTextFormat,
+  Position,
+} from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { setupTestServer } from "@/__tests__/helpers/server"
@@ -43,12 +48,28 @@ describe("Completion Tests", () => {
     })
   }
 
+  function validateCompletionItem(
+    completions: CompletionItem[] | undefined,
+    expected: CompletionItem,
+  ) {
+    expect(completions).toBeDefined()
+    if (completions === undefined) neverReach()
+
+    const completion = completions?.find(x => x.label === expected.label)
+    if (completion === undefined) neverReach()
+
+    assert.deepEqual(
+      (({ data: _data, ...target }) => target)(completion),
+      expected,
+    )
+  }
+
   function validateCompletionItems(
     definitoins: CompletionItem[] | undefined,
     expected: CompletionItem[],
   ) {
     expect(definitoins).toBeDefined()
-    if (definitoins === undefined) neverReach("")
+    if (definitoins === undefined) neverReach()
 
     assert.deepEqual(definitoins, expected)
   }
@@ -59,6 +80,311 @@ describe("Completion Tests", () => {
         "companies", Position.create(1, 1),
       )
       assert.ok(completions && completions.length > 1)
+    })
+
+    it("Completion on table", async () => {
+      const completions = await onCompletion(
+        "companies", Position.create(1, 1),
+      )
+      validateCompletionItem(
+        completions,
+        {
+          label: "companies",
+          kind: CompletionItemKind.Class,
+          detail: dedent`
+            Table public.companies(
+              id integer not null,
+              name character varying not null
+            )
+          `,
+        },
+      )
+    })
+
+    it("Completion on table with default schema", async () => {
+      const completions = await onCompletion(
+        "public.users", Position.create(1, 10),
+      )
+      validateCompletionItem(
+        completions,
+        {
+          label: "users",
+          kind: CompletionItemKind.Class,
+          detail: dedent`
+            Table public.users(
+              id integer not null,
+              name character varying not null,
+              company_id integer not null,
+              created_at timestamp with time zone not null default now(),
+              deleted_at timestamp with time zone
+            )
+          `,
+        },
+      )
+    })
+
+    it("Completion on table with exclude index", async () => {
+      const completions = await onCompletion(
+        "schedule", Position.create(1, 1),
+      )
+      validateCompletionItem(
+        completions,
+        {
+          label: "schedule",
+          kind: CompletionItemKind.Class,
+          detail: dedent`
+            Table public.schedule(
+              id integer not null default nextval('schedule_id_seq'::regclass),
+              room_name text not null,
+              reservation_time tsrange not null
+            )
+          `,
+        },
+      )
+    })
+
+    it("Completion on table with non-default schema", async () => {
+      const completions = await onCompletion(
+        "campaign.participants", Position.create(1, 10),
+      )
+      validateCompletionItem(
+        completions,
+        {
+          label: "participants",
+          kind: CompletionItemKind.Class,
+          detail: dedent`
+            Table campaign.participants(
+              id integer not null,
+              name character varying not null,
+              created_at timestamp with time zone not null default now(),
+              deleted_at timestamp with time zone
+            )
+          `,
+        },
+      )
+    })
+
+    it("Completion on view", async () => {
+      const completions = await onCompletion(
+        "deleted_users", Position.create(1, 1),
+      )
+      validateCompletionItem(
+        completions,
+        {
+          label: "deleted_users",
+          kind: CompletionItemKind.Class,
+          detail: dedent`
+            View public.deleted_users
+          `,
+        },
+      )
+    })
+
+    it("Completion on view with default schema", async () => {
+      const completions = await onCompletion(
+        "public.deleted_users", Position.create(1, 10),
+      )
+      validateCompletionItem(
+        completions,
+        {
+          label: "deleted_users",
+          kind: CompletionItemKind.Class,
+          detail: dedent`
+            View public.deleted_users
+          `,
+        },
+      )
+    })
+
+    it("Completion on view with non-default schema", async () => {
+      const completions = await onCompletion(
+        "campaign.deleted_participants", Position.create(1, 10),
+      )
+      validateCompletionItem(
+        completions,
+        {
+          label: "deleted_participants",
+          kind: CompletionItemKind.Class,
+          detail: dedent`
+            View campaign.deleted_participants
+          `,
+        },
+      )
+    })
+
+    it("Completion on positional argument function", async () => {
+      const completions = await onCompletion(
+        "positional_argument_function", Position.create(1, 1),
+      )
+      validateCompletionItem(
+        completions,
+        {
+          label: "positional_argument_function",
+          kind: CompletionItemKind.Function,
+          detail: dedent`
+            Function public.positional_argument_function(
+              integer,
+              integer
+            )
+              RETURNS int4
+              LANGUAGE sql
+              IMMUTABLE PARALLEL UNSAFE
+          `,
+          insertTextFormat: InsertTextFormat.Snippet,
+          insertText: dedent`
+            positional_argument_function(
+              $\{1:integer},
+              $\{2:integer}
+            )
+          `,
+        },
+      )
+    })
+
+    it("Completion on positional argument function with default schema", async () => {
+      const completions = await onCompletion(
+        "public.positional_argument_function", Position.create(1, 10),
+      )
+      validateCompletionItem(
+        completions,
+        {
+          label: "positional_argument_function",
+          kind: CompletionItemKind.Function,
+          detail: dedent`
+            Function public.positional_argument_function(
+              integer,
+              integer
+            )
+              RETURNS int4
+              LANGUAGE sql
+              IMMUTABLE PARALLEL UNSAFE
+          `,
+          insertTextFormat: InsertTextFormat.Snippet,
+          insertText: dedent`
+            positional_argument_function(
+              $\{1:integer},
+              $\{2:integer}
+            )
+          `,
+        },
+      )
+    })
+
+    it("Completion on keyword argument function", async () => {
+      const completions = await onCompletion(
+        "keyword_argument_function", Position.create(1, 1),
+      )
+      validateCompletionItem(
+        completions,
+        {
+          label: "keyword_argument_function",
+          kind: CompletionItemKind.Function,
+          detail: dedent`
+            Function public.keyword_argument_function(
+              i integer
+            )
+              RETURNS int4
+              LANGUAGE plpgsql
+              VOLATILE PARALLEL UNSAFE
+          `,
+          insertTextFormat: InsertTextFormat.Snippet,
+          insertText: dedent`
+            keyword_argument_function(
+              i := $\{1:i}
+            )
+          `,
+        },
+      )
+    })
+
+    it("Completion on built-in function", async () => {
+      const completions = await onCompletion(
+        "jsonb_build_object", Position.create(1, 1),
+      )
+      validateCompletionItem(
+        completions,
+        {
+          label: "jsonb_build_object",
+          kind: CompletionItemKind.Function,
+          detail: dedent`
+            Function pg_catalog.jsonb_build_object(
+              VARIADIC \"any\"
+            )
+              RETURNS jsonb
+              LANGUAGE internal
+              STABLE PARALLEL SAFE
+          `,
+          insertTextFormat: InsertTextFormat.Snippet,
+          insertText: dedent`
+            jsonb_build_object(
+              $\{1:VARIADIC}
+            )
+          `,
+        },
+      )
+    })
+
+    it("Completion on proceduren", async () => {
+      const completions = await onCompletion(
+        "correct_procedure", Position.create(1, 1),
+      )
+      validateCompletionItem(
+        completions,
+        {
+          label: "correct_procedure",
+          kind: CompletionItemKind.Function,
+          detail: dedent`
+            Function public.correct_procedure(
+              INOUT p1 text
+            )
+              RETURNS record
+              LANGUAGE plpgsql
+              VOLATILE PARALLEL UNSAFE
+          `,
+          insertTextFormat: InsertTextFormat.Snippet,
+          insertText: dedent`
+            correct_procedure(
+              INOUT := $\{1:INOUT}
+            )
+          `,
+        },
+      )
+    })
+
+    it("Completion on type", async () => {
+      const completions = await onCompletion(
+        "type_user", Position.create(1, 1),
+      )
+      validateCompletionItem(
+        completions,
+        {
+          label: "type_user",
+          kind: CompletionItemKind.Struct,
+          detail: dedent`
+            Type public.type_user(
+              id uuid
+            )
+          `,
+        },
+      )
+    })
+
+    it("Completion on type with default schema", async () => {
+      const completions = await onCompletion(
+        "public.type_user", Position.create(1, 10),
+      )
+      validateCompletionItem(
+        completions,
+        {
+          label: "type_user",
+          kind: CompletionItemKind.Struct,
+          detail: dedent`
+            Type public.type_user(
+              id uuid
+            )
+          `,
+        },
+      )
     })
 
     it("Disable comment completion", async () => {
