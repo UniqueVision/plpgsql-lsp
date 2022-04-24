@@ -75,13 +75,6 @@ describe("Completion Tests", () => {
   }
 
   describe("Completion", function () {
-    it("Completion items exist", async () => {
-      const completions = await onCompletion(
-        "companies", Position.create(1, 1),
-      )
-      assert.ok(completions && completions.length > 1)
-    })
-
     it("Completion on table", async () => {
       const completions = await onCompletion(
         "companies", Position.create(1, 1),
@@ -159,6 +152,22 @@ describe("Completion Tests", () => {
               created_at timestamp with time zone not null default now(),
               deleted_at timestamp with time zone
             )
+          `,
+        },
+      )
+    })
+
+    it("Completion on table with empty column", async () => {
+      const completions = await onCompletion(
+        "empty_table", Position.create(1, 1),
+      )
+      validateCompletionItem(
+        completions,
+        {
+          label: "empty_table",
+          kind: CompletionItemKind.Class,
+          detail: dedent`
+            Table public.empty_table()
           `,
         },
       )
@@ -351,6 +360,29 @@ describe("Completion Tests", () => {
       )
     })
 
+    it("Completion on constant proceduren", async () => {
+      const completions = await onCompletion(
+        "constant_function", Position.create(1, 1),
+      )
+      validateCompletionItem(
+        completions,
+        {
+          label: "constant_function",
+          kind: CompletionItemKind.Function,
+          detail: dedent`
+            Function public.constant_function()
+              RETURNS text
+              LANGUAGE plpgsql
+              IMMUTABLE PARALLEL SAFE
+          `,
+          insertTextFormat: InsertTextFormat.Snippet,
+          insertText: dedent`
+            constant_function()
+          `,
+        },
+      )
+    })
+
     it("Completion on type", async () => {
       const completions = await onCompletion(
         "type_user", Position.create(1, 1),
@@ -362,7 +394,8 @@ describe("Completion Tests", () => {
           kind: CompletionItemKind.Struct,
           detail: dedent`
             Type public.type_user(
-              id uuid
+              id uuid,
+              name text
             )
           `,
         },
@@ -380,8 +413,43 @@ describe("Completion Tests", () => {
           kind: CompletionItemKind.Struct,
           detail: dedent`
             Type public.type_user(
+              id uuid,
+              name text
+            )
+          `,
+        },
+      )
+    })
+
+    it("Completion on the single field type", async () => {
+      const completions = await onCompletion(
+        "type_single_field", Position.create(1, 1),
+      )
+      validateCompletionItem(
+        completions,
+        {
+          label: "type_single_field",
+          kind: CompletionItemKind.Struct,
+          detail: dedent`
+            Type public.type_single_field(
               id uuid
             )
+          `,
+        },
+      )
+    })
+
+    it("Completion on type with empty column", async () => {
+      const completions = await onCompletion(
+        "public.type_empty", Position.create(1, 10),
+      )
+      validateCompletionItem(
+        completions,
+        {
+          label: "type_empty",
+          kind: CompletionItemKind.Struct,
+          detail: dedent`
+            Type public.type_empty()
           `,
         },
       )
