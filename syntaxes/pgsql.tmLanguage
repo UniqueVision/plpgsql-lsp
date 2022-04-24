@@ -21,7 +21,7 @@
     </dict>
     <dict>
       <key>begin</key>
-      <string>(?i)^\s*(create)\s+(or\s+replace\s+)?(function|view)\s+((?:(?:[\w]+|".+")\.)?(?:[\w]+|".+"))</string>
+      <string>(?i)^\s*(create)\s+(or\s+replace\s+)?(function|procedure|view)\s+((?:(?:[\w]+|".+")\.)?(?:[\w]+|".+"))</string>
       <key>beginCaptures</key>
       <dict>
         <key>1</key>

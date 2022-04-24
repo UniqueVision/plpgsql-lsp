@@ -130,6 +130,14 @@ describe("Hover Tests", () => {
       `)
     })
 
+    it("Hover on table with empty column", async () => {
+      const hover = await onHover("empty_table")
+
+      validatePostgresCodeMarkdown(hover, dedent`
+        Table public.empty_table()
+      `)
+    })
+
     it("Hover on view", async () => {
       const hover = await onHover("deleted_users")
 
@@ -226,6 +234,17 @@ describe("Hover Tests", () => {
       `)
     })
 
+    it("Hover on constant function", async () => {
+      const hover = await onHover("constant_function")
+
+      validatePostgresCodeMarkdown(hover, dedent`
+        Function public.constant_function()
+          RETURNS text
+          LANGUAGE plpgsql
+          IMMUTABLE PARALLEL SAFE
+      `)
+    })
+
     it("Hover on type", async () => {
       const hover = await onHover("type_user")
 
@@ -255,6 +274,14 @@ describe("Hover Tests", () => {
           id uuid,
           name text
         )
+      `)
+    })
+
+    it("Hover on type with empty column", async () => {
+      const hover = await onHover("public.type_empty")
+
+      validatePostgresCodeMarkdown(hover, dedent`
+        Type public.type_empty()
       `)
     })
 

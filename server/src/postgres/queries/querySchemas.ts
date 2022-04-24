@@ -18,7 +18,7 @@ export async function querySchemas(
             schema_name
     `)
 
-    schemas = results.rows.map(row => `${row["schema_name"]}`)
+    schemas = results.rows.map(row => row.schema_name)
   }
   catch (error: unknown) {
     logger.error(`${(error as Error).message}`)
