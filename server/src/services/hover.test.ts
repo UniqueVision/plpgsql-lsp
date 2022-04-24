@@ -256,16 +256,6 @@ describe("Hover Tests", () => {
       `)
     })
 
-    it("Hover on the single field type", async () => {
-      const hover = await onHover("type_single_field")
-
-      validatePostgresCodeMarkdown(hover, dedent`
-        Type public.type_single_field(
-          id uuid
-        )
-      `)
-    })
-
     it("Hover on type with default schema", async () => {
       const hover = await onHover("public.type_user")
 
@@ -273,6 +263,16 @@ describe("Hover Tests", () => {
         Type public.type_user(
           id uuid,
           name text
+        )
+      `)
+    })
+
+    it("Hover on the single field type", async () => {
+      const hover = await onHover("type_single_field")
+
+      validatePostgresCodeMarkdown(hover, dedent`
+        Type public.type_single_field(
+          id uuid
         )
       `)
     })

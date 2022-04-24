@@ -23,7 +23,14 @@ import {
   makeTypeDefinitionText,
   queryTypeDefinitions,
 } from "@/postgres/queries/queryTypeDefinitions"
-import { getWordRangeAtPosition, isFirstCommentLine } from "@/utilities/text"
+import {
+  makeViewDefinitionText,
+  queryViewDefinitions,
+} from "@/postgres/queries/queryViewDefinitions"
+import {
+  getWordRangeAtPosition,
+  isFirstCommentLine,
+} from "@/utilities/text"
 
 
 export async function getCompletionItems(
@@ -52,6 +59,7 @@ export async function getCompletionItems(
 
   const completionItems = schmaCompletionItems
     .concat(await getTableCompletionItems(pgPool, schema, defaultSchema, logger))
+    .concat(await getViewCompletionItems(pgPool, schema, defaultSchema, logger))
     .concat(await getFunctionCompletionItems(pgPool, schema, defaultSchema, logger))
     .concat(await getTypeCompletionItems(pgPool, schema, defaultSchema, logger))
     .concat(getBuiltinFunctionCompletionItems())
@@ -141,7 +149,7 @@ async function getSchemaCompletionItems(
         label: schema,
         kind: CompletionItemKind.Module,
         data: index,
-        detail: `SCHEMA ${schema}`,
+        detail: `Schema ${schema}`,
       }
     },
   )
@@ -161,9 +169,30 @@ async function getTableCompletionItems(
     .map(
       (definition, index) => ({
         label: definition.tableName,
-        kind: CompletionItemKind.Struct,
+        kind: CompletionItemKind.Class,
         data: index,
         detail: makeTableDefinitionText(definition),
+      }),
+    )
+}
+
+async function getViewCompletionItems(
+  pgPool: PostgresPool,
+  schema: string | undefined,
+  defaultSchema: string,
+  logger: Logger,
+): Promise<CompletionItem[]> {
+  const definitions = await queryViewDefinitions(
+    pgPool, schema, defaultSchema, logger,
+  )
+
+  return definitions
+    .map(
+      (definition, index) => ({
+        label: definition.viewName,
+        kind: CompletionItemKind.Class,
+        data: index,
+        detail: makeViewDefinitionText(definition),
       }),
     )
 }
@@ -182,7 +211,7 @@ async function getFunctionCompletionItems(
     .map(
       (definition, index) => ({
         label: definition.functionName,
-        kind: CompletionItemKind.Value,
+        kind: CompletionItemKind.Function,
         data: index,
         detail: makeFunctionDefinitionText(definition),
         insertText: makeInsertFunctionText(definition),
@@ -205,7 +234,7 @@ async function getTypeCompletionItems(
     .map(
       (definition, index) => ({
         label: definition.typeName,
-        kind: CompletionItemKind.Value,
+        kind: CompletionItemKind.Struct,
         data: index,
         detail: makeTypeDefinitionText(definition),
       }),
@@ -217,10 +246,10 @@ function getBuiltinFunctionCompletionItems(): CompletionItem[] {
     .map(
       (functionName, index) => ({
         label: functionName,
-        kind: CompletionItemKind.Value,
+        kind: CompletionItemKind.Function,
         data: index,
         detail: dedent`
-          FUNCTION ${functionName}(value [, ...])
+          Function ${functionName}(value [, ...])
             LANGUAGE built-in
         `,
         insertText: `${functionName}($\{1:value}, $\{2:...})`,
@@ -230,10 +259,10 @@ function getBuiltinFunctionCompletionItems(): CompletionItem[] {
       .map(
         (functionName, index) => ({
           label: functionName,
-          kind: CompletionItemKind.Value,
+          kind: CompletionItemKind.Function,
           data: index,
           detail: dedent`
-          FUNCTION ${functionName}(value1, value2)
+          Function ${functionName}(value1, value2)
             LANGUAGE built-in
           `,
           insertText: `${functionName}($\{1:value1}, $\{2:value2})`,
