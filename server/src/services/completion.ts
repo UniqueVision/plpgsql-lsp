@@ -220,27 +220,6 @@ async function getFunctionCompletionItems(
     )
 }
 
-async function getTypeCompletionItems(
-  pgPool: PostgresPool,
-  schema: string | undefined,
-  defaultSchema: string,
-  logger: Logger,
-): Promise<CompletionItem[]> {
-  const definition = await queryTypeDefinitions(
-    pgPool, schema, defaultSchema, logger,
-  )
-
-  return definition
-    .map(
-      (definition, index) => ({
-        label: definition.typeName,
-        kind: CompletionItemKind.Struct,
-        data: index,
-        detail: makeTypeDefinitionText(definition),
-      }),
-    )
-}
-
 function getBuiltinFunctionCompletionItems(): CompletionItem[] {
   return ["COALESCE", "GREATEST", "LEAST"]
     .map(
@@ -269,6 +248,27 @@ function getBuiltinFunctionCompletionItems(): CompletionItem[] {
           insertTextFormat: InsertTextFormat.Snippet,
         }),
       ))
+}
+
+async function getTypeCompletionItems(
+  pgPool: PostgresPool,
+  schema: string | undefined,
+  defaultSchema: string,
+  logger: Logger,
+): Promise<CompletionItem[]> {
+  const definition = await queryTypeDefinitions(
+    pgPool, schema, defaultSchema, logger,
+  )
+
+  return definition
+    .map(
+      (definition, index) => ({
+        label: definition.typeName,
+        kind: CompletionItemKind.Struct,
+        data: index,
+        detail: makeTypeDefinitionText(definition),
+      }),
+    )
 }
 
 function getKeywordCompletionItems(
