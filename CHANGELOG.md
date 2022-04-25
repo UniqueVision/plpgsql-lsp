@@ -2,6 +2,13 @@
 
 ## Unreleased - TDB
 
+## [v2.4.1](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.4.1) - 2022/04/25
+- Add completion tests. [#33](https://github.com/UniqueVision/plpgsql-lsp/pull/33)
+- Fix hover/completion of the no column table/type. [#32](https://github.com/UniqueVision/plpgsql-lsp/pull/32)
+- Fix sql injection risk. [#31](https://github.com/UniqueVision/plpgsql-lsp/pull/31)
+- Refactor the code. [#30](https://github.com/UniqueVision/plpgsql-lsp/pull/30)
+- Fix clash when copy a sql file. [#29](https://github.com/UniqueVision/plpgsql-lsp/pull/29)
+
 ## [v2.4.0](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.4.0) - 2022/04/18
 - Enhanced the table hover. [#28](https://github.com/UniqueVision/plpgsql-lsp/pull/28)
 - Fix completion logic. [#24](https://github.com/UniqueVision/plpgsql-lsp/pull/24)
