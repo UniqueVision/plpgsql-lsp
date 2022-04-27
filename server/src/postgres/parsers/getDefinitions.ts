@@ -24,6 +24,12 @@ export function getDefinitions(
       else if (statement?.stmt?.CreateFunctionStmt !== undefined) {
         return getFunctionDefinitions(fileText, statement, uri, defaultSchema)
       }
+      else if (statement?.stmt?.CreateTrigStmt !== undefined) {
+        return getTriggerDefinitions(fileText, statement, uri)
+      }
+      else if (statement?.stmt?.IndexStmt !== undefined) {
+        return getIndexDefinitions(fileText, statement, uri)
+      }
       else {
         return []
       }
@@ -204,6 +210,82 @@ export function getFunctionDefinitions(
     schemaname,
     defaultSchema,
   )
+}
+
+export function getIndexDefinitions(
+  fileText: string,
+  statement: Statement,
+  uri: URI,
+): DefinitionCandidate[] {
+  const IndexStmt = statement?.stmt?.IndexStmt
+  if (IndexStmt === undefined) {
+    return []
+  }
+
+  const indexName = IndexStmt.idxname
+  const indexNameLocation = findIndexFromBuffer(
+    fileText, indexName, statement.stmt_location,
+  )
+  const stmtLocation = statement.stmt_location || 0
+
+  const definitionLink = LocationLink.create(
+    uri,
+    getRangeFromBuffer(
+      fileText,
+      stmtLocation,
+      stmtLocation + statement.stmt_len,
+    ),
+    getRangeFromBuffer(
+      fileText,
+      indexNameLocation,
+      indexNameLocation + indexName.length,
+    ),
+  )
+
+  return [
+    {
+      definition: indexName,
+      definitionLink,
+    },
+  ]
+}
+
+export function getTriggerDefinitions(
+  fileText: string,
+  statement: Statement,
+  uri: URI,
+): DefinitionCandidate[] {
+  const createTrigStmt = statement?.stmt?.CreateTrigStmt
+  if (createTrigStmt === undefined) {
+    return []
+  }
+
+  const triggerName = createTrigStmt.trigname
+  const triggerNameLocation = findIndexFromBuffer(
+    fileText, triggerName, statement.stmt_location,
+  )
+  const stmtLocation = statement.stmt_location || 0
+
+  const definitionLink = LocationLink.create(
+    uri,
+    getRangeFromBuffer(
+      fileText,
+      stmtLocation,
+      stmtLocation + statement.stmt_len,
+    ),
+    getRangeFromBuffer(
+      fileText,
+      triggerNameLocation,
+      triggerNameLocation + triggerName.length,
+    ),
+  )
+
+  return [
+    {
+      definition: triggerName,
+      definitionLink,
+    },
+  ]
 }
 
 function makeMultiSchemaDefinitionCandidates(

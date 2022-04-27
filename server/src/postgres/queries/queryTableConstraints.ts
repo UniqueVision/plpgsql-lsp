@@ -1,10 +1,16 @@
 import { Logger } from "vscode-languageserver"
 
 import { PostgresPool } from "@/postgres/pool"
+import {
+  DefinitionsManager,
+  makeTargetRelatedTableLink,
+} from "@/server/definitionsManager"
 
 interface TableConstraint {
   type: "foreign_key" | "check",
-  name: string,
+  schemaName: string,
+  tableName: string,
+  constraintName: string,
   definition: string,
 }
 
@@ -16,6 +22,7 @@ export async function queryTableConstraints(
   logger: Logger,
 ): Promise<TableConstraint[]> {
   let tableConstraints: TableConstraint[] = []
+  const schemaName = schema || defaultSchema
 
   const pgClient = await pgPool.connect()
   try {
@@ -53,13 +60,15 @@ export async function queryTableConstraints(
         type,
         name
       `,
-      [schema || defaultSchema, tableName.toLowerCase()],
+      [schemaName, tableName.toLowerCase()],
     )
 
     tableConstraints = results.rows.map(
       (row) => ({
         type: row.type,
-        name: row.name,
+        schemaName,
+        tableName,
+        constraintName: row.name,
         definition: row.definition,
       }),
     )
@@ -75,8 +84,14 @@ export async function queryTableConstraints(
 }
 
 
-export function makeTableConastaintText(tableConstraint: TableConstraint): string {
-  const { name, definition } = tableConstraint
+export function makeTableConastaintText(
+  tableConstraint: TableConstraint, definitionsManager: DefinitionsManager,
+): string {
+  const { schemaName, tableName, constraintName, definition } = tableConstraint
 
-  return `"${name}" ${definition}`
+  const targetLink = makeTargetRelatedTableLink(
+    constraintName, tableName, schemaName, definitionsManager,
+  )
+
+  return `${targetLink} ${definition}`
 }

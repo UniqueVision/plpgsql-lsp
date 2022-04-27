@@ -1,8 +1,14 @@
 import { Logger } from "vscode-languageserver"
 
 import { PostgresPool } from "@/postgres/pool"
+import {
+  DefinitionsManager,
+  makeTargetRelatedTableLink,
+} from "@/server/definitionsManager"
 
 interface TableIndex {
+  schemaName: string,
+  tableName: string,
   indexName: string,
   accessMethodName: string,
   columnNames: string[]
@@ -19,6 +25,7 @@ export async function queryTableIndexes(
   logger: Logger,
 ): Promise<TableIndex[]> {
   let tableIndexes: TableIndex[] = []
+  const schemaName = schema || defaultSchema
 
   const pgClient = await pgPool.connect()
   try {
@@ -65,11 +72,13 @@ export async function queryTableIndexes(
         is_primary_key DESC,
         index_name
       `,
-      [schema || defaultSchema, tableName.toLowerCase()],
+      [schemaName, tableName.toLowerCase()],
     )
 
     tableIndexes = results.rows.map(
       (row) => ({
+        schemaName,
+        tableName,
         indexName: row.index_name,
         accessMethodName: row.access_method_name,
         columnNames: row.column_names.split(","),
@@ -90,13 +99,26 @@ export async function queryTableIndexes(
 }
 
 
-export function makeTableIndexText(tableIndex: TableIndex): string {
+export function makeTableIndexText(
+  tableIndex: TableIndex, definitionsManager: DefinitionsManager,
+): string {
   const {
-    indexName, accessMethodName, columnNames, isPrimaryKey, isUnique, isExcludeUsing,
+    schemaName,
+    tableName,
+    indexName,
+    accessMethodName,
+    columnNames,
+    isPrimaryKey,
+    isUnique,
+    isExcludeUsing,
   } = tableIndex
 
+  const targetLink = makeTargetRelatedTableLink(
+    indexName, tableName, schemaName, definitionsManager,
+  )
+
   return [
-    `"${indexName}"`,
+    targetLink,
     isPrimaryKey ? "PRIMARY KEY," : null,
     !isPrimaryKey && isUnique ? "UNIQUE," : null,
     isExcludeUsing ? "EXCLUDE USING" : null,

@@ -6,7 +6,7 @@ import { getDefinitions } from "@/postgres/parsers/getDefinitions"
 import { getStmtements } from "@/postgres/parsers/statement"
 import { Settings } from "@/settings"
 import { disableLanguageServer } from "@/utilities/disableLanguageServer"
-import { readTextDocumentFromUri } from "@/utilities/text"
+import { makeDefinitionLinkMarkdown, readTextDocumentFromUri } from "@/utilities/text"
 
 export type Definition = string;
 export type DefinitionCandidate = {
@@ -125,4 +125,23 @@ export class DefinitionsManager {
       candidates.map((candidate) => candidate.definition),
     )
   }
+}
+
+export function makeTargetRelatedTableLink(
+  targetName: string,
+  tableName: string,
+  schemaName: string,
+  definitionsManager: DefinitionsManager,
+): string {
+  let targetLink = makeDefinitionLinkMarkdown(targetName, definitionsManager)
+  if (targetLink === undefined) {
+    targetLink = makeDefinitionLinkMarkdown(
+      targetName, definitionsManager, `${schemaName}.${tableName}`,
+    )
+    if (targetLink === undefined) {
+      targetLink = `\`"${targetName}"\``
+    }
+  }
+
+  return targetLink
 }
