@@ -1,6 +1,8 @@
 # Change Log
 
 ## Unreleased - TDB
+## [v2.5.0](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.5.0) - 2022/04/27
+- Enhanced hover/completion feature. [#34](https://github.com/UniqueVision/plpgsql-lsp/pull/34)
 
 ## [v2.4.1](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.4.1) - 2022/04/25
 - Add completion tests. [#33](https://github.com/UniqueVision/plpgsql-lsp/pull/33)
