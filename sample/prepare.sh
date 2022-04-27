@@ -12,6 +12,7 @@ sql_file=$(mktemp)
     cat definitions/views/*.pgsql
     cat definitions/types/*.pgsql
     cat definitions/stored/*.pgsql
+    cat definitions/triggers/*.pgsql
 } >> "$sql_file"
 
 if ${DRYRUN:-false}; then

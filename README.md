@@ -6,8 +6,8 @@
 ## Features
 
 - type/table/view/function/procedure name completion.
-- go to the type/table/view/function/procedure definition.
-- hover type/table/view/function/procedure definition.
+- go to the type/table/view/function/procedure/index/trigger definition.
+- hover type/table/view/function/procedure/index/trigger definition.
 - syntax check.
 - static analysis check (when [plpgsql_check](https://github.com/okbob/plpgsql_check) use) .
 - execute a file query by CodeLens/Command.

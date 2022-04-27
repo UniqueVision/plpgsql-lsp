@@ -1,5 +1,5 @@
 import { parseQuery } from "libpg-query"
-import { uinteger } from "vscode-languageserver"
+import { integer, uinteger } from "vscode-languageserver"
 
 export interface Statement {
   stmt: StatementItem
@@ -12,6 +12,8 @@ export interface StatementItem {
   ViewStmt?: ViewStmt
   CompositeTypeStmt?: CompositeTypeStmt
   CreateFunctionStmt?: CreateFunctionStmt
+  CreateTrigStmt?: CreateTrigStmt
+  IndexStmt?: IndexStmt
 }
 
 export interface CreateStmt {
@@ -46,21 +48,21 @@ export interface CompositeTypeStmtTypevar {
 }
 
 export interface CreateFunctionStmt {
-  is_procedure: boolean
+  is_procedure?: boolean
   replace: boolean
-  funcname: CreateFunctionStmtFuncName[]
+  funcname: FuncName[]
   returnType: CreateFunctionStmtReturnType
   options: CreateFunctionStmtOption[]
 }
 
-export interface CreateFunctionStmtFuncName {
-  String: CreateFunctionStmtFuncNameString
+export interface FuncName {
+  String: FuncNameString
 }
 
 export interface CreateFunctionStmtReturnType {
   location: uinteger
 }
-export interface CreateFunctionStmtFuncNameString {
+export interface FuncNameString {
   str: string
 }
 
@@ -90,6 +92,23 @@ export interface CreateFunctionStmtOptionsDefElemArgListItemString {
   str: string
 }
 
+export interface CreateTrigStmt {
+  trigname: string
+  relation: CreateTrigStmtRelation
+  funcname: FuncName[]
+  row: boolean
+  events: integer
+}
+
+export interface CreateTrigStmtRelation {
+  relname: string
+  inh: boolean
+  relpersistence: string
+}
+
+export interface IndexStmt {
+  idxname: string
+}
 
 export async function getStmtements(query: string): Promise<Statement[] | undefined> {
   try {

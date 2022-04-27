@@ -2,6 +2,8 @@ import { existsSync, readFileSync } from "fs"
 import { Position, Range, uinteger, URI } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
+import { Definition, DefinitionsManager } from "@/server/definitionsManager"
+
 export function getWordRangeAtPosition(
   document: TextDocument, position: Position,
 ): Range | undefined {
@@ -120,6 +122,30 @@ export function getNonSpaceCharacter(lineText: string): number {
 
 export function makePostgresCodeMarkdown(code: string): string {
   return `\`\`\`postgres\n${code}\n\`\`\``
+}
+
+export function makeListMarkdown(items: string[]): string {
+  return items.map(item => `- ${item}`).join("\n")
+}
+
+export function makeDefinitionLinkMarkdown(
+  target: string, definitionsManager: DefinitionsManager, definition?: Definition,
+): string | undefined {
+  if (definition === undefined) {
+    definition = target
+  }
+  const definitionLinks = definitionsManager.getDefinitionLinks(definition)
+  if (definitionLinks && definitionLinks.length >= 1) {
+    const link = [
+      definitionLinks[0].targetUri,
+      definitionLinks[0].targetSelectionRange.start.line + 1,
+    ].join("#L")
+
+    return `["${target}"](${link})`
+  }
+  else {
+    return undefined
+  }
 }
 
 export function getFirstLine(document: TextDocument): string {

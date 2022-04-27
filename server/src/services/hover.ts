@@ -13,6 +13,10 @@ import {
   queryFunctionDefinitions,
 } from "@/postgres/queries/queryFunctionDefinitions"
 import {
+  makeIndexDefinitionText,
+  queryIndexDefinitions,
+} from "@/postgres/queries/queryIndexDefinitions"
+import {
   makeTableConastaintText,
   queryTableConstraints,
 } from "@/postgres/queries/queryTableConstraints"
@@ -29,6 +33,14 @@ import {
   queryTablePartitionKeyDefinition,
 } from "@/postgres/queries/queryTablePartition"
 import {
+  makeTableTriggerText,
+  queryTableTriggers,
+} from "@/postgres/queries/queryTableTriggers"
+import {
+  makeTriggerDefinitionText,
+  queryTriggerDefinitions,
+} from "@/postgres/queries/queryTriggerDefinitions"
+import {
   makeTypeDefinitionText,
   queryTypeDefinitions,
 } from "@/postgres/queries/queryTypeDefinitions"
@@ -36,13 +48,19 @@ import {
   makeViewDefinitionText,
   queryViewDefinitions,
 } from "@/postgres/queries/queryViewDefinitions"
+import { DefinitionsManager } from "@/server/definitionsManager"
 import { asyncFlatMap } from "@/utilities/functool"
 import { sanitizeWordCandidates } from "@/utilities/sanitizeWord"
 import { separateSchemaFromCandidate } from "@/utilities/schema"
-import { getWordRangeAtPosition, makePostgresCodeMarkdown } from "@/utilities/text"
+import {
+  getWordRangeAtPosition,
+  makeListMarkdown,
+  makePostgresCodeMarkdown,
+} from "@/utilities/text"
 
 export async function getHover(
   pgPool: PostgresPool,
+  definitionsManager: DefinitionsManager,
   document: TextDocument,
   position: Position,
   defaultSchema: string,
@@ -65,7 +83,7 @@ export async function getHover(
 
     // Check as Table
     const tableHover = await getTableHover(
-      pgPool, schema, candidate, defaultSchema, logger,
+      pgPool, definitionsManager, schema, candidate, defaultSchema, logger,
     )
     if (tableHover !== undefined) {
       return tableHover
@@ -94,6 +112,22 @@ export async function getHover(
     if (typeHover !== undefined) {
       return typeHover
     }
+
+    // Check as Index
+    const indexHover = await getIndexHover(
+      pgPool, schema, candidate, defaultSchema, logger,
+    )
+    if (indexHover !== undefined) {
+      return indexHover
+    }
+
+    // Check as Trigger
+    const triggerHover = await getTriggerHover(
+      pgPool, schema, candidate, defaultSchema, logger,
+    )
+    if (triggerHover !== undefined) {
+      return triggerHover
+    }
   }
 
   return undefined
@@ -101,6 +135,7 @@ export async function getHover(
 
 async function getTableHover(
   pgPool: PostgresPool,
+  definitionsManager: DefinitionsManager,
   schema: string | undefined,
   tableName: string,
   defaultSchema: string,
@@ -109,16 +144,30 @@ async function getTableHover(
   const definitions = await queryTableDefinitions(
     pgPool, schema, defaultSchema, logger, tableName,
   )
+  if (definitions.length === 0) {
+    return undefined
+  }
 
-  const definitionsWithIndex = await asyncFlatMap(definitions,
+  const tablePartitionKeyDefinition = await queryTablePartitionKeyDefinition(
+    pgPool, schema, tableName, defaultSchema, logger,
+  )
+  const tableIndexes = await queryTableIndexes(
+    pgPool, schema, tableName, defaultSchema, logger,
+  )
+  const tableConstraints = await queryTableConstraints(
+    pgPool, schema, tableName, defaultSchema, logger,
+  )
+  const tableTriggers = await queryTableTriggers(
+    pgPool, schema, tableName, defaultSchema, logger,
+  )
+
+  const definitionsTexts = await asyncFlatMap(
+    definitions,
     async (definition) => {
       // Table definition
       let tableDefinitionText = makeTableDefinitionText(definition)
 
       // Partition
-      const tablePartitionKeyDefinition = await queryTablePartitionKeyDefinition(
-        pgPool, schema, tableName, defaultSchema, logger,
-      )
       if (tablePartitionKeyDefinition !== null) {
         tableDefinitionText += `\n  ${makeTablePartitionKeyDefinitionText(
           tablePartitionKeyDefinition,
@@ -127,54 +176,79 @@ async function getTableHover(
 
       // Indexes
       let tableIndexesText
-      const tableIndexes = await queryTableIndexes(
-        pgPool, schema, tableName, defaultSchema, logger,
+      const tableIndexTexts = tableIndexes.map(
+        tableIndex => makeTableIndexText(tableIndex, definitionsManager),
       )
-      if (tableIndexes.length !== 0) {
+
+      if (tableIndexTexts.length !== 0) {
         tableIndexesText = dedent`
-          Indexes:
-            ${tableIndexes.map(makeTableIndexText).join("\n")}
+          ### Indexes:
+          ${makeListMarkdown(tableIndexTexts)}
         `
       }
 
       // Constraints
-      const tableConstraints = await queryTableConstraints(
-        pgPool, schema, tableName, defaultSchema, logger,
-      )
-
       // Check constraints
       let tableCheckConstraintsText
-      const tableCheckConstraints = tableConstraints
+      const tableCheckConstraintTexts = tableConstraints
         .filter(constraint => constraint.type === "check")
-      if (tableCheckConstraints.length !== 0) {
+        .map(constraint => makeTableConastaintText(constraint, definitionsManager))
+
+      if (tableCheckConstraintTexts.length !== 0) {
         tableCheckConstraintsText = dedent`
-          Check constraints:
-            ${tableCheckConstraints.map(makeTableConastaintText).join("\n")}
+          ### Check constraints:
+          ${makeListMarkdown(tableCheckConstraintTexts)}
         `
       }
 
       // Foreign key constraints
       let tableForeignKeyConstraintsText
-      const tableForeignKeyConstraints = tableConstraints
+      const tableForeignKeyConstraintTexts = tableConstraints
         .filter(constraint => constraint.type === "foreign_key")
-      if (tableForeignKeyConstraints.length !== 0) {
+        .map(constraint => makeTableConastaintText(constraint, definitionsManager))
+
+      if (tableForeignKeyConstraintTexts.length !== 0) {
         tableForeignKeyConstraintsText = dedent`
-          Foreign key constraints:
-            ${tableForeignKeyConstraints.map(makeTableConastaintText).join("\n")}
+          ### Foreign key constraints:
+          ${makeListMarkdown(tableForeignKeyConstraintTexts)}
         `
       }
 
-      return [
-        tableDefinitionText,
+      // Triggers
+      let tableTriggersText
+      const tableTriggerTexts = tableTriggers
+        .map(trigger => makeTableTriggerText(trigger, definitionsManager))
+
+      if (tableTriggerTexts.length !== 0) {
+        tableTriggersText = dedent`
+          ### Triggers:
+          ${makeListMarkdown(tableTriggerTexts)}
+        `
+      }
+
+      // Table definition text
+      let tableInfos = [
         tableIndexesText,
         tableCheckConstraintsText,
         tableForeignKeyConstraintsText,
-      ]
-        .filter(elem => elem !== undefined)
-        .join("\n\n")
-    })
+        tableTriggersText,
+      ].filter<string>((x): x is string => typeof x === "string")
 
-  return makeHover(definitionsWithIndex)
+      if (tableInfos.length !== 0) {
+        tableInfos = ["----------------"].concat(tableInfos)
+      }
+
+      return [makePostgresCodeMarkdown(tableDefinitionText)]
+        .concat(tableInfos).join("\n\n")
+    },
+  )
+
+  return {
+    contents: {
+      kind: MarkupKind.Markdown,
+      value: definitionsTexts.join("\n\n"),
+    },
+  }
 }
 
 async function getViewHover(
@@ -227,6 +301,43 @@ async function getTypeHover(
   return await makeHover(
     definitions.map(
       (definition) => makeTypeDefinitionText(definition),
+    ),
+  )
+}
+
+
+async function getIndexHover(
+  pgPool: PostgresPool,
+  schema: string | undefined,
+  triggerName: string,
+  defaultSchema: string,
+  logger: Logger,
+): Promise<Hover | undefined> {
+  const definitions = await queryIndexDefinitions(
+    pgPool, schema, triggerName, defaultSchema, logger,
+  )
+
+  return await makeHover(
+    definitions.map(
+      (definition) => makeIndexDefinitionText(definition),
+    ),
+  )
+}
+
+async function getTriggerHover(
+  pgPool: PostgresPool,
+  schema: string | undefined,
+  triggerName: string,
+  defaultSchema: string,
+  logger: Logger,
+): Promise<Hover | undefined> {
+  const definitions = await queryTriggerDefinitions(
+    pgPool, schema, triggerName, defaultSchema, logger,
+  )
+
+  return await makeHover(
+    definitions.map(
+      (definition) => makeTriggerDefinitionText(definition),
     ),
   )
 }

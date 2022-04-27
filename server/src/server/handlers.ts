@@ -255,6 +255,7 @@ export class Handlers {
       (pgPool, document, settings) =>
         getHover(
           pgPool,
+          this.definitionsManager,
           document,
           params.position,
           settings.defaultSchema,

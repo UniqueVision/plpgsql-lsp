@@ -109,6 +109,7 @@ describe("Completion Tests", () => {
               name character varying not null,
               company_id integer not null,
               created_at timestamp with time zone not null default now(),
+              updated_at timestamp with time zone not null default now(),
               deleted_at timestamp with time zone
             )
           `,
