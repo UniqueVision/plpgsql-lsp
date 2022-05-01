@@ -167,7 +167,7 @@ async function getTableCompletionItems(
   logger: Logger,
 ): Promise<CompletionItem[]> {
   const definitions = await queryTableDefinitions(
-    pgPool, schema, defaultSchema, logger,
+    pgPool, schema, undefined, defaultSchema, logger,
   )
 
   return definitions
@@ -209,7 +209,7 @@ async function getFunctionCompletionItems(
   logger: Logger,
 ): Promise<CompletionItem[]> {
   const definitions = await queryFunctionDefinitions(
-    pgPool, schema, defaultSchema, logger,
+    pgPool, schema, undefined, defaultSchema, logger,
   )
 
   return definitions
@@ -283,7 +283,7 @@ async function getTypeCompletionItems(
   logger: Logger,
 ): Promise<CompletionItem[]> {
   const definition = await queryTypeDefinitions(
-    pgPool, schema, defaultSchema, logger,
+    pgPool, schema, undefined, defaultSchema, logger,
   )
 
   return definition

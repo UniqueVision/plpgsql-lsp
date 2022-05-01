@@ -149,7 +149,7 @@ async function getTableHover(
   logger: Logger,
 ): Promise<Hover | undefined> {
   const definitions = await queryTableDefinitions(
-    pgPool, schema, defaultSchema, logger, tableName,
+    pgPool, schema, tableName, defaultSchema, logger,
   )
   if (definitions.length === 0) {
     return undefined
@@ -284,7 +284,7 @@ async function getFunctionHover(
   logger: Logger,
 ): Promise<Hover | undefined> {
   const definitions = await queryFunctionDefinitions(
-    pgPool, schema, defaultSchema, logger, functionName,
+    pgPool, schema, functionName, defaultSchema, logger,
   )
 
   return await makeHover(
@@ -302,7 +302,7 @@ async function getTypeHover(
   logger: Logger,
 ): Promise<Hover | undefined> {
   const definitions = await queryTypeDefinitions(
-    pgPool, schema, defaultSchema, logger, typeName,
+    pgPool, schema, typeName, defaultSchema, logger,
   )
 
   return await makeHover(

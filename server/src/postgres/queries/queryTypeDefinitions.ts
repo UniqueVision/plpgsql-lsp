@@ -16,9 +16,9 @@ interface TypeDefinition {
 export async function queryTypeDefinitions(
   pgPool: PostgresPool,
   schema: string | undefined,
+  typeName: string | undefined,
   defaultSchema: string,
   logger: Logger,
-  typeName?: string,
 ): Promise<TypeDefinition[]> {
   let definitions: TypeDefinition[] = []
 
@@ -37,30 +37,30 @@ export async function queryTypeDefinitions(
             JOIN pg_catalog.pg_namespace n ON
               n.oid = t.typnamespace
           WHERE (
-            t.typrelid = 0
-            OR (
-              SELECT
-                c.relkind = 'c'
-              FROM
-                pg_catalog.pg_class c
-              WHERE
-                c.oid = t.typrelid
+              t.typrelid = 0
+              OR (
+                SELECT
+                  c.relkind = 'c'
+                FROM
+                  pg_catalog.pg_class c
+                WHERE
+                  c.oid = t.typrelid
+              )
             )
-          )
-          AND NOT EXISTS (
-            SELECT
-              1
-            FROM
-              pg_catalog.pg_type el
-            WHERE
-              el.oid = t.typelem
-              AND el.typarray = t.oid
-          )
+            AND NOT EXISTS (
+              SELECT
+                1
+              FROM
+                pg_catalog.pg_type el
+              WHERE
+                el.oid = t.typelem
+                AND el.typarray = t.oid
+            )
             AND t.typbasetype = 0
-          AND n.nspname <> 'information_schema'
-          AND n.nspname !~ '^pg_toast'
-          AND n.nspname::text = ANY($1)
-          AND ($2::text IS NULL OR pg_catalog.format_type(t.oid, NULL) = $2::text)
+            AND n.nspname <> 'information_schema'
+            AND n.nspname !~ '^pg_toast'
+            AND n.nspname::text = ANY($1)
+            AND ($2::text IS NULL OR pg_catalog.format_type(t.oid, NULL) = $2::text)
         )
         SELECT
           t_types.schema,

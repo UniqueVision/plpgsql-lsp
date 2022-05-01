@@ -19,9 +19,9 @@ interface FunctionDefinition {
 export async function queryFunctionDefinitions(
   pgPool: PostgresPool,
   schema: string | undefined,
+  functionName: string | undefined,
   defaultSchema: string,
   logger: Logger,
-  functionName?: string,
 ): Promise<FunctionDefinition[]> {
   let definitions: FunctionDefinition[] = []
 

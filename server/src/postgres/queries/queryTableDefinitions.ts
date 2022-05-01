@@ -18,9 +18,9 @@ interface TableDefinition {
 export async function queryTableDefinitions(
   pgPool: PostgresPool,
   schema: string | undefined,
+  tableName: string | undefined,
   defaultSchema: string,
   logger: Logger,
-  tableName?: string,
 ): Promise<TableDefinition[]> {
   let definitions: TableDefinition[] = []
 
