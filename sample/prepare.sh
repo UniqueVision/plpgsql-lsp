@@ -10,6 +10,7 @@ sql_file=$(mktemp)
     cat initialize.pgsql
     cat definitions/tables/*.pgsql
     cat definitions/views/*.pgsql
+    cat definitions/domains/*.pgsql
     cat definitions/types/*.pgsql
     cat definitions/stored/*.pgsql
     cat definitions/triggers/*.pgsql

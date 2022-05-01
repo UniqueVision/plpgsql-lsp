@@ -56,6 +56,7 @@ export async function queryTypeDefinitions(
               el.oid = t.typelem
               AND el.typarray = t.oid
           )
+            AND t.typbasetype = 0
           AND n.nspname <> 'information_schema'
           AND n.nspname !~ '^pg_toast'
           AND n.nspname::text = ANY($1)

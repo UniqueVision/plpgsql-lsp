@@ -10,6 +10,10 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { PostgresPool } from "@/postgres"
 import {
+  makeDomainDefinitionText,
+  queryDomainDefinitions,
+} from "@/postgres/queries/queryDomainDefinitions"
+import {
   makeFunctionDefinitionText,
   makeInsertFunctionText,
   queryFunctionDefinitions,
@@ -62,6 +66,7 @@ export async function getCompletionItems(
     .concat(await getViewCompletionItems(pgPool, schema, defaultSchema, logger))
     .concat(await getFunctionCompletionItems(pgPool, schema, defaultSchema, logger))
     .concat(await getTypeCompletionItems(pgPool, schema, defaultSchema, logger))
+    .concat(await getDomainCompletionItems(pgPool, schema, defaultSchema, logger))
     .concat(getBuiltinFunctionCompletionItems())
 
   return completionItems
@@ -248,6 +253,27 @@ function getBuiltinFunctionCompletionItems(): CompletionItem[] {
           insertTextFormat: InsertTextFormat.Snippet,
         }),
       ))
+}
+
+async function getDomainCompletionItems(
+  pgPool: PostgresPool,
+  schema: string | undefined,
+  defaultSchema: string,
+  logger: Logger,
+): Promise<CompletionItem[]> {
+  const definition = await queryDomainDefinitions(
+    pgPool, schema, undefined, defaultSchema, logger,
+  )
+
+  return definition
+    .map(
+      (definition, index) => ({
+        label: definition.domainName,
+        kind: CompletionItemKind.Struct,
+        data: index,
+        detail: makeDomainDefinitionText(definition),
+      }),
+    )
 }
 
 async function getTypeCompletionItems(

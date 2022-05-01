@@ -1,13 +1,12 @@
 import dedent from "ts-dedent"
-import {
-  Hover,
-  Logger,
-  MarkupKind,
-  Position,
-} from "vscode-languageserver"
+import { Hover, Logger, MarkupKind, Position } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { PostgresPool } from "@/postgres"
+import {
+  makeDomainDefinitionText,
+  queryDomainDefinitions,
+} from "@/postgres/queries/queryDomainDefinitions"
 import {
   makeFunctionDefinitionText,
   queryFunctionDefinitions,
@@ -111,6 +110,14 @@ export async function getHover(
     )
     if (typeHover !== undefined) {
       return typeHover
+    }
+
+    // Check as Domain
+    const domainHover = await getDomainHover(
+      pgPool, schema, candidate, defaultSchema, logger,
+    )
+    if (domainHover !== undefined) {
+      return domainHover
     }
 
     // Check as Index
@@ -305,6 +312,23 @@ async function getTypeHover(
   )
 }
 
+async function getDomainHover(
+  pgPool: PostgresPool,
+  schema: string | undefined,
+  domainName: string,
+  defaultSchema: string,
+  logger: Logger,
+): Promise<Hover | undefined> {
+  const definitions = await queryDomainDefinitions(
+    pgPool, schema, domainName, defaultSchema, logger,
+  )
+
+  return await makeHover(
+    definitions.map(
+      (definition) => makeDomainDefinitionText(definition),
+    ),
+  )
+}
 
 async function getIndexHover(
   pgPool: PostgresPool,
