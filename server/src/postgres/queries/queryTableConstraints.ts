@@ -90,7 +90,7 @@ export function makeTableConastaintText(
   const { schemaName, tableName, constraintName, definition } = tableConstraint
 
   const targetLink = makeTargetRelatedTableLink(
-    constraintName, tableName, schemaName, definitionsManager,
+    constraintName, schemaName, tableName, definitionsManager,
   )
 
   return `${targetLink} ${definition}`
