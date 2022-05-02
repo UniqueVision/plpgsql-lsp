@@ -54,6 +54,6 @@ export function makeTriggerDefinitionText(definition: TriggerDefinition): string
   const { triggerName } = definition
 
   return dedent`
-      Trigger ${triggerName}
+      TRIGGER ${triggerName}
     `
 }
