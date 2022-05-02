@@ -5,13 +5,24 @@
 
 ## Features
 
-- type/table/view/function/procedure name completion.
-- go to the type/table/view/function/procedure/index/trigger definition.
-- hover type/table/view/function/procedure/index/trigger definition.
-- syntax check.
-- static analysis check (when [plpgsql_check](https://github.com/okbob/plpgsql_check) use) .
-- execute a file query by CodeLens/Command.
-- [Multi-root Workspace](https://code.visualstudio.com/docs/editor/multi-root-workspaces) support.
+- complete definitions.
+- go to definition.
+- hover the definition.
+- check syntax errors.
+- check static analysis errors (when [plpgsql_check](https://github.com/okbob/plpgsql_check) use) .
+- execute the current file query by CodeLens/Command.
+- support [Multi-root Workspace](https://code.visualstudio.com/docs/editor/multi-root-workspaces).
+
+| | Completion | Go to definition | Hover |
+| :--- | :---: | :---: | :---: |
+| Domain    | ✅ | ✅ | ✅ |
+| Function  | ✅ | ✅ | ✅ |
+| Index     | - | ✅ | ✅ |
+| Procedure | ✅ | ✅ | ✅ |
+| Table     | ✅ | ✅ | ✅ |
+| Trigger   | - | ✅ | ✅ |
+| Type      | ✅ | ✅ | ✅ |
+| View      | ✅ | ✅ | ✅ |
 
 ## Usage
 
