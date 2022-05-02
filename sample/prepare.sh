@@ -8,12 +8,13 @@ sql_file=$(mktemp)
 
 {
     cat initialize.pgsql
-    cat definitions/tables/*.pgsql
-    cat definitions/views/*.pgsql
-    cat definitions/domains/*.pgsql
-    cat definitions/types/*.pgsql
-    cat definitions/stored/*.pgsql
-    cat definitions/triggers/*.pgsql
+    cat definitions/domain/*.pgsql
+    cat definitions/table/*.pgsql
+    cat definitions/view/*.pgsql
+    cat definitions/type/*.pgsql
+    cat definitions/procedure/*.pgsql
+    cat definitions/function/*.pgsql
+    cat definitions/trigger/*.pgsql
 } >> "$sql_file"
 
 if ${DRYRUN:-false}; then

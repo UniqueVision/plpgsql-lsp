@@ -83,7 +83,7 @@ describe("Hover Tests", () => {
 
   describe("Hover", function () {
     it("Hover on table", async () => {
-      updateFileDefinitions("definitions/tables/companies.pgsql")
+      updateFileDefinitions("definitions/table/companies.pgsql")
 
       const hover = await onHover("companies")
 
@@ -107,8 +107,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on table with default schema", async () => {
-      updateFileDefinitions("definitions/tables/public_users.pgsql")
-      updateFileDefinitions("definitions/triggers/user_update.pgsql")
+      updateFileDefinitions("definitions/table/public_users.pgsql")
+      updateFileDefinitions("definitions/trigger/user_update.pgsql")
 
       const hover = await onHover("public.users")
 
@@ -145,7 +145,7 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on table with exclude index", async () => {
-      updateFileDefinitions("definitions/tables/schedule.pgsql")
+      updateFileDefinitions("definitions/table/schedule.pgsql")
 
       const hover = await onHover("schedule")
 
@@ -170,7 +170,7 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on table with non-default schema", async () => {
-      updateFileDefinitions("definitions/tables/campaign_participants.pgsql")
+      updateFileDefinitions("definitions/table/campaign_participants.pgsql")
 
       const hover = await onHover("campaign.participants")
 
