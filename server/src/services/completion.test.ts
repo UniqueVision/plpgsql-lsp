@@ -456,6 +456,38 @@ describe("Completion Tests", () => {
       )
     })
 
+    it("Completion on domain", async () => {
+      const completions = await onCompletion(
+        "us_postal_code", Position.create(1, 1),
+      )
+      validateCompletionItem(
+        completions,
+        {
+          label: "us_postal_code",
+          kind: CompletionItemKind.Struct,
+          detail: dedent`
+            Domain public.us_postal_code AS text
+          `,
+        },
+      )
+    })
+
+    it("Completion on domain with default schema", async () => {
+      const completions = await onCompletion(
+        "public.jp_postal_code", Position.create(1, 10),
+      )
+      validateCompletionItem(
+        completions,
+        {
+          label: "jp_postal_code",
+          kind: CompletionItemKind.Struct,
+          detail: dedent`
+            Domain public.jp_postal_code AS text
+          `,
+        },
+      )
+    })
+
     it("Disable comment completion", async () => {
       const completions = await onCompletion(
         "-- ", Position.create(0, 0),

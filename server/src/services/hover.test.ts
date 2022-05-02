@@ -420,6 +420,32 @@ describe("Hover Tests", () => {
       )
     })
 
+    it("Hover on domain", async () => {
+      const hover = await onHover("us_postal_code")
+
+      validateHoverContent(
+        hover,
+        makePostgresCodeMarkdown(
+          dedent`
+            Domain public.us_postal_code AS text
+          `,
+        ),
+      )
+    })
+
+    it("Hover on domain with default schema", async () => {
+      const hover = await onHover("public.jp_postal_code")
+
+      validateHoverContent(
+        hover,
+        makePostgresCodeMarkdown(
+          dedent`
+            Domain public.jp_postal_code AS text
+          `,
+        ),
+      )
+    })
+
     it("Hover on index", async () => {
       const hover = await onHover("users_id_name_index")
 

@@ -11,6 +11,7 @@ export interface StatementItem {
   CreateStmt?: CreateStmt
   ViewStmt?: ViewStmt
   CompositeTypeStmt?: CompositeTypeStmt
+  CreateDomainStmt?: CreateDomainStmt
   CreateFunctionStmt?: CreateFunctionStmt
   CreateTrigStmt?: CreateTrigStmt
   IndexStmt?: IndexStmt
@@ -47,22 +48,31 @@ export interface CompositeTypeStmtTypevar {
   location: uinteger
 }
 
+export interface CreateDomainStmt {
+  domainname: Name[]
+  typeName: CreateDomainStmtTypeName
+}
+
+export interface CreateDomainStmtTypeName {
+  names: Name[]
+}
+
 export interface CreateFunctionStmt {
   is_procedure?: boolean
   replace: boolean
-  funcname: FuncName[]
+  funcname: Name[]
   returnType: CreateFunctionStmtReturnType
   options: CreateFunctionStmtOption[]
 }
 
-export interface FuncName {
-  String: FuncNameString
+export interface Name {
+  String: NameString
 }
 
 export interface CreateFunctionStmtReturnType {
   location: uinteger
 }
-export interface FuncNameString {
+export interface NameString {
   str: string
 }
 
@@ -95,7 +105,7 @@ export interface CreateFunctionStmtOptionsDefElemArgListItemString {
 export interface CreateTrigStmt {
   trigname: string
   relation: CreateTrigStmtRelation
-  funcname: FuncName[]
+  funcname: Name[]
   row: boolean
   events: integer
 }

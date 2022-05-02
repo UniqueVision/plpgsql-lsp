@@ -21,6 +21,9 @@ export function getDefinitions(
       else if (statement?.stmt?.CompositeTypeStmt !== undefined) {
         return getTypeDefinitions(fileText, statement, uri, defaultSchema)
       }
+      else if (statement?.stmt?.CreateDomainStmt !== undefined) {
+        return getDomainDefinitions(fileText, statement, uri, defaultSchema)
+      }
       else if (statement?.stmt?.CreateFunctionStmt !== undefined) {
         return getFunctionDefinitions(fileText, statement, uri, defaultSchema)
       }
@@ -151,6 +154,63 @@ export function getTypeDefinitions(
   )
 }
 
+export function getDomainDefinitions(
+  fileText: string,
+  statement: Statement,
+  uri: URI,
+  defaultSchema: string,
+): DefinitionCandidate[] {
+  const createDomainStmt = statement?.stmt?.CreateDomainStmt
+  if (createDomainStmt === undefined) {
+    return []
+  }
+
+  let schemaname = undefined
+  let domainName = undefined
+  const nameList = createDomainStmt.domainname
+    .filter((name) => "String" in name)
+    .map((name) => name.String.str)
+
+  if (nameList.length === 1) {
+    domainName = nameList[0]
+  }
+  else if (nameList.length === 2) {
+    schemaname = nameList[0]
+    domainName = nameList[1]
+  }
+  else {
+    return []
+  }
+
+  const definition = nameList.join(".")
+
+  const domainNameLocation = findIndexFromBuffer(
+    fileText, definition, statement.stmt_location,
+  )
+  const stmtLocation = statement.stmt_location || 0
+
+  const definitionLink = LocationLink.create(
+    uri,
+    getRangeFromBuffer(
+      fileText,
+      stmtLocation,
+      stmtLocation + statement.stmt_len,
+    ),
+    getRangeFromBuffer(
+      fileText,
+      domainNameLocation,
+      domainNameLocation + definition.length,
+    ),
+  )
+
+  return makeMultiSchemaDefinitionCandidates(
+    domainName,
+    definitionLink,
+    schemaname,
+    defaultSchema,
+  )
+}
+
 export function getFunctionDefinitions(
   fileText: string,
   statement: Statement,
@@ -168,10 +228,7 @@ export function getFunctionDefinitions(
     .filter((name) => "String" in name)
     .map((name) => name.String.str)
 
-  if (nameList.length === 0) {
-    return []
-  }
-  else if (nameList.length === 1) {
+  if (nameList.length === 1) {
     functionName = nameList[0]
   }
   else if (nameList.length === 2) {

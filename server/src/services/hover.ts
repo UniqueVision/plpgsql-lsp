@@ -1,13 +1,12 @@
 import dedent from "ts-dedent"
-import {
-  Hover,
-  Logger,
-  MarkupKind,
-  Position,
-} from "vscode-languageserver"
+import { Hover, Logger, MarkupKind, Position } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { PostgresPool } from "@/postgres"
+import {
+  makeDomainDefinitionText,
+  queryDomainDefinitions,
+} from "@/postgres/queries/queryDomainDefinitions"
 import {
   makeFunctionDefinitionText,
   queryFunctionDefinitions,
@@ -113,6 +112,14 @@ export async function getHover(
       return typeHover
     }
 
+    // Check as Domain
+    const domainHover = await getDomainHover(
+      pgPool, schema, candidate, defaultSchema, logger,
+    )
+    if (domainHover !== undefined) {
+      return domainHover
+    }
+
     // Check as Index
     const indexHover = await getIndexHover(
       pgPool, schema, candidate, defaultSchema, logger,
@@ -142,7 +149,7 @@ async function getTableHover(
   logger: Logger,
 ): Promise<Hover | undefined> {
   const definitions = await queryTableDefinitions(
-    pgPool, schema, defaultSchema, logger, tableName,
+    pgPool, schema, tableName, defaultSchema, logger,
   )
   if (definitions.length === 0) {
     return undefined
@@ -277,7 +284,7 @@ async function getFunctionHover(
   logger: Logger,
 ): Promise<Hover | undefined> {
   const definitions = await queryFunctionDefinitions(
-    pgPool, schema, defaultSchema, logger, functionName,
+    pgPool, schema, functionName, defaultSchema, logger,
   )
 
   return await makeHover(
@@ -295,7 +302,7 @@ async function getTypeHover(
   logger: Logger,
 ): Promise<Hover | undefined> {
   const definitions = await queryTypeDefinitions(
-    pgPool, schema, defaultSchema, logger, typeName,
+    pgPool, schema, typeName, defaultSchema, logger,
   )
 
   return await makeHover(
@@ -305,6 +312,23 @@ async function getTypeHover(
   )
 }
 
+async function getDomainHover(
+  pgPool: PostgresPool,
+  schema: string | undefined,
+  domainName: string,
+  defaultSchema: string,
+  logger: Logger,
+): Promise<Hover | undefined> {
+  const definitions = await queryDomainDefinitions(
+    pgPool, schema, domainName, defaultSchema, logger,
+  )
+
+  return await makeHover(
+    definitions.map(
+      (definition) => makeDomainDefinitionText(definition),
+    ),
+  )
+}
 
 async function getIndexHover(
   pgPool: PostgresPool,
