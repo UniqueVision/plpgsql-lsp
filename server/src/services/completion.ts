@@ -18,6 +18,10 @@ import {
   makeInsertFunctionText,
   queryFunctionDefinitions,
 } from "@/postgres/queries/queryFunctionDefinitions"
+import {
+  makeMaterializedViewDefinitionText,
+  queryMaterializedViewDefinitions,
+} from "@/postgres/queries/queryMaterializedViewDefinitions"
 import { querySchemas } from "@/postgres/queries/querySchemas"
 import {
   makeTableDefinitionText,
@@ -64,6 +68,9 @@ export async function getCompletionItems(
   const completionItems = schmaCompletionItems
     .concat(await getTableCompletionItems(pgPool, schema, defaultSchema, logger))
     .concat(await getViewCompletionItems(pgPool, schema, defaultSchema, logger))
+    .concat(
+      await getMaterializedViewCompletionItems(pgPool, schema, defaultSchema, logger),
+    )
     .concat(await getFunctionCompletionItems(pgPool, schema, defaultSchema, logger))
     .concat(await getTypeCompletionItems(pgPool, schema, defaultSchema, logger))
     .concat(await getDomainCompletionItems(pgPool, schema, defaultSchema, logger))
@@ -188,7 +195,7 @@ async function getViewCompletionItems(
   logger: Logger,
 ): Promise<CompletionItem[]> {
   const definitions = await queryViewDefinitions(
-    pgPool, schema, defaultSchema, logger,
+    pgPool, schema, undefined, defaultSchema, logger,
   )
 
   return definitions
@@ -198,6 +205,27 @@ async function getViewCompletionItems(
         kind: CompletionItemKind.Class,
         data: index,
         detail: makeViewDefinitionText(definition),
+      }),
+    )
+}
+
+async function getMaterializedViewCompletionItems(
+  pgPool: PostgresPool,
+  schema: string | undefined,
+  defaultSchema: string,
+  logger: Logger,
+): Promise<CompletionItem[]> {
+  const definitions = await queryMaterializedViewDefinitions(
+    pgPool, schema, undefined, defaultSchema, logger,
+  )
+
+  return definitions
+    .map(
+      (definition, index) => ({
+        label: definition.viewName,
+        kind: CompletionItemKind.Class,
+        data: index,
+        detail: makeMaterializedViewDefinitionText(definition),
       }),
     )
 }

@@ -11,9 +11,9 @@ interface ViewDefinition {
 export async function queryViewDefinitions(
   pgPool: PostgresPool,
   schema: string | undefined,
+  viewName: string | undefined,
   defaultSchema: string,
   logger: Logger,
-  viewName?: string,
 ): Promise<ViewDefinition[]> {
   let definitions: ViewDefinition[] = []
 

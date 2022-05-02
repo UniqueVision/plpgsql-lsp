@@ -222,6 +222,22 @@ describe("Completion Tests", () => {
       )
     })
 
+    it("Completion on materialized view", async () => {
+      const completions = await onCompletion(
+        "my_users", Position.create(1, 1),
+      )
+      validateCompletionItem(
+        completions,
+        {
+          label: "my_users",
+          kind: CompletionItemKind.Class,
+          detail: dedent`
+            Materialized View public.my_users
+          `,
+        },
+      )
+    })
+
     it("Completion on positional argument function", async () => {
       const completions = await onCompletion(
         "positional_argument_function", Position.create(1, 1),

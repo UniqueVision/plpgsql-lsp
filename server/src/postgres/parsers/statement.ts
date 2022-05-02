@@ -15,6 +15,7 @@ export interface StatementItem {
   CreateFunctionStmt?: CreateFunctionStmt
   CreateTrigStmt?: CreateTrigStmt
   IndexStmt?: IndexStmt
+  CreateTableAsStmt?: CreateTableAsStmt
 }
 
 export interface CreateStmt {
@@ -118,6 +119,22 @@ export interface CreateTrigStmtRelation {
 
 export interface IndexStmt {
   idxname: string
+}
+
+export interface CreateTableAsStmt {
+  into: CreateTableAsStmtInto
+  relkind: string
+}
+
+export interface CreateTableAsStmtInto {
+  rel: CreateTableAsStmtRelation
+}
+
+export interface CreateTableAsStmtRelation {
+  schemaname: string | undefined
+  relname: string
+  inh: boolean
+  relpersistence: string
 }
 
 export async function getStmtements(query: string): Promise<Statement[] | undefined> {

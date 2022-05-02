@@ -247,6 +247,19 @@ describe("Hover Tests", () => {
       )
     })
 
+    it("Hover on materialized view", async () => {
+      const hover = await onHover("my_users")
+
+      validateHoverContent(
+        hover,
+        makePostgresCodeMarkdown(
+          dedent`
+            Materialized View public.my_users
+          `,
+        ),
+      )
+    })
+
     it("Hover on positional argument function", async () => {
       const hover = await onHover("positional_argument_function")
 
