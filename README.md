@@ -15,15 +15,53 @@
 
 | | Completion | Go to definition | Hover |
 | :--- | :---: | :---: | :---: |
-| Domain            | ✔️ | ✔️ | ✔️ |
-| Function          | ✔️ | ✔️ | ✔️ |
-| Index             | - | ✔️ | ✔️ |
-| Materialized View | ✔️ | ✔️ | ✔️ |
-| Procedure         | ✔️ | ✔️ | ✔️ |
-| Table             | ✔️ | ✔️ | ✔️ |
-| Trigger           | - | ✔️ | ✔️ |
-| Type              | ✔️ | ✔️ | ✔️ |
-| View              | ✔️ | ✔️ | ✔️ |
+| DOMAIN                    | ✔️ | ✔️ | ✔️ |
+| FUNCTION                  | ✔️ | ✔️ | ✔️ |
+| INDEX                     | - | ✔️ | ✔️ |
+| MATERIALIZED VIEW         | ✔️ | ✔️ | ✔️ |
+| PROCEDURE                 | ✔️ | ✔️ | ✔️ |
+| TABLE                     | ✔️ | ✔️ | ✔️ |
+| TRIGGER                   | - | ✔️ | ✔️ |
+| TYPE                      | ✔️ | ✔️ | ✔️ |
+| VIEW                      | ✔️ | ✔️ | ✔️ |
+
+<!-- UnSupported Feature
+| | Completion | Go to definition | Hover |
+| :--- | :---: | :---: | :---: |
+| ACCESS METHOD             | - | - | - |
+| AGGREGATE                 | - | - | - |
+| CAST                      | - | - | - |
+| COLLATION                 | - | - | - |
+| CONVERSION                | - | - | - |
+| DATABASE                  | - | - | - |
+| EVENT TRIGGER             | - | - | - |
+| EXTENSION                 | - | - | - |
+| FOREIGN DATA WRAPPER      | - | - | - |
+| FOREIGN TABLE             | - | - | - |
+| GROUP                     | - | - | - |
+| LANGUAGE                  | - | - | - |
+| OPERATOR                  | - | - | - |
+| OPERATOR CLASS            | - | - | - |
+| OPERATOR FAMILY           | - | - | - |
+| POLICY                    | - | - | - |
+| PUBLICATION               | - | - | - |
+| ROLE                      | - | - | - |
+| RULE                      | - | - | - |
+| SCHEMA                    | - | - | - |
+| SEQUENCE                  | - | - | - |
+| SERVER                    | - | - | - |
+| STATISTICS                | - | - | - |
+| SUBSCRIPTION              | - | - | - |
+| TABLE AS                  | - | - | - |
+| TABLESPACE                | - | - | - |
+| TEXT SEARCH CONFIGURATION | - | - | - |
+| TEXT SEARCH DICTIONARY    | - | - | - |
+| TEXT SEARCH PARSER        | - | - | - |
+| TEXT SEARCH TEMPLATE      | - | - | - |
+| TRANSFORM                 | - | - | - |
+| USER                      | - | - | - |
+| USER MAPPING              | - | - | - |
+-->
 
 ## Usage
 
