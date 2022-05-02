@@ -68,7 +68,7 @@ describe("Validate Tests", () => {
       validateDiagnostics(diagnostics, [])
     })
 
-    it("Function has unused variable", async () => {
+    it("FUNCTION has unused variable", async () => {
       const diagnostics = await validateSampleFile(
         "definitions/function/static_analysis_warning_function_unused_variable.pgsql",
       )
@@ -82,7 +82,7 @@ describe("Validate Tests", () => {
       ])
     })
 
-    it("Function column does not exists", async () => {
+    it("FUNCTION column does not exists", async () => {
       const diagnostics = await validateSampleFile(
         "definitions/function/syntax_error_function_column_does_not_exist.pgsql",
         { skipDisableComment: true },

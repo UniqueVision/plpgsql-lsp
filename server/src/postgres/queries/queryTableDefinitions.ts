@@ -93,7 +93,7 @@ export function makeTableDefinitionText(definition: TableDefinition): string {
   } = definition
 
   if (fields.length === 0) {
-    return `Table ${schema}.${tableName}()`
+    return `TABLE ${schema}.${tableName}()`
   }
   else {
     const tableFields = fields.map(
@@ -108,7 +108,7 @@ export function makeTableDefinitionText(definition: TableDefinition): string {
     )
 
     return dedent`
-      Table ${schema}.${tableName}(
+      TABLE ${schema}.${tableName}(
         ${tableFields.join(",\n")}
       )
     `

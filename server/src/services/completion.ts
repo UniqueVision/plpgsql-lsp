@@ -261,7 +261,7 @@ function getBuiltinFunctionCompletionItems(): CompletionItem[] {
         kind: CompletionItemKind.Function,
         data: index,
         detail: dedent`
-          Function ${functionName}(value [, ...])
+          FUNCTION ${functionName}(value [, ...])
             LANGUAGE built-in
         `,
         insertText: `${functionName}($\{1:value}, $\{2:...})`,
@@ -274,7 +274,7 @@ function getBuiltinFunctionCompletionItems(): CompletionItem[] {
           kind: CompletionItemKind.Function,
           data: index,
           detail: dedent`
-          Function ${functionName}(value1, value2)
+          FUNCTION ${functionName}(value1, value2)
             LANGUAGE built-in
           `,
           insertText: `${functionName}($\{1:value1}, $\{2:value2})`,

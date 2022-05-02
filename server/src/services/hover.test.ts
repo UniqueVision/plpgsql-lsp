@@ -91,7 +91,7 @@ describe("Hover Tests", () => {
         hover,
         dedent`
           \`\`\`postgres
-          Table public.companies(
+          TABLE public.companies(
             id integer not null,
             name character varying not null
           )
@@ -116,7 +116,7 @@ describe("Hover Tests", () => {
         hover,
         dedent`
         \`\`\`postgres
-        Table public.users(
+        TABLE public.users(
           id integer not null,
           name character varying not null,
           company_id integer not null,
@@ -153,7 +153,7 @@ describe("Hover Tests", () => {
         hover,
         dedent`
           \`\`\`postgres
-          Table public.schedule(
+          TABLE public.schedule(
             id integer not null default nextval('schedule_id_seq'::regclass),
             room_name text not null,
             reservation_time tsrange not null
@@ -178,7 +178,7 @@ describe("Hover Tests", () => {
         hover,
         dedent`
           \`\`\`postgres
-          Table campaign.participants(
+          TABLE campaign.participants(
             id integer not null,
             name character varying not null,
             created_at timestamp with time zone not null default now(),
@@ -202,7 +202,7 @@ describe("Hover Tests", () => {
         hover,
         makePostgresCodeMarkdown(
           dedent`
-            Table public.empty_table()
+            TABLE public.empty_table()
           `,
         ),
       )
@@ -215,7 +215,7 @@ describe("Hover Tests", () => {
         hover,
         makePostgresCodeMarkdown(
           dedent`
-            View public.deleted_users
+            VIEW public.deleted_users
           `,
         ),
       )
@@ -228,7 +228,7 @@ describe("Hover Tests", () => {
         hover,
         makePostgresCodeMarkdown(
           dedent`
-            View public.deleted_users
+            VIEW public.deleted_users
           `,
         ),
       )
@@ -241,7 +241,7 @@ describe("Hover Tests", () => {
         hover,
         makePostgresCodeMarkdown(
           dedent`
-            View campaign.deleted_participants
+            VIEW campaign.deleted_participants
           `,
         ),
       )
@@ -254,7 +254,7 @@ describe("Hover Tests", () => {
         hover,
         makePostgresCodeMarkdown(
           dedent`
-            Materialized View public.my_users
+            MATERIALIZED VIEW public.my_users
           `,
         ),
       )
@@ -267,7 +267,7 @@ describe("Hover Tests", () => {
         hover,
         makePostgresCodeMarkdown(
           dedent`
-            Function public.positional_argument_function(
+            FUNCTION public.positional_argument_function(
               integer,
               integer
             )
@@ -286,7 +286,7 @@ describe("Hover Tests", () => {
         hover,
         makePostgresCodeMarkdown(
           dedent`
-            Function public.positional_argument_function(
+            FUNCTION public.positional_argument_function(
               integer,
               integer
             )
@@ -305,7 +305,7 @@ describe("Hover Tests", () => {
         hover,
         makePostgresCodeMarkdown(
           dedent`
-            Function public.keyword_argument_function(
+            FUNCTION public.keyword_argument_function(
               i integer
             )
               RETURNS int4
@@ -323,12 +323,12 @@ describe("Hover Tests", () => {
         hover,
         makePostgresCodeMarkdown(
           dedent`
-            Function pg_catalog.jsonb_build_object()
+            FUNCTION pg_catalog.jsonb_build_object()
               RETURNS jsonb
               LANGUAGE internal
               STABLE PARALLEL SAFE
 
-            Function pg_catalog.jsonb_build_object(
+            FUNCTION pg_catalog.jsonb_build_object(
               VARIADIC "any"
             )
               RETURNS jsonb
@@ -346,7 +346,7 @@ describe("Hover Tests", () => {
         hover,
         makePostgresCodeMarkdown(
           dedent`
-            Function public.correct_procedure(
+            FUNCTION public.correct_procedure(
               INOUT p1 text
             )
               RETURNS record
@@ -364,7 +364,7 @@ describe("Hover Tests", () => {
         hover,
         makePostgresCodeMarkdown(
           dedent`
-            Function public.constant_function()
+            FUNCTION public.constant_function()
               RETURNS text
               LANGUAGE plpgsql
               IMMUTABLE PARALLEL SAFE
@@ -380,7 +380,7 @@ describe("Hover Tests", () => {
         hover,
         makePostgresCodeMarkdown(
           dedent`
-            Type public.type_user(
+            TYPE public.type_user(
               id uuid,
               name text
             )
@@ -396,7 +396,7 @@ describe("Hover Tests", () => {
         hover,
         makePostgresCodeMarkdown(
           dedent`
-            Type public.type_user(
+            TYPE public.type_user(
               id uuid,
               name text
             )
@@ -412,7 +412,7 @@ describe("Hover Tests", () => {
         hover,
         makePostgresCodeMarkdown(
           dedent`
-            Type public.type_single_field(
+            TYPE public.type_single_field(
               id uuid
             )
           `,
@@ -427,7 +427,7 @@ describe("Hover Tests", () => {
         hover,
         makePostgresCodeMarkdown(
           dedent`
-            Type public.type_empty()
+            TYPE public.type_empty()
           `,
         ),
       )
@@ -440,7 +440,7 @@ describe("Hover Tests", () => {
         hover,
         makePostgresCodeMarkdown(
           dedent`
-            Domain public.us_postal_code AS text
+            DOMAIN public.us_postal_code AS text
           `,
         ),
       )
@@ -453,7 +453,7 @@ describe("Hover Tests", () => {
         hover,
         makePostgresCodeMarkdown(
           dedent`
-            Domain public.jp_postal_code AS text
+            DOMAIN public.jp_postal_code AS text
           `,
         ),
       )
@@ -466,7 +466,7 @@ describe("Hover Tests", () => {
         hover,
         makePostgresCodeMarkdown(
           dedent`
-            Index users_id_name_index
+            INDEX users_id_name_index
           `,
         ),
       )

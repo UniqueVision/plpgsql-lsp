@@ -61,5 +61,5 @@ export async function queryDomainDefinitions(
 export function makeDomainDefinitionText(definition: DomainDefinition): string {
   const { schema, domainName, baseTypeName } = definition
 
-  return `Domain ${schema}.${domainName} AS ${baseTypeName}`
+  return `DOMAIN ${schema}.${domainName} AS ${baseTypeName}`
 }

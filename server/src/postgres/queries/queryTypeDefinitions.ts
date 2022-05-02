@@ -122,7 +122,7 @@ export function makeTypeDefinitionText(definition: TypeDefinition): string {
   } = definition
 
   if (fields.length === 0) {
-    return `Type ${schema}.${typeName}()`
+    return `TYPE ${schema}.${typeName}()`
   }
   else {
     const typeFields = fields.map(
@@ -130,7 +130,7 @@ export function makeTypeDefinitionText(definition: TypeDefinition): string {
     )
 
     return dedent`
-      Type ${schema}.${typeName}(
+      TYPE ${schema}.${typeName}(
         ${typeFields.join(",\n")}
       )
     `

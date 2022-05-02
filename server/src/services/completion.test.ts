@@ -85,7 +85,7 @@ describe("Completion Tests", () => {
           label: "companies",
           kind: CompletionItemKind.Class,
           detail: dedent`
-            Table public.companies(
+            TABLE public.companies(
               id integer not null,
               name character varying not null
             )
@@ -104,7 +104,7 @@ describe("Completion Tests", () => {
           label: "users",
           kind: CompletionItemKind.Class,
           detail: dedent`
-            Table public.users(
+            TABLE public.users(
               id integer not null,
               name character varying not null,
               company_id integer not null,
@@ -127,7 +127,7 @@ describe("Completion Tests", () => {
           label: "schedule",
           kind: CompletionItemKind.Class,
           detail: dedent`
-            Table public.schedule(
+            TABLE public.schedule(
               id integer not null default nextval('schedule_id_seq'::regclass),
               room_name text not null,
               reservation_time tsrange not null
@@ -147,7 +147,7 @@ describe("Completion Tests", () => {
           label: "participants",
           kind: CompletionItemKind.Class,
           detail: dedent`
-            Table campaign.participants(
+            TABLE campaign.participants(
               id integer not null,
               name character varying not null,
               created_at timestamp with time zone not null default now(),
@@ -168,7 +168,7 @@ describe("Completion Tests", () => {
           label: "empty_table",
           kind: CompletionItemKind.Class,
           detail: dedent`
-            Table public.empty_table()
+            TABLE public.empty_table()
           `,
         },
       )
@@ -184,7 +184,7 @@ describe("Completion Tests", () => {
           label: "deleted_users",
           kind: CompletionItemKind.Class,
           detail: dedent`
-            View public.deleted_users
+            VIEW public.deleted_users
           `,
         },
       )
@@ -200,7 +200,7 @@ describe("Completion Tests", () => {
           label: "deleted_users",
           kind: CompletionItemKind.Class,
           detail: dedent`
-            View public.deleted_users
+            VIEW public.deleted_users
           `,
         },
       )
@@ -216,7 +216,7 @@ describe("Completion Tests", () => {
           label: "deleted_participants",
           kind: CompletionItemKind.Class,
           detail: dedent`
-            View campaign.deleted_participants
+            VIEW campaign.deleted_participants
           `,
         },
       )
@@ -232,7 +232,7 @@ describe("Completion Tests", () => {
           label: "my_users",
           kind: CompletionItemKind.Class,
           detail: dedent`
-            Materialized View public.my_users
+            MATERIALIZED VIEW public.my_users
           `,
         },
       )
@@ -248,7 +248,7 @@ describe("Completion Tests", () => {
           label: "positional_argument_function",
           kind: CompletionItemKind.Function,
           detail: dedent`
-            Function public.positional_argument_function(
+            FUNCTION public.positional_argument_function(
               integer,
               integer
             )
@@ -277,7 +277,7 @@ describe("Completion Tests", () => {
           label: "positional_argument_function",
           kind: CompletionItemKind.Function,
           detail: dedent`
-            Function public.positional_argument_function(
+            FUNCTION public.positional_argument_function(
               integer,
               integer
             )
@@ -306,7 +306,7 @@ describe("Completion Tests", () => {
           label: "keyword_argument_function",
           kind: CompletionItemKind.Function,
           detail: dedent`
-            Function public.keyword_argument_function(
+            FUNCTION public.keyword_argument_function(
               i integer
             )
               RETURNS int4
@@ -333,7 +333,7 @@ describe("Completion Tests", () => {
           label: "jsonb_build_object",
           kind: CompletionItemKind.Function,
           detail: dedent`
-            Function pg_catalog.jsonb_build_object(
+            FUNCTION pg_catalog.jsonb_build_object(
               VARIADIC \"any\"
             )
               RETURNS jsonb
@@ -360,7 +360,7 @@ describe("Completion Tests", () => {
           label: "correct_procedure",
           kind: CompletionItemKind.Function,
           detail: dedent`
-            Function public.correct_procedure(
+            FUNCTION public.correct_procedure(
               INOUT p1 text
             )
               RETURNS record
@@ -387,7 +387,7 @@ describe("Completion Tests", () => {
           label: "constant_function",
           kind: CompletionItemKind.Function,
           detail: dedent`
-            Function public.constant_function()
+            FUNCTION public.constant_function()
               RETURNS text
               LANGUAGE plpgsql
               IMMUTABLE PARALLEL SAFE
@@ -410,7 +410,7 @@ describe("Completion Tests", () => {
           label: "type_user",
           kind: CompletionItemKind.Struct,
           detail: dedent`
-            Type public.type_user(
+            TYPE public.type_user(
               id uuid,
               name text
             )
@@ -429,7 +429,7 @@ describe("Completion Tests", () => {
           label: "type_user",
           kind: CompletionItemKind.Struct,
           detail: dedent`
-            Type public.type_user(
+            TYPE public.type_user(
               id uuid,
               name text
             )
@@ -448,7 +448,7 @@ describe("Completion Tests", () => {
           label: "type_single_field",
           kind: CompletionItemKind.Struct,
           detail: dedent`
-            Type public.type_single_field(
+            TYPE public.type_single_field(
               id uuid
             )
           `,
@@ -466,7 +466,7 @@ describe("Completion Tests", () => {
           label: "type_empty",
           kind: CompletionItemKind.Struct,
           detail: dedent`
-            Type public.type_empty()
+            TYPE public.type_empty()
           `,
         },
       )
@@ -482,7 +482,7 @@ describe("Completion Tests", () => {
           label: "us_postal_code",
           kind: CompletionItemKind.Struct,
           detail: dedent`
-            Domain public.us_postal_code AS text
+            DOMAIN public.us_postal_code AS text
           `,
         },
       )
@@ -498,7 +498,7 @@ describe("Completion Tests", () => {
           label: "jp_postal_code",
           kind: CompletionItemKind.Struct,
           detail: dedent`
-            Domain public.jp_postal_code AS text
+            DOMAIN public.jp_postal_code AS text
           `,
         },
       )

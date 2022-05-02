@@ -123,7 +123,7 @@ export function makeFunctionDefinitionText(definition: FunctionDefinition): stri
   }
 
   const definitionText = dedent`
-    Function ${schema}.${functionName}(${argsString})
+    FUNCTION ${schema}.${functionName}(${argsString})
       RETURNS ${isSetOf ? "SETOF " + returnType : returnType}
       LANGUAGE ${languageName}
       ${[volatile, parallel].filter(x => x !== null).join(" ")}

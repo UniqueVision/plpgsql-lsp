@@ -57,6 +57,6 @@ export function makeMaterializedViewDefinitionText(
   const { schemaName, viewName } = definition
 
   return dedent`
-      Materialized View ${schemaName}.${viewName}
+      MATERIALIZED VIEW ${schemaName}.${viewName}
     `
 }

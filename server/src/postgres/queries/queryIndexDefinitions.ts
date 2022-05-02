@@ -60,6 +60,6 @@ export function makeIndexDefinitionText(definition: IndexDefinition): string {
   const { indexName } = definition
 
   return dedent`
-      Index ${indexName}
+      INDEX ${indexName}
     `
 }
