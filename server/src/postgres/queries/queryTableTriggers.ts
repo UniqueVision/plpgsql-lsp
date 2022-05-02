@@ -7,8 +7,9 @@ import {
 } from "@/server/definitionsManager"
 
 interface TableTrigger {
-  schemaName: string,
+  tableSchemaName: string,
   tableName: string,
+  triggerSchemaName: string,
   triggerName: string,
   actionStatement: string,
 }
@@ -21,30 +22,32 @@ export async function queryTableTriggers(
   logger: Logger,
 ): Promise<TableTrigger[]> {
   let tableTriggers: TableTrigger[] = []
-  const schemaName = schema || defaultSchema
+  const tableSchemaName = schema || defaultSchema
 
   const pgClient = await pgPool.connect()
   try {
     const results = await pgClient.query(
       `
         SELECT
+          trigger_schema,
           trigger_name,
           action_statement
         FROM
           information_schema.triggers
         WHERE
-          trigger_schema = $1
+          event_object_schema = $1
           AND event_object_table = $2
         ORDER BY
           trigger_name
       `,
-      [schemaName, tableName.toLowerCase()],
+      [tableSchemaName, tableName.toLowerCase()],
     )
 
     tableTriggers = results.rows.map(
       (row) => ({
-        schemaName,
+        tableSchemaName,
         tableName,
+        triggerSchemaName: row.trigger_schema,
         triggerName: row.trigger_name,
         actionStatement: row.action_statement,
       }),
@@ -65,14 +68,14 @@ export function makeTableTriggerText(
   tableIndex: TableTrigger, definitionsManager: DefinitionsManager,
 ): string {
   const {
-    schemaName,
-    tableName,
     triggerName,
+    tableSchemaName,
+    tableName,
     actionStatement,
   } = tableIndex
 
   const targetLink = makeTargetRelatedTableLink(
-    triggerName, tableName, schemaName, definitionsManager,
+    triggerName, tableSchemaName, tableName, definitionsManager,
   )
 
   return `${targetLink} ${actionStatement}`

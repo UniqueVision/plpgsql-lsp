@@ -129,14 +129,14 @@ export class DefinitionsManager {
 
 export function makeTargetRelatedTableLink(
   targetName: string,
+  tableSchemaName: string,
   tableName: string,
-  schemaName: string,
   definitionsManager: DefinitionsManager,
 ): string {
   let targetLink = makeDefinitionLinkMarkdown(targetName, definitionsManager)
   if (targetLink === undefined) {
     targetLink = makeDefinitionLinkMarkdown(
-      targetName, definitionsManager, `${schemaName}.${tableName}`,
+      targetName, definitionsManager, `${tableSchemaName}.${tableName}`,
     )
     if (targetLink === undefined) {
       targetLink = `\`"${targetName}"\``

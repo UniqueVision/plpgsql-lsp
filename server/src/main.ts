@@ -17,6 +17,4 @@ if (process.argv.indexOf("--stdio") === -1) {
 }
 
 // Start Server.
-const server = new Server(connection, new ConsoleLogger(connection))
-
-server.start()
+new Server(connection, new ConsoleLogger(connection)).start()

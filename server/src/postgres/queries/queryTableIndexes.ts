@@ -114,7 +114,7 @@ export function makeTableIndexText(
   } = tableIndex
 
   const targetLink = makeTargetRelatedTableLink(
-    indexName, tableName, schemaName, definitionsManager,
+    indexName, schemaName, tableName, definitionsManager,
   )
 
   return [
