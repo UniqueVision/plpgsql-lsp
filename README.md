@@ -15,14 +15,14 @@
 
 | | Completion | Go to definition | Hover |
 | :--- | :---: | :---: | :---: |
-| Domain    | ✅ | ✅ | ✅ |
-| Function  | ✅ | ✅ | ✅ |
-| Index     | - | ✅ | ✅ |
-| Procedure | ✅ | ✅ | ✅ |
-| Table     | ✅ | ✅ | ✅ |
-| Trigger   | - | ✅ | ✅ |
-| Type      | ✅ | ✅ | ✅ |
-| View      | ✅ | ✅ | ✅ |
+| Domain    | ✔️ | ✔️ | ✔️ |
+| Function  | ✔️ | ✔️ | ✔️ |
+| Index     | - | ✔️ | ✔️ |
+| Procedure | ✔️ | ✔️ | ✔️ |
+| Table     | ✔️ | ✔️ | ✔️ |
+| Trigger   | - | ✔️ | ✔️ |
+| Type      | ✔️ | ✔️ | ✔️ |
+| View      | ✔️ | ✔️ | ✔️ |
 
 ## Usage
 
