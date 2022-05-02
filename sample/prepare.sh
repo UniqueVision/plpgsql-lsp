@@ -11,6 +11,7 @@ sql_file=$(mktemp)
     cat definitions/domain/*.pgsql
     cat definitions/table/*.pgsql
     cat definitions/view/*.pgsql
+    cat definitions/materialized_view/*.pgsql
     cat definitions/type/*.pgsql
     cat definitions/procedure/*.pgsql
     cat definitions/function/*.pgsql
