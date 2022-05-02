@@ -1,0 +1,113 @@
+[
+  {
+    "RawStmt": {
+      "stmt": {
+        "DropStmt": {
+          "objects": [
+            {
+              "ObjectWithArgs": {
+                "objname": [
+                  {
+                    "String": {
+                      "str": "function_column_does_not_exist"
+                    }
+                  }
+                ],
+                "args_unspecified": true
+              }
+            }
+          ],
+          "removeType": "OBJECT_FUNCTION",
+          "behavior": "DROP_RESTRICT",
+          "missing_ok": true
+        }
+      },
+      "stmt_len": 104
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "CreateFunctionStmt": {
+          "funcname": [
+            {
+              "String": {
+                "str": "function_column_does_not_exist"
+              }
+            }
+          ],
+          "parameters": [
+            {
+              "FunctionParameter": {
+                "name": "p_id",
+                "argType": {
+                  "names": [
+                    {
+                      "String": {
+                        "str": "pg_catalog"
+                      }
+                    },
+                    {
+                      "String": {
+                        "str": "int4"
+                      }
+                    }
+                  ],
+                  "typemod": -1
+                },
+                "mode": "FUNC_PARAM_IN"
+              }
+            }
+          ],
+          "returnType": {
+            "names": [
+              {
+                "String": {
+                  "str": "public"
+                }
+              },
+              {
+                "String": {
+                  "str": "users"
+                }
+              }
+            ],
+            "setof": true,
+            "typemod": -1
+          },
+          "options": [
+            {
+              "DefElem": {
+                "defname": "as",
+                "arg": {
+                  "List": {
+                    "items": [
+                      {
+                        "String": {
+                          "str": "\nDECLARE\nBEGIN\n  RETURN QUERY\n  SELECT\n    id,\n    name,\n    tags,\n    deleted_at\n  FROM\n    public.users\n  WHERE\n    id = p_id;\nEND;\n"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "defaction": "DEFELEM_UNSPEC"
+              }
+            },
+            {
+              "DefElem": {
+                "defname": "language",
+                "arg": {
+                  "String": {
+                    "str": "plpgsql"
+                  }
+                },
+                "defaction": "DEFELEM_UNSPEC"
+              }
+            }
+          ]
+        }
+      },
+      "stmt_len": 268
+    }
+  }
+]

@@ -1,0 +1,93 @@
+[
+  {
+    "RawStmt": {
+      "stmt": {
+        "DropStmt": {
+          "objects": [
+            {
+              "ObjectWithArgs": {
+                "objname": [
+                  {
+                    "String": {
+                      "str": "correct_procedure"
+                    }
+                  }
+                ],
+                "args_unspecified": true
+              }
+            }
+          ],
+          "removeType": "OBJECT_PROCEDURE",
+          "behavior": "DROP_RESTRICT",
+          "missing_ok": true
+        }
+      },
+      "stmt_len": 42
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "CreateFunctionStmt": {
+          "is_procedure": true,
+          "funcname": [
+            {
+              "String": {
+                "str": "correct_procedure"
+              }
+            }
+          ],
+          "parameters": [
+            {
+              "FunctionParameter": {
+                "name": "p1",
+                "argType": {
+                  "names": [
+                    {
+                      "String": {
+                        "str": "text"
+                      }
+                    }
+                  ],
+                  "typemod": -1
+                },
+                "mode": "FUNC_PARAM_INOUT"
+              }
+            }
+          ],
+          "options": [
+            {
+              "DefElem": {
+                "defname": "as",
+                "arg": {
+                  "List": {
+                    "items": [
+                      {
+                        "String": {
+                          "str": "\nBEGIN\n  p1 := '!! ' || p1 || ' !!';\n  RAISE NOTICE 'Procedure Parameter: %', p1;\nEND;\n"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "defaction": "DEFELEM_UNSPEC"
+              }
+            },
+            {
+              "DefElem": {
+                "defname": "language",
+                "arg": {
+                  "String": {
+                    "str": "plpgsql"
+                  }
+                },
+                "defaction": "DEFELEM_UNSPEC"
+              }
+            }
+          ]
+        }
+      },
+      "stmt_len": 167
+    }
+  }
+]

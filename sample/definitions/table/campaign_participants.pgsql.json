@@ -1,0 +1,239 @@
+[
+  {
+    "RawStmt": {
+      "stmt": {
+        "DropStmt": {
+          "objects": [
+            {
+              "List": {
+                "items": [
+                  {
+                    "String": {
+                      "str": "campaign"
+                    }
+                  },
+                  {
+                    "String": {
+                      "str": "participants"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "removeType": "OBJECT_TABLE",
+          "behavior": "DROP_CASCADE",
+          "missing_ok": true
+        }
+      },
+      "stmt_len": 50
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "CreateStmt": {
+          "relation": {
+            "schemaname": "campaign",
+            "relname": "participants",
+            "inh": true,
+            "relpersistence": "p"
+          },
+          "tableElts": [
+            {
+              "ColumnDef": {
+                "colname": "id",
+                "typeName": {
+                  "names": [
+                    {
+                      "String": {
+                        "str": "pg_catalog"
+                      }
+                    },
+                    {
+                      "String": {
+                        "str": "int4"
+                      }
+                    }
+                  ],
+                  "typemod": -1
+                },
+                "is_local": true,
+                "constraints": [
+                  {
+                    "Constraint": {
+                      "contype": "CONSTR_NOTNULL"
+                    }
+                  },
+                  {
+                    "Constraint": {
+                      "contype": "CONSTR_PRIMARY"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "ColumnDef": {
+                "colname": "name",
+                "typeName": {
+                  "names": [
+                    {
+                      "String": {
+                        "str": "pg_catalog"
+                      }
+                    },
+                    {
+                      "String": {
+                        "str": "varchar"
+                      }
+                    }
+                  ],
+                  "typmods": [
+                    {
+                      "A_Const": {
+                        "val": {
+                          "Integer": {
+                            "ival": 10
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "typemod": -1
+                },
+                "is_local": true,
+                "constraints": [
+                  {
+                    "Constraint": {
+                      "contype": "CONSTR_NOTNULL"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "ColumnDef": {
+                "colname": "created_at",
+                "typeName": {
+                  "names": [
+                    {
+                      "String": {
+                        "str": "pg_catalog"
+                      }
+                    },
+                    {
+                      "String": {
+                        "str": "timestamptz"
+                      }
+                    }
+                  ],
+                  "typemod": -1
+                },
+                "is_local": true,
+                "constraints": [
+                  {
+                    "Constraint": {
+                      "contype": "CONSTR_NOTNULL"
+                    }
+                  },
+                  {
+                    "Constraint": {
+                      "contype": "CONSTR_DEFAULT",
+                      "raw_expr": {
+                        "FuncCall": {
+                          "funcname": [
+                            {
+                              "String": {
+                                "str": "now"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "ColumnDef": {
+                "colname": "deleted_at",
+                "typeName": {
+                  "names": [
+                    {
+                      "String": {
+                        "str": "pg_catalog"
+                      }
+                    },
+                    {
+                      "String": {
+                        "str": "timestamptz"
+                      }
+                    }
+                  ],
+                  "typemod": -1
+                },
+                "is_local": true,
+                "constraints": [
+                  {
+                    "Constraint": {
+                      "contype": "CONSTR_CHECK",
+                      "raw_expr": {
+                        "A_Expr": {
+                          "kind": "AEXPR_OP",
+                          "name": [
+                            {
+                              "String": {
+                                "str": ">"
+                              }
+                            }
+                          ],
+                          "lexpr": {
+                            "ColumnRef": {
+                              "fields": [
+                                {
+                                  "String": {
+                                    "str": "deleted_at"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          "rexpr": {
+                            "ColumnRef": {
+                              "fields": [
+                                {
+                                  "String": {
+                                    "str": "created_at"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "initially_valid": true
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "partspec": {
+            "strategy": "hash",
+            "partParams": [
+              {
+                "PartitionElem": {
+                  "name": "id"
+                }
+              }
+            ]
+          },
+          "oncommit": "ONCOMMIT_NOOP"
+        }
+      },
+      "stmt_len": 261
+    }
+  }
+]
