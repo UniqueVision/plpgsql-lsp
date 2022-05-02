@@ -18,8 +18,8 @@
 | Domain            | ✔️ | ✔️ | ✔️ |
 | Function          | ✔️ | ✔️ | ✔️ |
 | Index             | - | ✔️ | ✔️ |
-| Procedure         | ✔️ | ✔️ | ✔️ |
 | Materialized View | ✔️ | ✔️ | ✔️ |
+| Procedure         | ✔️ | ✔️ | ✔️ |
 | Table             | ✔️ | ✔️ | ✔️ |
 | Trigger           | - | ✔️ | ✔️ |
 | Type              | ✔️ | ✔️ | ✔️ |
