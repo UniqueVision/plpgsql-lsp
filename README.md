@@ -26,6 +26,9 @@
 | VIEW                      | ✔️ | ✔️ | ✔️ |
 
 <!-- UnSupported Features
+
+See https://www.postgresql.org/docs/current/sql-commands.html
+
 | | Completion | Go to definition | Hover |
 | :--- | :---: | :---: | :---: |
 | ACCESS METHOD             | - | - | - |
