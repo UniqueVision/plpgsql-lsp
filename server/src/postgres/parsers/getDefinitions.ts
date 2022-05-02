@@ -171,10 +171,7 @@ export function getDomainDefinitions(
     .filter((name) => "String" in name)
     .map((name) => name.String.str)
 
-  if (nameList.length === 0) {
-    return []
-  }
-  else if (nameList.length === 1) {
+  if (nameList.length === 1) {
     domainName = nameList[0]
   }
   else if (nameList.length === 2) {
@@ -231,10 +228,7 @@ export function getFunctionDefinitions(
     .filter((name) => "String" in name)
     .map((name) => name.String.str)
 
-  if (nameList.length === 0) {
-    return []
-  }
-  else if (nameList.length === 1) {
+  if (nameList.length === 1) {
     functionName = nameList[0]
   }
   else if (nameList.length === 2) {
