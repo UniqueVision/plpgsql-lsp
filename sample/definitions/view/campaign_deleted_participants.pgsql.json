@@ -1,0 +1,109 @@
+[
+  {
+    "RawStmt": {
+      "stmt": {
+        "DropStmt": {
+          "objects": [
+            {
+              "List": {
+                "items": [
+                  {
+                    "String": {
+                      "str": "campaign"
+                    }
+                  },
+                  {
+                    "String": {
+                      "str": "deleted_participants"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "removeType": "OBJECT_VIEW",
+          "behavior": "DROP_CASCADE",
+          "missing_ok": true
+        }
+      },
+      "stmt_len": 57
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "ViewStmt": {
+          "view": {
+            "schemaname": "campaign",
+            "relname": "deleted_participants",
+            "inh": true,
+            "relpersistence": "p"
+          },
+          "query": {
+            "SelectStmt": {
+              "targetList": [
+                {
+                  "ResTarget": {
+                    "val": {
+                      "ColumnRef": {
+                        "fields": [
+                          {
+                            "A_Star": {}
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              ],
+              "fromClause": [
+                {
+                  "RangeVar": {
+                    "schemaname": "campaign",
+                    "relname": "participants",
+                    "inh": true,
+                    "relpersistence": "p"
+                  }
+                }
+              ],
+              "whereClause": {
+                "A_Expr": {
+                  "kind": "AEXPR_OP",
+                  "name": [
+                    {
+                      "String": {
+                        "str": "<>"
+                      }
+                    }
+                  ],
+                  "lexpr": {
+                    "ColumnRef": {
+                      "fields": [
+                        {
+                          "String": {
+                            "str": "deleted_at"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "rexpr": {
+                    "A_Const": {
+                      "val": {
+                        "Null": {}
+                      }
+                    }
+                  }
+                }
+              },
+              "limitOption": "LIMIT_OPTION_DEFAULT",
+              "op": "SETOP_NONE"
+            }
+          },
+          "withCheckOption": "NO_CHECK_OPTION"
+        }
+      },
+      "stmt_len": 113
+    }
+  }
+]

@@ -1,0 +1,150 @@
+[
+  {
+    "RawStmt": {
+      "stmt": {
+        "DropStmt": {
+          "objects": [
+            {
+              "List": {
+                "items": [
+                  {
+                    "String": {
+                      "str": "schedule"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "removeType": "OBJECT_TABLE",
+          "behavior": "DROP_CASCADE",
+          "missing_ok": true
+        }
+      },
+      "stmt_len": 37
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "CreateStmt": {
+          "relation": {
+            "relname": "schedule",
+            "inh": true,
+            "relpersistence": "p"
+          },
+          "tableElts": [
+            {
+              "ColumnDef": {
+                "colname": "id",
+                "typeName": {
+                  "names": [
+                    {
+                      "String": {
+                        "str": "serial"
+                      }
+                    }
+                  ],
+                  "typemod": -1
+                },
+                "is_local": true,
+                "constraints": [
+                  {
+                    "Constraint": {
+                      "contype": "CONSTR_PRIMARY"
+                    }
+                  },
+                  {
+                    "Constraint": {
+                      "contype": "CONSTR_NOTNULL"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "ColumnDef": {
+                "colname": "room_name",
+                "typeName": {
+                  "names": [
+                    {
+                      "String": {
+                        "str": "text"
+                      }
+                    }
+                  ],
+                  "typemod": -1
+                },
+                "is_local": true,
+                "constraints": [
+                  {
+                    "Constraint": {
+                      "contype": "CONSTR_NOTNULL"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "ColumnDef": {
+                "colname": "reservation_time",
+                "typeName": {
+                  "names": [
+                    {
+                      "String": {
+                        "str": "tsrange"
+                      }
+                    }
+                  ],
+                  "typemod": -1
+                },
+                "is_local": true,
+                "constraints": [
+                  {
+                    "Constraint": {
+                      "contype": "CONSTR_NOTNULL"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "Constraint": {
+                "contype": "CONSTR_EXCLUSION",
+                "exclusions": [
+                  {
+                    "List": {
+                      "items": [
+                        {
+                          "IndexElem": {
+                            "name": "reservation_time",
+                            "ordering": "SORTBY_DEFAULT",
+                            "nulls_ordering": "SORTBY_NULLS_DEFAULT"
+                          }
+                        },
+                        {
+                          "List": {
+                            "items": [
+                              {
+                                "String": {
+                                  "str": "&&"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "access_method": "gist"
+              }
+            }
+          ],
+          "oncommit": "ONCOMMIT_NOOP"
+        }
+      },
+      "stmt_len": 172
+    }
+  }
+]

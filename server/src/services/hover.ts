@@ -16,6 +16,10 @@ import {
   queryIndexDefinitions,
 } from "@/postgres/queries/queryIndexDefinitions"
 import {
+  makeMaterializedViewDefinitionText,
+  queryMaterializedViewDefinitions,
+} from "@/postgres/queries/queryMaterializedViewDefinitions"
+import {
   makeTableConastaintText,
   queryTableConstraints,
 } from "@/postgres/queries/queryTableConstraints"
@@ -94,6 +98,14 @@ export async function getHover(
     )
     if (viewHover !== undefined) {
       return viewHover
+    }
+
+    // Check as Materialized View
+    const materializedViewHover = await getMaterializedViewHover(
+      pgPool, schema, candidate, defaultSchema, logger,
+    )
+    if (materializedViewHover !== undefined) {
+      return materializedViewHover
     }
 
     // Check as Function
@@ -261,17 +273,35 @@ async function getTableHover(
 async function getViewHover(
   pgPool: PostgresPool,
   schema: string | undefined,
-  tableName: string,
+  viewName: string,
   defaultSchema: string,
   logger: Logger,
 ): Promise<Hover | undefined> {
   const definitions = await queryViewDefinitions(
-    pgPool, schema, defaultSchema, logger, tableName,
+    pgPool, schema, viewName, defaultSchema, logger,
   )
 
   return await makeHover(
     definitions.map(
       (definition) => makeViewDefinitionText(definition),
+    ),
+  )
+}
+
+async function getMaterializedViewHover(
+  pgPool: PostgresPool,
+  schema: string | undefined,
+  viewName: string,
+  defaultSchema: string,
+  logger: Logger,
+): Promise<Hover | undefined> {
+  const definitions = await queryMaterializedViewDefinitions(
+    pgPool, schema, viewName, defaultSchema, logger,
+  )
+
+  return await makeHover(
+    definitions.map(
+      (definition) => makeMaterializedViewDefinitionText(definition),
     ),
   )
 }

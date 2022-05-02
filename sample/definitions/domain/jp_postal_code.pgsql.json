@@ -1,0 +1,104 @@
+[
+  {
+    "RawStmt": {
+      "stmt": {
+        "DropStmt": {
+          "objects": [
+            {
+              "TypeName": {
+                "names": [
+                  {
+                    "String": {
+                      "str": "public"
+                    }
+                  },
+                  {
+                    "String": {
+                      "str": "jp_postal_code"
+                    }
+                  }
+                ],
+                "typemod": -1
+              }
+            }
+          ],
+          "removeType": "OBJECT_DOMAIN",
+          "behavior": "DROP_RESTRICT",
+          "missing_ok": true
+        }
+      },
+      "stmt_len": 43
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "CreateDomainStmt": {
+          "domainname": [
+            {
+              "String": {
+                "str": "public"
+              }
+            },
+            {
+              "String": {
+                "str": "jp_postal_code"
+              }
+            }
+          ],
+          "typeName": {
+            "names": [
+              {
+                "String": {
+                  "str": "text"
+                }
+              }
+            ],
+            "typemod": -1
+          },
+          "constraints": [
+            {
+              "Constraint": {
+                "contype": "CONSTR_CHECK",
+                "raw_expr": {
+                  "A_Expr": {
+                    "kind": "AEXPR_OP",
+                    "name": [
+                      {
+                        "String": {
+                          "str": "~"
+                        }
+                      }
+                    ],
+                    "lexpr": {
+                      "ColumnRef": {
+                        "fields": [
+                          {
+                            "String": {
+                              "str": "value"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "rexpr": {
+                      "A_Const": {
+                        "val": {
+                          "String": {
+                            "str": "^\\d{3}-\\d{4}$"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "initially_valid": true
+              }
+            }
+          ]
+        }
+      },
+      "stmt_len": 81
+    }
+  }
+]

@@ -1,0 +1,137 @@
+[
+  {
+    "RawStmt": {
+      "stmt": {
+        "DropStmt": {
+          "objects": [
+            {
+              "ObjectWithArgs": {
+                "objname": [
+                  {
+                    "String": {
+                      "str": "update_user_update_at"
+                    }
+                  }
+                ],
+                "args_unspecified": true
+              }
+            }
+          ],
+          "removeType": "OBJECT_FUNCTION",
+          "behavior": "DROP_CASCADE",
+          "missing_ok": true
+        }
+      },
+      "stmt_len": 53
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "CreateFunctionStmt": {
+          "funcname": [
+            {
+              "String": {
+                "str": "update_user_update_at"
+              }
+            }
+          ],
+          "returnType": {
+            "names": [
+              {
+                "String": {
+                  "str": "trigger"
+                }
+              }
+            ],
+            "typemod": -1
+          },
+          "options": [
+            {
+              "DefElem": {
+                "defname": "as",
+                "arg": {
+                  "List": {
+                    "items": [
+                      {
+                        "String": {
+                          "str": "\nBEGIN\n  UPDATE users SET updated_at = now();\nEND;\n"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "defaction": "DEFELEM_UNSPEC"
+              }
+            },
+            {
+              "DefElem": {
+                "defname": "language",
+                "arg": {
+                  "String": {
+                    "str": "plpgsql"
+                  }
+                },
+                "defaction": "DEFELEM_UNSPEC"
+              }
+            }
+          ]
+        }
+      },
+      "stmt_len": 149
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "DropStmt": {
+          "objects": [
+            {
+              "List": {
+                "items": [
+                  {
+                    "String": {
+                      "str": "users"
+                    }
+                  },
+                  {
+                    "String": {
+                      "str": "check_update_trigger"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "removeType": "OBJECT_TRIGGER",
+          "behavior": "DROP_CASCADE",
+          "missing_ok": true
+        }
+      },
+      "stmt_len": 63
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "CreateTrigStmt": {
+          "trigname": "check_update_trigger",
+          "relation": {
+            "relname": "users",
+            "inh": true,
+            "relpersistence": "p"
+          },
+          "funcname": [
+            {
+              "String": {
+                "str": "update_user_update_at"
+              }
+            }
+          ],
+          "events": 16
+        }
+      },
+      "stmt_len": 108
+    }
+  }
+]

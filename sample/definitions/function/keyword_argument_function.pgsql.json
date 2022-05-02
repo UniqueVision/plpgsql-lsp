@@ -1,0 +1,112 @@
+[
+  {
+    "RawStmt": {
+      "stmt": {
+        "DropStmt": {
+          "objects": [
+            {
+              "ObjectWithArgs": {
+                "objname": [
+                  {
+                    "String": {
+                      "str": "keyword_argument_function"
+                    }
+                  }
+                ],
+                "args_unspecified": true
+              }
+            }
+          ],
+          "removeType": "OBJECT_FUNCTION",
+          "behavior": "DROP_RESTRICT",
+          "missing_ok": true
+        }
+      },
+      "stmt_len": 49
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "CreateFunctionStmt": {
+          "funcname": [
+            {
+              "String": {
+                "str": "keyword_argument_function"
+              }
+            }
+          ],
+          "parameters": [
+            {
+              "FunctionParameter": {
+                "name": "i",
+                "argType": {
+                  "names": [
+                    {
+                      "String": {
+                        "str": "pg_catalog"
+                      }
+                    },
+                    {
+                      "String": {
+                        "str": "int4"
+                      }
+                    }
+                  ],
+                  "typemod": -1
+                },
+                "mode": "FUNC_PARAM_IN"
+              }
+            }
+          ],
+          "returnType": {
+            "names": [
+              {
+                "String": {
+                  "str": "pg_catalog"
+                }
+              },
+              {
+                "String": {
+                  "str": "int4"
+                }
+              }
+            ],
+            "typemod": -1
+          },
+          "options": [
+            {
+              "DefElem": {
+                "defname": "as",
+                "arg": {
+                  "List": {
+                    "items": [
+                      {
+                        "String": {
+                          "str": "\nBEGIN\n  RETURN i + 1;\nEND;\n"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "defaction": "DEFELEM_UNSPEC"
+              }
+            },
+            {
+              "DefElem": {
+                "defname": "language",
+                "arg": {
+                  "String": {
+                    "str": "plpgsql"
+                  }
+                },
+                "defaction": "DEFELEM_UNSPEC"
+              }
+            }
+          ]
+        }
+      },
+      "stmt_len": 127
+    }
+  }
+]

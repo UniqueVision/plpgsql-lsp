@@ -33,6 +33,14 @@ export function getDefinitions(
       else if (statement?.stmt?.IndexStmt !== undefined) {
         return getIndexDefinitions(fileText, statement, uri)
       }
+      else if (statement?.stmt?.CreateTableAsStmt !== undefined) {
+        if (statement?.stmt?.CreateTableAsStmt?.relkind === "OBJECT_MATVIEW") {
+          return getMaterializedViewDefinitions(fileText, statement, uri, defaultSchema)
+        }
+        else {
+          return []
+        }
+      }
       else {
         return []
       }
@@ -51,8 +59,8 @@ export function getTableDefinitions(
     return []
   }
 
-  const schemaname = createStmt.relation.schemaname
-  const relname = createStmt.relation.relname
+  const schemaName = createStmt.relation.schemaname
+  const relationName = createStmt.relation.relname
   const stmtLocation = statement.stmt_location || 0
 
   const definitionLink = LocationLink.create(
@@ -66,15 +74,15 @@ export function getTableDefinitions(
       fileText,
       createStmt.relation.location,
       createStmt.relation.location
-      + (schemaname !== undefined ? (schemaname + ".").length : 0)
-      + relname.length,
+      + (schemaName !== undefined ? (schemaName + ".").length : 0)
+      + relationName.length,
     ),
   )
 
   return makeMultiSchemaDefinitionCandidates(
-    relname,
+    relationName,
     definitionLink,
-    schemaname,
+    schemaName,
     defaultSchema,
   )
 }
@@ -90,8 +98,8 @@ export function getViewDefinitions(
     return []
   }
 
-  const schemaname = createStmt.view.schemaname
-  const relname = createStmt.view.relname
+  const schemaName = createStmt.view.schemaname
+  const relationName = createStmt.view.relname
   const stmtLocation = statement.stmt_location || 0
 
   const definitionLink = LocationLink.create(
@@ -105,15 +113,15 @@ export function getViewDefinitions(
       fileText,
       createStmt.view.location,
       createStmt.view.location
-      + (schemaname !== undefined ? (schemaname + ".").length : 0)
-      + relname.length,
+      + (schemaName !== undefined ? (schemaName + ".").length : 0)
+      + relationName.length,
     ),
   )
 
   return makeMultiSchemaDefinitionCandidates(
-    relname,
+    relationName,
     definitionLink,
-    schemaname,
+    schemaName,
     defaultSchema,
   )
 }
@@ -128,8 +136,8 @@ export function getTypeDefinitions(
   if (compositTypeStmt === undefined) {
     return []
   }
-  const relname = compositTypeStmt.typevar.relname
-  const schemaname = compositTypeStmt.typevar.schemaname
+  const relationName = compositTypeStmt.typevar.relname
+  const schemaName = compositTypeStmt.typevar.schemaname
   const stmtLocation = statement.stmt_location || 0
 
   const definitionLink = LocationLink.create(
@@ -142,14 +150,14 @@ export function getTypeDefinitions(
     getRangeFromBuffer(
       fileText,
       compositTypeStmt.typevar.location,
-      compositTypeStmt.typevar.location + relname.length,
+      compositTypeStmt.typevar.location + relationName.length,
     ),
   )
 
   return makeMultiSchemaDefinitionCandidates(
-    relname,
+    relationName,
     definitionLink,
-    schemaname,
+    schemaName,
     defaultSchema,
   )
 }
@@ -165,7 +173,7 @@ export function getDomainDefinitions(
     return []
   }
 
-  let schemaname = undefined
+  let schemaName = undefined
   let domainName = undefined
   const nameList = createDomainStmt.domainname
     .filter((name) => "String" in name)
@@ -175,7 +183,7 @@ export function getDomainDefinitions(
     domainName = nameList[0]
   }
   else if (nameList.length === 2) {
-    schemaname = nameList[0]
+    schemaName = nameList[0]
     domainName = nameList[1]
   }
   else {
@@ -206,7 +214,7 @@ export function getDomainDefinitions(
   return makeMultiSchemaDefinitionCandidates(
     domainName,
     definitionLink,
-    schemaname,
+    schemaName,
     defaultSchema,
   )
 }
@@ -222,7 +230,7 @@ export function getFunctionDefinitions(
     return []
   }
 
-  let schemaname = undefined
+  let schemaName = undefined
   let functionName = undefined
   const nameList = createFunctionStmt.funcname
     .filter((name) => "String" in name)
@@ -232,7 +240,7 @@ export function getFunctionDefinitions(
     functionName = nameList[0]
   }
   else if (nameList.length === 2) {
-    schemaname = nameList[0]
+    schemaName = nameList[0]
     functionName = nameList[1]
   }
   else {
@@ -264,7 +272,7 @@ export function getFunctionDefinitions(
   return makeMultiSchemaDefinitionCandidates(
     functionName,
     definitionLink,
-    schemaname,
+    schemaName,
     defaultSchema,
   )
 }
@@ -343,6 +351,46 @@ export function getTriggerDefinitions(
       definitionLink,
     },
   ]
+}
+
+export function getMaterializedViewDefinitions(
+  fileText: string,
+  statement: Statement,
+  uri: URI,
+  defaultSchema: string,
+): DefinitionCandidate[] {
+  const CreateTableAsStmt = statement?.stmt?.CreateTableAsStmt
+  if (CreateTableAsStmt === undefined) {
+    return []
+  }
+
+  const schemaName = CreateTableAsStmt.into.rel.schemaname || defaultSchema
+  const viewName = CreateTableAsStmt.into.rel.relname
+  const viewNameLocation = findIndexFromBuffer(
+    fileText, viewName, statement.stmt_location,
+  )
+  const stmtLocation = statement.stmt_location || 0
+
+  const definitionLink = LocationLink.create(
+    uri,
+    getRangeFromBuffer(
+      fileText,
+      stmtLocation,
+      stmtLocation + statement.stmt_len,
+    ),
+    getRangeFromBuffer(
+      fileText,
+      viewNameLocation,
+      viewNameLocation + viewName.length,
+    ),
+  )
+
+  return makeMultiSchemaDefinitionCandidates(
+    viewName,
+    definitionLink,
+    schemaName,
+    defaultSchema,
+  )
 }
 
 function makeMultiSchemaDefinitionCandidates(

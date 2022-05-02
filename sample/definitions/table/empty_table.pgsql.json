@@ -1,0 +1,42 @@
+[
+  {
+    "RawStmt": {
+      "stmt": {
+        "DropStmt": {
+          "objects": [
+            {
+              "List": {
+                "items": [
+                  {
+                    "String": {
+                      "str": "empty_table"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "removeType": "OBJECT_TABLE",
+          "behavior": "DROP_CASCADE",
+          "missing_ok": true
+        }
+      },
+      "stmt_len": 40
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "CreateStmt": {
+          "relation": {
+            "relname": "empty_table",
+            "inh": true,
+            "relpersistence": "p"
+          },
+          "oncommit": "ONCOMMIT_NOOP"
+        }
+      },
+      "stmt_len": 28
+    }
+  }
+]

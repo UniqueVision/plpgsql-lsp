@@ -1,0 +1,103 @@
+[
+  {
+    "RawStmt": {
+      "stmt": {
+        "DropStmt": {
+          "objects": [
+            {
+              "ObjectWithArgs": {
+                "objname": [
+                  {
+                    "String": {
+                      "str": "correct_function"
+                    }
+                  }
+                ],
+                "args_unspecified": true
+              }
+            }
+          ],
+          "removeType": "OBJECT_FUNCTION",
+          "behavior": "DROP_RESTRICT",
+          "missing_ok": true
+        }
+      },
+      "stmt_len": 40
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "CreateFunctionStmt": {
+          "funcname": [
+            {
+              "String": {
+                "str": "correct_function"
+              }
+            }
+          ],
+          "parameters": [
+            {
+              "FunctionParameter": {
+                "name": "p_id",
+                "argType": {
+                  "names": [
+                    {
+                      "String": {
+                        "str": "uuid"
+                      }
+                    }
+                  ],
+                  "typemod": -1
+                },
+                "mode": "FUNC_PARAM_IN"
+              }
+            }
+          ],
+          "returnType": {
+            "names": [
+              {
+                "String": {
+                  "str": "uuid"
+                }
+              }
+            ],
+            "setof": true,
+            "typemod": -1
+          },
+          "options": [
+            {
+              "DefElem": {
+                "defname": "as",
+                "arg": {
+                  "List": {
+                    "items": [
+                      {
+                        "String": {
+                          "str": "\nDECLARE\nBEGIN\n  RETURN QUERY\n  SELECT\n    p_id;\nEND;\n"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "defaction": "DEFELEM_UNSPEC"
+              }
+            },
+            {
+              "DefElem": {
+                "defname": "language",
+                "arg": {
+                  "String": {
+                    "str": "plpgsql"
+                  }
+                },
+                "defaction": "DEFELEM_UNSPEC"
+              }
+            }
+          ]
+        }
+      },
+      "stmt_len": 163
+    }
+  }
+]

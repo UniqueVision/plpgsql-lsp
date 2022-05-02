@@ -1,0 +1,81 @@
+[
+  {
+    "RawStmt": {
+      "stmt": {
+        "DropStmt": {
+          "objects": [
+            {
+              "List": {
+                "items": [
+                  {
+                    "String": {
+                      "str": "public"
+                    }
+                  },
+                  {
+                    "String": {
+                      "str": "my_users"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "removeType": "OBJECT_MATVIEW",
+          "behavior": "DROP_CASCADE",
+          "missing_ok": true
+        }
+      },
+      "stmt_len": 56
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "CreateTableAsStmt": {
+          "query": {
+            "SelectStmt": {
+              "targetList": [
+                {
+                  "ResTarget": {
+                    "val": {
+                      "ColumnRef": {
+                        "fields": [
+                          {
+                            "A_Star": {}
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              ],
+              "fromClause": [
+                {
+                  "RangeVar": {
+                    "relname": "users",
+                    "inh": true,
+                    "relpersistence": "p"
+                  }
+                }
+              ],
+              "limitOption": "LIMIT_OPTION_DEFAULT",
+              "op": "SETOP_NONE"
+            }
+          },
+          "into": {
+            "rel": {
+              "schemaname": "public",
+              "relname": "my_users",
+              "inh": true,
+              "relpersistence": "p"
+            },
+            "onCommit": "ONCOMMIT_NOOP"
+          },
+          "relkind": "OBJECT_MATVIEW"
+        }
+      },
+      "stmt_len": 65
+    }
+  }
+]
