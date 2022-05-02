@@ -12,15 +12,15 @@ import { getStmtements, Statement } from "./statement"
 
 test.each([
   [
-    "definitions/tables/companies.pgsql",
+    "definitions/table/companies.pgsql",
     Array(2).fill(Range.create(2, 13, 2, 22)),
   ],
   [
-    "definitions/tables/public_users.pgsql",
+    "definitions/table/public_users.pgsql",
     Array(2).fill(Range.create(2, 13, 2, 25)),
   ],
   [
-    "definitions/tables/campaign_participants.pgsql",
+    "definitions/table/campaign_participants.pgsql",
     [Range.create(2, 13, 2, 34)],
   ],
 ])(
@@ -41,15 +41,15 @@ test.each([
 
 test.each([
   [
-    "definitions/views/deleted_users.pgsql",
+    "definitions/view/deleted_users.pgsql",
     Array(2).fill(Range.create(2, 12, 2, 25)),
   ],
   [
-    "definitions/views/public_deleted_users.pgsql",
+    "definitions/view/public_deleted_users.pgsql",
     Array(2).fill(Range.create(2, 12, 2, 32)),
   ],
   [
-    "definitions/views/campaign_deleted_participants.pgsql",
+    "definitions/view/campaign_deleted_participants.pgsql",
     [Range.create(2, 12, 2, 41)],
   ],
 ])(
@@ -69,7 +69,7 @@ test.each([
 
 test.each([
   [
-    "definitions/types/type_user.pgsql",
+    "definitions/type/type_user.pgsql",
     Array(2).fill(Range.create(2, 12, 2, 21)),
   ],
 ])(
@@ -89,7 +89,7 @@ test.each([
 
 test.each([
   [
-    "definitions/stored/correct_function.pgsql",
+    "definitions/function/correct_function.pgsql",
     Array(2).fill(Range.create(2, 16, 2, 32)),
   ],
 ])(
