@@ -1,6 +1,9 @@
 # Change Log
 
 ## Unreleased - TDB
+- Fix table trigger link [#36](https://github.com/UniqueVision/plpgsql-lsp/pull/36)
+- Support domain. [#35](https://github.com/UniqueVision/plpgsql-lsp/pull/35)
+
 ## [v2.5.0](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.5.0) - 2022/04/27
 - Enhanced hover/completion feature. [#34](https://github.com/UniqueVision/plpgsql-lsp/pull/34)
 
