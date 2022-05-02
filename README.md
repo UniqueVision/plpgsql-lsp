@@ -25,7 +25,7 @@
 | TYPE                      | ✔️ | ✔️ | ✔️ |
 | VIEW                      | ✔️ | ✔️ | ✔️ |
 
-<!-- UnSupported Feature
+<!-- UnSupported Features
 | | Completion | Go to definition | Hover |
 | :--- | :---: | :---: | :---: |
 | ACCESS METHOD             | - | - | - |
