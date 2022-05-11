@@ -1,6 +1,10 @@
 # Change Log
 
 ## Unreleased - TDB
+
+## [v2.6.0](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.6.0) - 2022/05/11
+
+- Support materialized view. [#37](https://github.com/UniqueVision/plpgsql-lsp/pull/37)
 - Fix table trigger link [#36](https://github.com/UniqueVision/plpgsql-lsp/pull/36)
 - Support domain. [#35](https://github.com/UniqueVision/plpgsql-lsp/pull/35)
 
