@@ -210,7 +210,6 @@ export class Handlers {
   ): Promise<void> {
     this.settingsManager.reset(params.settings?.plpgsqlLanguageServer)
     for (const document of this.documents.all()) {
-
       await this.validate(document)
     }
   }
@@ -220,13 +219,12 @@ export class Handlers {
   ): Promise<void> {
     let hasChanges = false
 
-    params.changes.forEach(
-      ({ type }) => {
-        if (type === FileChangeType.Changed) {
-          hasChanges = true
-        }
-      },
-    )
+    for (const { type } of params.changes) {
+      if (type === FileChangeType.Changed) {
+        hasChanges = true
+        break
+      }
+    }
 
     if (hasChanges) {
       for (const document of this.documents.all()) {
