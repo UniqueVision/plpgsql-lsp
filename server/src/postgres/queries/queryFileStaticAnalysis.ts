@@ -6,7 +6,7 @@ import {
   QueryParameterInfo,
   sanitizeFileWithQueryParameters,
 } from "@/postgres/parameters"
-import { FunctionInfo } from "@/postgres/parsers/getFunctions"
+import { FunctionInfo } from "@/postgres/parsers/parseFunctions"
 import { getLineRangeFromBuffer, getTextAllRange } from "@/utilities/text"
 
 export interface StaticAnalysisErrorRow {

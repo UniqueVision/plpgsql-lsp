@@ -4,7 +4,7 @@ import { Statement } from "@/postgres/parsers/statement"
 import { DefinitionCandidate } from "@/server/definitionsManager"
 import { findIndexFromBuffer, getRangeFromBuffer } from "@/utilities/text"
 
-export function getDefinitions(
+export function parseDefinitions(
   fileText: string,
   statements: Statement[],
   uri: URI,
@@ -13,29 +13,31 @@ export function getDefinitions(
   return statements.flatMap(
     (statement) => {
       if (statement?.stmt?.CreateStmt !== undefined) {
-        return getTableDefinitions(fileText, statement, uri, defaultSchema)
+        return parseTableDefinitions(fileText, statement, uri, defaultSchema)
       }
       else if (statement?.stmt?.ViewStmt !== undefined) {
-        return getViewDefinitions(fileText, statement, uri, defaultSchema)
+        return parseViewDefinitions(fileText, statement, uri, defaultSchema)
       }
       else if (statement?.stmt?.CompositeTypeStmt !== undefined) {
-        return getTypeDefinitions(fileText, statement, uri, defaultSchema)
+        return parseTypeDefinitions(fileText, statement, uri, defaultSchema)
       }
       else if (statement?.stmt?.CreateDomainStmt !== undefined) {
-        return getDomainDefinitions(fileText, statement, uri, defaultSchema)
+        return parseDomainDefinitions(fileText, statement, uri, defaultSchema)
       }
       else if (statement?.stmt?.CreateFunctionStmt !== undefined) {
-        return getFunctionDefinitions(fileText, statement, uri, defaultSchema)
+        return parseFunctionDefinitions(fileText, statement, uri, defaultSchema)
       }
       else if (statement?.stmt?.CreateTrigStmt !== undefined) {
-        return getTriggerDefinitions(fileText, statement, uri)
+        return parseTriggerDefinitions(fileText, statement, uri)
       }
       else if (statement?.stmt?.IndexStmt !== undefined) {
-        return getIndexDefinitions(fileText, statement, uri)
+        return parseIndexDefinitions(fileText, statement, uri)
       }
       else if (statement?.stmt?.CreateTableAsStmt !== undefined) {
         if (statement?.stmt?.CreateTableAsStmt?.relkind === "OBJECT_MATVIEW") {
-          return getMaterializedViewDefinitions(fileText, statement, uri, defaultSchema)
+          return parseMaterializedViewDefinitions(
+            fileText, statement, uri, defaultSchema,
+          )
         }
         else {
           return []
@@ -48,7 +50,7 @@ export function getDefinitions(
   )
 }
 
-export function getTableDefinitions(
+export function parseTableDefinitions(
   fileText: string,
   statement: Statement,
   uri: URI,
@@ -87,7 +89,7 @@ export function getTableDefinitions(
   )
 }
 
-export function getViewDefinitions(
+export function parseViewDefinitions(
   fileText: string,
   statement: Statement,
   uri: URI,
@@ -126,7 +128,7 @@ export function getViewDefinitions(
   )
 }
 
-export function getTypeDefinitions(
+export function parseTypeDefinitions(
   fileText: string,
   statement: Statement,
   uri: URI,
@@ -162,7 +164,7 @@ export function getTypeDefinitions(
   )
 }
 
-export function getDomainDefinitions(
+export function parseDomainDefinitions(
   fileText: string,
   statement: Statement,
   uri: URI,
@@ -219,7 +221,7 @@ export function getDomainDefinitions(
   )
 }
 
-export function getFunctionDefinitions(
+export function parseFunctionDefinitions(
   fileText: string,
   statement: Statement,
   uri: URI,
@@ -277,7 +279,7 @@ export function getFunctionDefinitions(
   )
 }
 
-export function getIndexDefinitions(
+export function parseIndexDefinitions(
   fileText: string,
   statement: Statement,
   uri: URI,
@@ -315,7 +317,7 @@ export function getIndexDefinitions(
   ]
 }
 
-export function getTriggerDefinitions(
+export function parseTriggerDefinitions(
   fileText: string,
   statement: Statement,
   uri: URI,
@@ -353,7 +355,7 @@ export function getTriggerDefinitions(
   ]
 }
 
-export function getMaterializedViewDefinitions(
+export function parseMaterializedViewDefinitions(
   fileText: string,
   statement: Statement,
   uri: URI,

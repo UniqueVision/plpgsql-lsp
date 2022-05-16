@@ -3,7 +3,7 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { PostgresPool } from "@/postgres"
 import { QueryParameterInfo } from "@/postgres/parameters"
-import { getFunctions } from "@/postgres/parsers/getFunctions"
+import { parseFunctions } from "@/postgres/parsers/parseFunctions"
 import {
   queryFileStaticAnalysis,
 } from "@/postgres/queries/queryFileStaticAnalysis"
@@ -113,7 +113,7 @@ async function validateStaticAnalysis(
   const errors = await queryFileStaticAnalysis(
     pgPool,
     document,
-    await getFunctions(document.uri, options.queryParameterInfo, logger),
+    await parseFunctions(document.uri, options.queryParameterInfo, logger),
     {
       isComplete: options.isComplete,
       queryParameterInfo: options.queryParameterInfo,

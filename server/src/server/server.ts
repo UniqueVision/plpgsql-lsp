@@ -21,6 +21,7 @@ import { CommandExecuter } from "./commandExecuter"
 import { DefinitionsManager } from "./definitionsManager"
 import { Handlers } from "./handlers"
 import { SettingsManager } from "./settingsManager"
+import { SymbolsManager } from "./symbolsManager"
 
 export class Server {
   handlers?: Handlers
@@ -32,6 +33,7 @@ export class Server {
   settingsManager: SettingsManager
   // PostgresSQL file definitions.
   definitionsManager: DefinitionsManager = new DefinitionsManager()
+  symbolsManager: SymbolsManager = new SymbolsManager()
   commandExecuter?: CommandExecuter
 
   // Language client configuration
@@ -113,6 +115,7 @@ export class Server {
       this.documents,
       this.settingsManager,
       this.definitionsManager,
+      this.symbolsManager,
       this.commandExecuter,
       {
         hasDiagnosticRelatedInformationCapability:
@@ -132,6 +135,8 @@ export class Server {
         codeLensProvider: {
           resolveProvider: false,
         },
+        documentSymbolProvider: true,
+        workspaceSymbolProvider: true,
         workspace: {
           workspaceFolders: {
             changeNotifications: true,
