@@ -322,8 +322,6 @@ export class Handlers {
   async onWorkspaceSymbol(
     _params: WorkspaceSymbolParams,
   ): Promise<SymbolInformation[] | undefined> {
-    this.logger.info(`symbols: ${this.symbolsManager.getSymbols()?.length}`)
-
     return this.symbolsManager.getSymbols()
   }
 
