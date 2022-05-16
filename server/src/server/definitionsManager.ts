@@ -2,8 +2,8 @@ import { sync as glob } from "glob"
 import { DefinitionLink, Logger, URI, WorkspaceFolder } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { getDefinitions } from "@/postgres/parsers/getDefinitions"
-import { getStmtements } from "@/postgres/parsers/statement"
+import { parseDefinitions } from "@/postgres/parsers/parseDefinitions"
+import { parseStmtements } from "@/postgres/parsers/statement"
 import { Settings } from "@/settings"
 import { disableLanguageServer } from "@/utilities/disableLanguageServer"
 import { makeDefinitionLinkMarkdown, readTextDocumentFromUri } from "@/utilities/text"
@@ -37,18 +37,18 @@ export class DefinitionsManager {
   ): Promise<DefinitionCandidate[] | undefined> {
     const fileText = document.getText()
 
-    const statements = await getStmtements(fileText)
+    const statements = await parseStmtements(fileText)
     if (statements === undefined) {
       return undefined
     }
 
-    const candidates = getDefinitions(
+    const definitions = parseDefinitions(
       fileText, statements, document.uri, defaultSchema,
     )
 
-    this.updateCandidates(document.uri, candidates)
+    this.updateCandidates(document.uri, definitions)
 
-    return candidates
+    return definitions
   }
 
   async loadWorkspaceDefinitions(

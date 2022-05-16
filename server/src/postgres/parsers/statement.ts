@@ -137,7 +137,7 @@ export interface CreateTableAsStmtRelation {
   relpersistence: string
 }
 
-export async function getStmtements(query: string): Promise<Statement[] | undefined> {
+export async function parseStmtements(query: string): Promise<Statement[] | undefined> {
   try {
     return (await parseQuery(query))?.["stmts"]
   }

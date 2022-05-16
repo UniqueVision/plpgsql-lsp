@@ -3,12 +3,12 @@ import { Range, uinteger } from "vscode-languageserver"
 import { loadSampleFile } from "@/__tests__/helpers/file"
 
 import {
-  getFunctionDefinitions,
-  getTableDefinitions,
-  getTypeDefinitions,
-  getViewDefinitions,
-} from "./getDefinitions"
-import { getStmtements, Statement } from "./statement"
+  parseFunctionDefinitions,
+  parseTableDefinitions,
+  parseTypeDefinitions,
+  parseViewDefinitions,
+} from "./parseDefinitions"
+import { parseStmtements, Statement } from "./statement"
 
 test.each([
   [
@@ -24,11 +24,11 @@ test.each([
     [Range.create(2, 13, 2, 34)],
   ],
 ])(
-  'getTableDefinitions <- "%s"',
+  'parseTableDefinitions <- "%s"',
   async (file, expected) => {
     const fileText = loadSampleFile(file)
-    const statements = getTableDefinitions(
-      fileText, await getStmtement(fileText, 1), `file://${file}`, "public",
+    const statements = parseTableDefinitions(
+      fileText, await parseStmtement(fileText, 1), `file://${file}`, "public",
     )
 
     expect(
@@ -53,10 +53,10 @@ test.each([
     [Range.create(2, 12, 2, 41)],
   ],
 ])(
-  'getViewDefinitions <- "%s"', async (file, expected) => {
+  'parseViewDefinitions <- "%s"', async (file, expected) => {
     const fileText = loadSampleFile(file)
-    const statements = getViewDefinitions(
-      fileText, await getStmtement(fileText, 1), `file://${file}`, "public",
+    const statements = parseViewDefinitions(
+      fileText, await parseStmtement(fileText, 1), `file://${file}`, "public",
     )
 
     expect(
@@ -73,10 +73,10 @@ test.each([
     Array(2).fill(Range.create(2, 12, 2, 21)),
   ],
 ])(
-  'getTypeDefinitions <- "%s"', async (file, expected) => {
+  'parseTypeDefinitions <- "%s"', async (file, expected) => {
     const fileText = loadSampleFile(file)
-    const statements = getTypeDefinitions(
-      fileText, await getStmtement(fileText, 1), `file://${file}`, "public",
+    const statements = parseTypeDefinitions(
+      fileText, await parseStmtement(fileText, 1), `file://${file}`, "public",
     )
 
     expect(
@@ -93,11 +93,11 @@ test.each([
     Array(2).fill(Range.create(2, 16, 2, 32)),
   ],
 ])(
-  'getFunctionDefinitions <- "%s"',
+  'parseFunctionDefinitions <- "%s"',
   async (file, expected) => {
     const fileText = loadSampleFile(file)
-    const statements = getFunctionDefinitions(
-      fileText, await getStmtement(fileText, 1), `file://${file}`, "public",
+    const statements = parseFunctionDefinitions(
+      fileText, await parseStmtement(fileText, 1), `file://${file}`, "public",
     )
 
     expect(
@@ -109,6 +109,6 @@ test.each([
 )
 
 
-async function getStmtement(fileText: string, index: uinteger): Promise<Statement> {
-  return ((await getStmtements(fileText)) || [])[index]
+async function parseStmtement(fileText: string, index: uinteger): Promise<Statement> {
+  return ((await parseStmtements(fileText)) || [])[index]
 }

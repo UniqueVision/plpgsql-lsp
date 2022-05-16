@@ -11,14 +11,17 @@ import {
   Diagnostic,
   DidChangeConfigurationParams,
   DidChangeWatchedFilesParams,
+  DocumentSymbolParams,
   ExecuteCommandParams,
   FileChangeType,
   Hover,
   HoverParams,
   Logger,
+  SymbolInformation,
   TextDocumentChangeEvent,
   TextDocumentIdentifier,
   TextDocuments,
+  WorkspaceSymbolParams,
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
@@ -34,6 +37,7 @@ import {
   getDefinitionLinks,
 } from "@/services/definition"
 import { getHover } from "@/services/hover"
+import { getDocumentSymbols } from "@/services/symbol"
 import { validateTextDocument } from "@/services/validation"
 import { Settings } from "@/settings"
 import {
@@ -41,6 +45,7 @@ import {
 } from "@/utilities/disableLanguageServer"
 
 import { CommandExecuter } from "./commandExecuter"
+import { SymbolsManager } from "./symbolsManager"
 
 
 export type HandlersOptions = {
@@ -54,6 +59,7 @@ export class Handlers {
     private readonly documents: TextDocuments<TextDocument>,
     private readonly settingsManager: SettingsManager,
     private readonly definitionsManager: DefinitionsManager,
+    private readonly symbolsManager: SymbolsManager,
     private readonly commaneExecuter: CommandExecuter,
     private readonly options: HandlersOptions,
     private readonly logger: Logger,
@@ -73,8 +79,10 @@ export class Handlers {
     this.connection.onDidChangeWatchedFiles(
       (params) => this.onDidChangeWatchedFiles(params),
     )
+    this.connection.onDocumentSymbol((params) => this.onDocumentSymbol(params))
     this.connection.onExecuteCommand((params) => this.onExecuteCommand(params))
     this.connection.onHover((params) => this.onHover(params))
+    this.connection.onWorkspaceSymbol((params) => this.onWorkspaceSymbol(params))
   }
 
   async onDidChangeContent(
@@ -118,6 +126,22 @@ export class Handlers {
 
       this.logger.log("The definitions have been loaded!! 👍")
     }
+
+    if (!this.symbolsManager.hasWorkspaceFolder(workspaceFolder)) {
+      const settings = await this.settingsManager.get(event.document.uri)
+
+      this.logger.log(
+        `The "${workspaceFolder.name}" workspace symbols are loading...`,
+      )
+
+      await this.symbolsManager.loadWorkspaceSymbols(
+        workspaceFolder,
+        settings,
+        this.logger,
+      )
+
+      this.logger.log("The symbols have been loaded!! 👍")
+    }
   }
 
   async onDidSave(
@@ -148,6 +172,27 @@ export class Handlers {
 
         this.logger.log(
           `The file definitions have been updated!! 😎 ${JSON.stringify(definitions)}`,
+        )
+      }
+    }
+
+    if (
+      this.symbolsManager.hasFileSymbols(document.uri)
+      || await this.settingsManager.isDefinitionTarget(document.uri)
+    ) {
+      const settings = await this.settingsManager.get(document.uri)
+
+      this.logger.log("The file definitions are updating...")
+
+      const symbols = await this.symbolsManager.updateFileSymbols(
+        document, settings.defaultSchema,
+      )
+
+      if (symbols !== undefined) {
+        const symbolNames = symbols.map(symbol => symbol.name)
+
+        this.logger.log(
+          `The file symbols have been updated!! 😎 ${JSON.stringify(symbolNames)}`,
         )
       }
     }
@@ -233,6 +278,18 @@ export class Handlers {
     }
   }
 
+  async onDocumentSymbol(
+    params: DocumentSymbolParams,
+  ): Promise<SymbolInformation[] | undefined> {
+    const document = this.documents.get(params.textDocument.uri)
+    if (document === undefined || disableLanguageServer(document)) {
+      return undefined
+    }
+    const settings = await this.settingsManager.get(document.uri)
+
+    return getDocumentSymbols(document, settings)
+  }
+
   async onExecuteCommand(params: ExecuteCommandParams): Promise<void> {
     try {
       await this.commaneExecuter.execute(params)
@@ -260,6 +317,12 @@ export class Handlers {
           this.logger,
         ),
     )
+  }
+
+  async onWorkspaceSymbol(
+    _params: WorkspaceSymbolParams,
+  ): Promise<SymbolInformation[] | undefined> {
+    return this.symbolsManager.getSymbols()
   }
 
   async validate(

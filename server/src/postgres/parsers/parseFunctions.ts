@@ -3,7 +3,7 @@ import { Logger, URI } from "vscode-languageserver"
 import {
   QueryParameterInfo, sanitizeFileWithQueryParameters,
 } from "@/postgres/parameters"
-import { getStmtements, Statement } from "@/postgres/parsers/statement"
+import { parseStmtements, Statement } from "@/postgres/parsers/statement"
 import { readFileFromUri } from "@/utilities/text"
 
 export interface FunctionInfo {
@@ -11,7 +11,7 @@ export interface FunctionInfo {
   location: number | undefined,
 }
 
-export async function getFunctions(
+export async function parseFunctions(
   uri: URI,
   queryParameterInfo: QueryParameterInfo | null,
   logger: Logger,
@@ -25,7 +25,7 @@ export async function getFunctions(
     fileText, queryParameterInfo, logger,
   )
 
-  const stmtements = await getStmtements(sanitizedFileText)
+  const stmtements = await parseStmtements(sanitizedFileText)
   if (stmtements === undefined) {
     return []
   }

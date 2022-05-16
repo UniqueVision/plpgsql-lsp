@@ -7,6 +7,7 @@
 
 - complete definitions.
 - go to definition.
+- go to document/workspace symbols.
 - hover the definition.
 - check syntax errors.
 - check static analysis errors (when [plpgsql_check](https://github.com/okbob/plpgsql_check) use) .
