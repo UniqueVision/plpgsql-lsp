@@ -4,8 +4,37 @@ import {
   URI,
 } from "vscode-languageserver"
 
+import { PostgresKind } from "@/postgres/kind"
 import { parseStmtements, Statement } from "@/postgres/parsers/statement"
+import { neverReach } from "@/utilities/neverReach"
 import { findIndexFromBuffer, getRangeFromBuffer } from "@/utilities/text"
+
+function convertToSymbleKind(kind: PostgresKind): SymbolKind {
+  switch (kind) {
+    case PostgresKind.Schema:
+      return SymbolKind.Module
+    case PostgresKind.Table:
+      return SymbolKind.Class
+    case PostgresKind.View:
+      return SymbolKind.Class
+    case PostgresKind.MaterializedView:
+      return SymbolKind.Class
+    case PostgresKind.Type:
+      return SymbolKind.Struct
+    case PostgresKind.Domain:
+      return SymbolKind.Struct
+    case PostgresKind.Index:
+      return SymbolKind.Struct
+    case PostgresKind.Function:
+      return SymbolKind.Function
+    case PostgresKind.Trigger:
+      return SymbolKind.Event
+    default: {
+      const unknownKind: never = kind
+      neverReach( `"${unknownKind}" is unknown "PostgresKind".` )
+    }
+  }
+}
 
 export async function parseDocumentSymbols(
   fileText: string,
@@ -74,7 +103,7 @@ export function parseTableDocumentSymbols(
   return [
     {
       name: `${schemaName}.${relationName}`,
-      kind: SymbolKind.Class,
+      kind: convertToSymbleKind(PostgresKind.Table),
       location: {
         uri: uri,
         range: getRangeFromBuffer(
@@ -106,7 +135,7 @@ export function parseViewDocumentSymbols(
   return [
     {
       name: `${schemaName}.${relationName}`,
-      kind: SymbolKind.Class,
+      kind: convertToSymbleKind(PostgresKind.View),
       location: {
         uri,
         range: getRangeFromBuffer(
@@ -137,7 +166,7 @@ export function parseTypeDocumentSymbols(
   return [
     {
       name: `${schemaName}.${relationName}`,
-      kind: SymbolKind.Struct,
+      kind: convertToSymbleKind(PostgresKind.Type),
       location: {
         uri, range: getRangeFromBuffer(
           fileText,
@@ -187,7 +216,7 @@ export function parseDomainDocumentSymbols(
   return [
     {
       name: `${schemaName}.${domainName}`,
-      kind: SymbolKind.Struct,
+      kind: convertToSymbleKind(PostgresKind.Domain),
       location: {
         uri,
         range: getRangeFromBuffer(
@@ -238,7 +267,7 @@ export function parseFunctionDocumentSymbols(
   return [
     {
       name: `${schemaName}.${functionName}`,
-      kind: SymbolKind.Function,
+      kind: convertToSymbleKind(PostgresKind.Function),
       location: {
         uri,
         range: getRangeFromBuffer(
@@ -269,7 +298,7 @@ export function parseIndexDocumentSymbols(
   return [
     {
       name: indexName,
-      kind: SymbolKind.Struct,
+      kind: convertToSymbleKind(PostgresKind.Index),
       location: {
         uri,
         range: getRangeFromBuffer(
@@ -300,7 +329,7 @@ export function parseTriggerDocumentSymbols(
   return [
     {
       name: triggerName,
-      kind: SymbolKind.Event,
+      kind: convertToSymbleKind(PostgresKind.Trigger),
       location: {
         uri,
         range: getRangeFromBuffer(
@@ -333,7 +362,7 @@ export function parseMaterializedViewDocumentSymbols(
   return [
     {
       name: `${schemaName}.${viewName}`,
-      kind: SymbolKind.Class,
+      kind: convertToSymbleKind(PostgresKind.MaterializedView),
       location: {
         uri,
         range: getRangeFromBuffer(
