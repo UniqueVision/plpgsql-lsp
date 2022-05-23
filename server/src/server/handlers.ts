@@ -1,3 +1,4 @@
+import { sync as glob } from "glob"
 import {
   CodeAction,
   CodeActionParams,
@@ -21,6 +22,7 @@ import {
   TextDocumentChangeEvent,
   TextDocumentIdentifier,
   TextDocuments,
+  URI,
   WorkspaceSymbolParams,
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
@@ -43,6 +45,7 @@ import { Settings } from "@/settings"
 import {
   disableLanguageServer, disableValidation,
 } from "@/utilities/disableLanguageServer"
+import { readTextDocumentFromUri } from "@/utilities/text"
 
 import { CommandExecuter } from "./commandExecuter"
 import { SymbolsManager } from "./symbolsManager"
@@ -53,6 +56,8 @@ export type HandlersOptions = {
 }
 
 export class Handlers {
+  private workspaceFolderUris: Set<URI> = new Set()
+
   constructor(
     private readonly connection: Connection,
     private readonly pgPools: PostgresPoolMap,
@@ -111,36 +116,54 @@ export class Handlers {
       return
     }
 
-    if (!this.definitionsManager.hasWorkspaceFolder(workspaceFolder)) {
+    if (!this.workspaceFolderUris.has(workspaceFolder.uri)) {
+      this.workspaceFolderUris.add(workspaceFolder.uri)
+
       const settings = await this.settingsManager.get(event.document.uri)
 
+      const files = [
+        ...new Set(
+          settings.definitionFiles.flatMap((filePattern) => glob(filePattern)),
+        ),
+      ]
       this.logger.log(
-        `The "${workspaceFolder.name}" workspace definitions are loading...`,
+        `The "${workspaceFolder.name}" workspace definitions/symbols are loading...`,
       )
 
-      await this.definitionsManager.loadWorkspaceDefinitions(
-        workspaceFolder,
-        settings,
-        this.logger,
-      )
+      for (const file of files) {
+        const documentUri = `${workspaceFolder.uri}/${file}`
+        const document = readTextDocumentFromUri(documentUri)
 
-      this.logger.log("The definitions have been loaded!! 👍")
-    }
+        if (disableLanguageServer(document)) {
+          continue
+        }
 
-    if (!this.symbolsManager.hasWorkspaceFolder(workspaceFolder)) {
-      const settings = await this.settingsManager.get(event.document.uri)
+        try {
+          await this.definitionsManager.updateFileDefinitions(
+            document, settings.defaultSchema,
+          )
+        }
+        catch (error: unknown) {
+          this.logger.error(
+            `The definitions of "${documentUri}" cannot load.`
+          + ` ${(error as Error).message}`,
+          )
+        }
 
-      this.logger.log(
-        `The "${workspaceFolder.name}" workspace symbols are loading...`,
-      )
+        try {
+          await this.symbolsManager.updateFileSymbols(
+            document, settings.defaultSchema,
+          )
+        }
+        catch (error: unknown) {
+          this.logger.error(
+            `The symbols of "${documentUri}" cannot load.`
+          + ` ${(error as Error).message}`,
+          )
+        }
+      }
 
-      await this.symbolsManager.loadWorkspaceSymbols(
-        workspaceFolder,
-        settings,
-        this.logger,
-      )
-
-      this.logger.log("The symbols have been loaded!! 👍")
+      this.logger.log("The definitions/symbols have been loaded!! 👍")
     }
   }
 
