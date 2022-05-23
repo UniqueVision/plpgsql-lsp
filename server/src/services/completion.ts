@@ -42,32 +42,6 @@ import {
   isFirstCommentLine,
 } from "@/utilities/text"
 
-function convertToCompletionItemKind(kind: PostgresKind): CompletionItemKind {
-  switch (kind) {
-    case PostgresKind.Schema:
-      return CompletionItemKind.Module
-    case PostgresKind.Table:
-      return CompletionItemKind.Class
-    case PostgresKind.View:
-      return CompletionItemKind.Class
-    case PostgresKind.MaterializedView:
-      return CompletionItemKind.Class
-    case PostgresKind.Type:
-      return CompletionItemKind.Struct
-    case PostgresKind.Domain:
-      return CompletionItemKind.Struct
-    case PostgresKind.Index:
-      return CompletionItemKind.Struct
-    case PostgresKind.Function:
-      return CompletionItemKind.Function
-    case PostgresKind.Trigger:
-      return CompletionItemKind.Event
-    default: {
-      const unknownKind: never = kind
-      neverReach( `"${unknownKind}" is unknown "PostgresKind".` )
-    }
-  }
-}
 export async function getCompletionItems(
   pgPool: PostgresPool,
   document: TextDocument,
@@ -114,6 +88,33 @@ export async function getCompletionItems(
         return item
       },
     )
+}
+
+function convertToCompletionItemKind(kind: PostgresKind): CompletionItemKind {
+  switch (kind) {
+    case PostgresKind.Schema:
+      return CompletionItemKind.Module
+    case PostgresKind.Table:
+      return CompletionItemKind.Class
+    case PostgresKind.View:
+      return CompletionItemKind.Class
+    case PostgresKind.MaterializedView:
+      return CompletionItemKind.Class
+    case PostgresKind.Type:
+      return CompletionItemKind.Struct
+    case PostgresKind.Domain:
+      return CompletionItemKind.Struct
+    case PostgresKind.Index:
+      return CompletionItemKind.Struct
+    case PostgresKind.Function:
+      return CompletionItemKind.Function
+    case PostgresKind.Trigger:
+      return CompletionItemKind.Event
+    default: {
+      const unknownKind: never = kind
+      neverReach( `"${unknownKind}" is unknown "PostgresKind".` )
+    }
+  }
 }
 
 function findSchema(
