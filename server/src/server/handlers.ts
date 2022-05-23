@@ -1,4 +1,4 @@
-import { sync as glob } from "glob"
+import glob from "glob-promise"
 import {
   CodeAction,
   CodeActionParams,
@@ -45,6 +45,7 @@ import { Settings } from "@/settings"
 import {
   disableLanguageServer, disableValidation,
 } from "@/utilities/disableLanguageServer"
+import { asyncFlatMap } from "@/utilities/functool"
 import { readTextDocumentFromUri } from "@/utilities/text"
 
 import { CommandExecuter } from "./commandExecuter"
@@ -123,16 +124,19 @@ export class Handlers {
 
       const files = [
         ...new Set(
-          settings.definitionFiles.flatMap((filePattern) => glob(filePattern)),
+          await asyncFlatMap(
+            settings.definitionFiles,
+            (filePattern) => glob.promise(filePattern),
+          ),
         ),
       ]
+
       this.logger.log(
         `The "${workspaceFolder.name}" workspace definitions/symbols are loading...`,
       )
 
       for (const file of files) {
-        const documentUri = `${workspaceFolder.uri}/${file}`
-        const document = readTextDocumentFromUri(documentUri)
+        const document = readTextDocumentFromUri(`${workspaceFolder.uri}/${file}`)
 
         if (disableLanguageServer(document)) {
           continue
@@ -145,7 +149,7 @@ export class Handlers {
         }
         catch (error: unknown) {
           this.logger.error(
-            `The definitions of "${documentUri}" cannot load.`
+            `The definitions of "${document.uri}" cannot load.`
           + ` ${(error as Error).message}`,
           )
         }
@@ -157,7 +161,7 @@ export class Handlers {
         }
         catch (error: unknown) {
           this.logger.error(
-            `The symbols of "${documentUri}" cannot load.`
+            `The symbols of "${document.uri}" cannot load.`
           + ` ${(error as Error).message}`,
           )
         }
