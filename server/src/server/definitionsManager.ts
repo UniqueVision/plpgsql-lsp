@@ -2,8 +2,7 @@ import { sync as glob } from "glob"
 import { DefinitionLink, Logger, URI, WorkspaceFolder } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { parseDefinitions } from "@/postgres/parsers/parseDefinitions"
-import { parseStmtements } from "@/postgres/parsers/statement"
+import { parseDefinitions } from "@/services/definition"
 import { Settings } from "@/settings"
 import { disableLanguageServer } from "@/utilities/disableLanguageServer"
 import { makeDefinitionLinkMarkdown, readTextDocumentFromUri } from "@/utilities/text"
@@ -37,14 +36,13 @@ export class DefinitionsManager {
   ): Promise<DefinitionCandidate[] | undefined> {
     const fileText = document.getText()
 
-    const statements = await parseStmtements(fileText)
-    if (statements === undefined) {
+
+    const definitions = await parseDefinitions(
+      fileText, document.uri, defaultSchema,
+    )
+    if (definitions === undefined) {
       return undefined
     }
-
-    const definitions = parseDefinitions(
-      fileText, statements, document.uri, defaultSchema,
-    )
 
     this.updateCandidates(document.uri, definitions)
 

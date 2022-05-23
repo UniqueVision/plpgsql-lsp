@@ -2,7 +2,7 @@ import { sync as glob } from "glob"
 import { Logger, SymbolInformation, URI, WorkspaceFolder } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { parseDocumentSymbols } from "@/postgres/parsers/parseSymbols"
+import { parseDocumentSymbols } from "@/services/symbol"
 import { Settings } from "@/settings"
 import { disableLanguageServer } from "@/utilities/disableLanguageServer"
 import { readTextDocumentFromUri } from "@/utilities/text"
