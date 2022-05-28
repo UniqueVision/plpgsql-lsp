@@ -51,7 +51,7 @@ describe("Definition Tests", () => {
   async function onDocumentSymbol(
     documentUri: URI,
   ): Promise<SymbolInformation[] | undefined> {
-    const textDocument = loadSampleTextDocument(documentUri);
+    const textDocument = await loadSampleTextDocument(documentUri);
 
     (server.documents as TestTextDocuments).set(textDocument)
 

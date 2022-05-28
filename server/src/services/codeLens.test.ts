@@ -25,7 +25,7 @@ describe("CodeLens Tests", () => {
     file: string,
     options: LoadFileOptions = DEFAULT_LOAD_FILE_OPTIONS,
   ): Promise<[CodeLens[] | undefined, TextDocument]> {
-    const document = loadSampleTextDocument(
+    const document = await loadSampleTextDocument(
       file,
       options,
     );

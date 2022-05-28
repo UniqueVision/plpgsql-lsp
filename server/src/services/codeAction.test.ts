@@ -25,7 +25,7 @@ describe("CodeAction Tests", () => {
     file: string,
     options: LoadFileOptions = DEFAULT_LOAD_FILE_OPTIONS,
   ): Promise<[CodeAction[] | undefined, TextDocument]> {
-    const document = loadSampleTextDocument(
+    const document = await loadSampleTextDocument(
       file,
       options,
     );

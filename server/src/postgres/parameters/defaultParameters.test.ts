@@ -16,7 +16,7 @@ export type DefaultQueryParametersInfo = {
 describe("Default Query Parameter Tests", () => {
   describe("Keyword Parameter Tests", function () {
     it("Check sanitized query length.", async () => {
-      const document = loadSampleTextDocument(
+      const document = await loadSampleTextDocument(
         "queries/correct_query_with_default_keyword_parameter.pgsql",
         { skipDisableComment: true },
       )

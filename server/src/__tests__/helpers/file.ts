@@ -1,4 +1,4 @@
-import { readFileSync } from "fs"
+import { promises } from "fs"
 import path from "path"
 import { URI } from "vscode-languageserver"
 
@@ -15,11 +15,13 @@ export function getSampleFileResource(file: string): URI {
   return `file://${path.join(sampleDirPath(), file)}`
 }
 
-export function loadSampleFile(
+export async function loadSampleFile(
   filename: string,
   options: LoadFileOptions = DEFAULT_LOAD_FILE_OPTIONS,
-): string {
-  const fileText = readFileSync(path.join(sampleDirPath(), filename)).toString()
+): Promise<string> {
+  const fileText = (
+    await promises.readFile(path.join(sampleDirPath(), filename))
+  ).toString()
   if (options.skipDisableComment) {
     return skipDisableComment(fileText)
   }
