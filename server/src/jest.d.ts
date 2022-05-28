@@ -1,4 +1,4 @@
-import { CompletionItem } from "vscode-languageserver"
+import { CompletionItem, URI } from "vscode-languageserver"
 
 declare global {
   namespace jest {
@@ -9,6 +9,10 @@ declare global {
 
       toHoverCodeEqual(
         expectedCode: string,
+      ): R
+
+      toDefinitionUriEqual(
+        expectedUir: URI,
       ): R
     }
   }

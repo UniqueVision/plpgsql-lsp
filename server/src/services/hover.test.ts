@@ -120,6 +120,7 @@ describe("Hover Tests", () => {
     it("Hover on table with default schema", async () => {
       updateFileDefinitions("definitions/table/public_users.pgsql")
       updateFileDefinitions("definitions/trigger/user_update.pgsql")
+      updateFileDefinitions("definitions/index/users_id_name_index.pgsql")
 
       const hover = await onHover("public.users")
 
@@ -154,7 +155,7 @@ describe("Hover Tests", () => {
       )
     })
 
-    it("Hover on table with exclude index", async () => {
+    it("Hover on table without index", async () => {
       updateFileDefinitions("definitions/table/schedule.pgsql")
 
       const hover = await onHover("schedule")
@@ -203,7 +204,9 @@ describe("Hover Tests", () => {
       )
     })
 
-    it("Hover on table with empty column", async () => {
+    it("Hover on empty column table", async () => {
+      updateFileDefinitions("definitions/table/empty_table.pgsql")
+
       const hover = await onHover("empty_table")
 
       expect(hover).toHoverCodeEqual(
@@ -216,6 +219,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on view", async () => {
+      updateFileDefinitions("definitions/view/deleted_users.pgsql")
+
       const hover = await onHover("deleted_users")
 
       expect(hover).toHoverCodeEqual(
@@ -228,6 +233,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on view with default schema", async () => {
+      updateFileDefinitions("definitions/view/deleted_users.pgsql")
+
       const hover = await onHover("public.deleted_users")
 
       expect(hover).toHoverCodeEqual(
@@ -240,6 +247,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on view with non-default schema", async () => {
+      updateFileDefinitions("definitions/view/campaign_deleted_participants.pgsql")
+
       const hover = await onHover("campaign.deleted_participants")
 
       expect(hover).toHoverCodeEqual(
@@ -252,6 +261,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on materialized view", async () => {
+      updateFileDefinitions("definitions/materialized_view/my_users.pgsql")
+
       const hover = await onHover("my_users")
 
       expect(hover).toHoverCodeEqual(
@@ -264,6 +275,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on positional argument function", async () => {
+      updateFileDefinitions("definitions/function/positional_argument_function.pgsql")
+
       const hover = await onHover("positional_argument_function")
 
       expect(hover).toHoverCodeEqual(
@@ -282,6 +295,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on positional argument function with default schema", async () => {
+      updateFileDefinitions("definitions/function/positional_argument_function.pgsql")
+
       const hover = await onHover("public.positional_argument_function")
 
       expect(hover).toHoverCodeEqual(
@@ -300,6 +315,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on keyword argument function", async () => {
+      updateFileDefinitions("definitions/function/keyword_argument_function.pgsql")
+
       const hover = await onHover("keyword_argument_function")
 
       expect(hover).toHoverCodeEqual(
@@ -339,6 +356,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on proceduren", async () => {
+      updateFileDefinitions("definitions/procedure/correct_procedure.pgsql")
+
       const hover = await onHover("correct_procedure")
 
       expect(hover).toHoverCodeEqual(
@@ -356,6 +375,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on constant function", async () => {
+      updateFileDefinitions("definitions/function/constant_function.pgsql")
+
       const hover = await onHover("constant_function")
 
       expect(hover).toHoverCodeEqual(
@@ -371,6 +392,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on type", async () => {
+      updateFileDefinitions("definitions/type/type_user.pgsql")
+
       const hover = await onHover("type_user")
 
       expect(hover).toHoverCodeEqual(
@@ -386,6 +409,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on type with default schema", async () => {
+      updateFileDefinitions("definitions/type/type_user.pgsql")
+
       const hover = await onHover("public.type_user")
 
       expect(hover).toHoverCodeEqual(
@@ -401,6 +426,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on the single field type", async () => {
+      updateFileDefinitions("definitions/type/type_single_field.pgsql")
+
       const hover = await onHover("type_single_field")
 
       expect(hover).toHoverCodeEqual(
@@ -415,6 +442,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on type with empty column", async () => {
+      updateFileDefinitions("definitions/type/type_empty.pgsql")
+
       const hover = await onHover("public.type_empty")
 
       expect(hover).toHoverCodeEqual(
@@ -427,6 +456,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on domain", async () => {
+      updateFileDefinitions("definitions/domain/us_postal_code.pgsql")
+
       const hover = await onHover("us_postal_code")
 
       expect(hover).toHoverCodeEqual(
@@ -439,6 +470,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on domain with default schema", async () => {
+      updateFileDefinitions("definitions/domain/jp_postal_code.pgsql")
+
       const hover = await onHover("public.jp_postal_code")
 
       expect(hover).toHoverCodeEqual(
@@ -451,6 +484,8 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on index", async () => {
+      updateFileDefinitions("definitions/table/public_users.pgsql")
+
       const hover = await onHover("users_id_name_index")
 
       expect(hover).toHoverCodeEqual(

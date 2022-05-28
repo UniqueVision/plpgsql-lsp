@@ -113,7 +113,7 @@ describe("Completion Tests", () => {
       )
     })
 
-    it("Completion on table with exclude index", async () => {
+    it("Completion on table without index", async () => {
       const completions = await onCompletion(
         "schedule", Position.create(1, 1),
       )
@@ -152,7 +152,7 @@ describe("Completion Tests", () => {
       )
     })
 
-    it("Completion on table with empty column", async () => {
+    it("Completion on empty column table", async () => {
       const completions = await onCompletion(
         "empty_table", Position.create(1, 1),
       )
