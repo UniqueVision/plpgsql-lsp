@@ -95,7 +95,7 @@ describe("Definition Tests", () => {
       "definitions/domain/jp_postal_code.pgsql",
       "definitions/index/users_id_name_index.pgsql",
     ])(
-      "can go to definition (%s)", async (source) => {
+      "can go to symbol (%s)", async (source) => {
         const documentUri = getSampleFileResource(source)
         const definition = await onDocumentSymbol(source)
 
