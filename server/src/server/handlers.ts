@@ -144,6 +144,7 @@ export class Handlers {
           continue
         }
 
+        // Load File Definitions.
         try {
           await this.definitionsManager.updateFileDefinitions(
             document, settings.defaultSchema,
@@ -156,6 +157,7 @@ export class Handlers {
           )
         }
 
+        // Load File Symbols.
         try {
           await this.symbolsManager.updateFileSymbols(
             document, settings.defaultSchema,
@@ -187,6 +189,7 @@ export class Handlers {
 
     await this.validate(document, { isComplete: true })
 
+    // Update File Definitions.
     if (
       this.definitionsManager.hasFileDefinitions(document.uri)
       || await this.settingsManager.isDefinitionTarget(document.uri)
@@ -208,6 +211,7 @@ export class Handlers {
       }
     }
 
+    // Update File Symbols.
     if (
       this.symbolsManager.hasFileSymbols(document.uri)
       || await this.settingsManager.isDefinitionTarget(document.uri)
