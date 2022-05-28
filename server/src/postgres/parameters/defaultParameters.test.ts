@@ -1,6 +1,6 @@
 import { NullLogger } from "vscode-languageserver"
 
-import { makeSampleTextDocument } from "@/__tests__/helpers/textDocuments"
+import { loadSampleTextDocument } from "@/__tests__/helpers/textDocuments"
 import { neverReach } from "@/utilities/neverReach"
 
 import {
@@ -16,7 +16,7 @@ export type DefaultQueryParametersInfo = {
 describe("Default Query Parameter Tests", () => {
   describe("Keyword Parameter Tests", function () {
     it("Check sanitized query length.", async () => {
-      const document = makeSampleTextDocument(
+      const document = loadSampleTextDocument(
         "queries/correct_query_with_default_keyword_parameter.pgsql",
         { skipDisableComment: true },
       )

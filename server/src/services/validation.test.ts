@@ -4,7 +4,7 @@ import { DEFAULT_LOAD_FILE_OPTIONS, LoadFileOptions } from "@/__tests__/helpers/
 import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
 import {
-  makeSampleTextDocument,
+  loadSampleTextDocument,
   TestTextDocuments,
 } from "@/__tests__/helpers/textDocuments"
 import {
@@ -25,7 +25,7 @@ describe("Validate Tests", () => {
     file: string,
     options: LoadFileOptions = DEFAULT_LOAD_FILE_OPTIONS,
   ): Promise<Diagnostic[] | undefined> {
-    const document = makeSampleTextDocument(
+    const document = loadSampleTextDocument(
       file,
       options,
     );

@@ -3,17 +3,13 @@ import { CompletionItem, URI } from "vscode-languageserver"
 declare global {
   namespace jest {
     interface Matchers<R> {
-      completionItemContaining(
-        expected: CompletionItem,
-      ): R
+      completionItemContaining(expected: CompletionItem): R
 
-      toHoverCodeEqual(
-        expectedCode: string,
-      ): R
+      toHoverCodeEqual(expectedCode: string): R
 
-      toDefinitionUriEqual(
-        expectedUir: URI,
-      ): R
+      toDefinitionUriEqual(expectedUri: URI): R
+
+      toSymbolUriEqual(expectedUri: URI): R
     }
   }
 }

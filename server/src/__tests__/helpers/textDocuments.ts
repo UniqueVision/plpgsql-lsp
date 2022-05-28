@@ -22,7 +22,7 @@ export class TestTextDocuments extends TextDocuments<TextDocument> {
   }
 }
 
-export function makeSampleTextDocument(
+export function loadSampleTextDocument(
   file: string,
   options: LoadFileOptions = DEFAULT_LOAD_FILE_OPTIONS,
 ): TextDocument {

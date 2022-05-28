@@ -6,7 +6,7 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
 import {
-  makeSampleTextDocument,
+  loadSampleTextDocument,
   TestTextDocuments,
 } from "@/__tests__/helpers/textDocuments"
 import { Server } from "@/server"
@@ -70,7 +70,7 @@ describe("Hover Tests", () => {
 
   function updateFileDefinitions(targetFile: string) {
     server.definitionsManager.updateFileDefinitions(
-      makeSampleTextDocument(targetFile),
+      loadSampleTextDocument(targetFile),
       settings.defaultSchema,
     )
   }
