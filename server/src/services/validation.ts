@@ -4,12 +4,8 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 import { PostgresPool } from "@/postgres"
 import { QueryParameterInfo } from "@/postgres/parameters"
 import { parseFunctions } from "@/postgres/parsers/parseFunctions"
-import {
-  queryFileStaticAnalysis,
-} from "@/postgres/queries/queryFileStaticAnalysis"
-import {
-  queryFileSyntaxAnalysis,
-} from "@/postgres/queries/queryFileSyntaxAnalysis"
+import { queryFileStaticAnalysis } from "@/postgres/queries/queryFileStaticAnalysis"
+import { queryFileSyntaxAnalysis } from "@/postgres/queries/queryFileSyntaxAnalysis"
 
 type ValidateTextDocumentOptions = {
   isComplete: boolean,

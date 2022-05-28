@@ -1,6 +1,4 @@
-import {
-  SymbolInformation, SymbolKind, URI,
-} from "vscode-languageserver"
+import { SymbolInformation, SymbolKind, URI } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { PostgresKind } from "@/postgres/kind"
