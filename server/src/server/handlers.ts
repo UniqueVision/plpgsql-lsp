@@ -1,4 +1,5 @@
 import glob from "glob-promise"
+import dedent from "ts-dedent"
 import {
   CodeAction,
   CodeActionParams,
@@ -131,12 +132,13 @@ export class Handlers {
         ),
       ]
 
-      this.logger.log(
-        `The "${workspaceFolder.name}" workspace definitions/symbols are loading...`,
-      )
+      this.logger.log(dedent`
+        The "${workspaceFolder.name}" workspace definitions are loading...
+        The "${workspaceFolder.name}" workspace symbols are loading...
+      `)
 
       for (const file of files) {
-        const document = readTextDocumentFromUri(`${workspaceFolder.uri}/${file}`)
+        const document = await readTextDocumentFromUri(`${workspaceFolder.uri}/${file}`)
 
         if (disableLanguageServer(document)) {
           continue
@@ -167,7 +169,10 @@ export class Handlers {
         }
       }
 
-      this.logger.log("The definitions/symbols have been loaded!! 👍")
+      this.logger.log(dedent`
+        The definitions have been loaded!! 👍
+        The symbols have been loaded!! 👍
+      `)
     }
   }
 

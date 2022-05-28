@@ -1,4 +1,4 @@
-import { promises } from "fs"
+import { promises as fs } from "fs"
 import path from "path"
 import { URI } from "vscode-languageserver"
 
@@ -20,7 +20,7 @@ export async function loadSampleFile(
   options: LoadFileOptions = DEFAULT_LOAD_FILE_OPTIONS,
 ): Promise<string> {
   const fileText = (
-    await promises.readFile(path.join(sampleDirPath(), filename))
+    await fs.readFile(path.join(sampleDirPath(), filename))
   ).toString()
   if (options.skipDisableComment) {
     return skipDisableComment(fileText)

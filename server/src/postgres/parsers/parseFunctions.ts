@@ -16,7 +16,7 @@ export async function parseFunctions(
   queryParameterInfo: QueryParameterInfo | null,
   logger: Logger,
 ): Promise<FunctionInfo[]> {
-  const fileText = readFileFromUri(uri)
+  const fileText = await readFileFromUri(uri)
   if (fileText === null) {
     return []
   }

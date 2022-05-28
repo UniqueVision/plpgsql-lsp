@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "fs"
+import { existsSync, promises as fs } from "fs"
 import { Position, Range, uinteger, URI } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
@@ -180,18 +180,18 @@ export function isFirstCommentLine(
   )
 }
 
-export function readFileFromUri(uri: URI): string | null {
+export async function readFileFromUri(uri: URI): Promise<string | null> {
   const filePath = uri.replace(/^file:\/\//, "")
   if (existsSync(filePath)) {
-    return readFileSync(filePath).toString()
+    return (await fs.readFile(filePath)).toString()
   }
   else {
     return null
   }
 }
 
-export function readTextDocumentFromUri(uri: URI): TextDocument {
+export async function readTextDocumentFromUri(uri: URI): Promise<TextDocument> {
   return TextDocument.create(
-    uri, "postgres", 1, readFileFromUri(uri) || "",
+    uri, "postgres", 1, await readFileFromUri(uri) || "",
   )
 }

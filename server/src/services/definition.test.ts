@@ -58,7 +58,7 @@ describe("Definition Tests", () => {
     (server.documents as TestTextDocuments).set(document)
 
     await server.definitionsManager.updateFileDefinitions(
-      readTextDocumentFromUri(documentUri),
+      await readTextDocumentFromUri(documentUri),
       (await server.settingsManager.get(document.uri)).defaultSchema,
     )
 

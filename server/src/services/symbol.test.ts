@@ -56,7 +56,7 @@ describe("Definition Tests", () => {
     (server.documents as TestTextDocuments).set(textDocument)
 
     await server.symbolsManager.updateFileSymbols(
-      readTextDocumentFromUri(documentUri),
+      await readTextDocumentFromUri(documentUri),
       (await server.settingsManager.get(textDocument.uri)).defaultSchema,
     )
 
