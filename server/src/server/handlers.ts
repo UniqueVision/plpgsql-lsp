@@ -148,7 +148,7 @@ export class Handlers {
       this.definitionsManager.hasFileDefinitions(document.uri)
       || await this.settingsManager.isDefinitionTarget(document.uri)
     ) {
-      await this.definitionsManager.updateFileDefinitions(
+      await this.definitionsManager.updateDocumentDefinitions(
         document, settings, this.logger,
       )
     }
@@ -158,7 +158,7 @@ export class Handlers {
       this.symbolsManager.hasFileSymbols(document.uri)
       || await this.settingsManager.isDefinitionTarget(document.uri)
     ) {
-      await this.symbolsManager.updateFileSymbols(
+      await this.symbolsManager.updateDocumentSymbols(
         document, settings, this.logger,
       )
     }

@@ -25,14 +25,14 @@ export class SymbolsManager {
       .sort((a, b) => (a.name > b.name ? -1 : 1))
   }
 
-  async updateFileSymbols(
+  async updateDocumentSymbols(
     document: TextDocument,
     settings: Settings,
     logger: Logger,
   ): Promise<void> {
     logger.log("The file symbols are updating...")
 
-    const symbols = await this.updateDocumentSymbols(document, settings.defaultSchema)
+    const symbols = await this._updateDocumentSymbols(document, settings.defaultSchema)
 
     if (symbols !== undefined) {
       const symbolNames = symbols.map(symbol => symbol.name)
@@ -58,7 +58,7 @@ export class SymbolsManager {
       }
 
       try {
-        await this.updateDocumentSymbols(
+        await this._updateDocumentSymbols(
           document, settings.defaultSchema,
         )
       }
@@ -72,7 +72,7 @@ export class SymbolsManager {
     logger.log("The symbols have been loaded!! 👍")
   }
 
-  private async updateDocumentSymbols(
+  private async _updateDocumentSymbols(
     document: TextDocument,
     defaultSchema: string,
   ): Promise<SymbolInformation[] | undefined> {
