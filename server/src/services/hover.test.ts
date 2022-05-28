@@ -1,5 +1,4 @@
 /* eslint-disable max-len */
-import * as assert from "assert"
 import dedent from "ts-dedent"
 import { Hover, MarkupContent, Position } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
@@ -15,6 +14,33 @@ import { Settings } from "@/settings"
 import { neverReach } from "@/utilities/neverReach"
 import { makeDefinitionLinkMarkdown, makePostgresCodeMarkdown } from "@/utilities/text"
 
+jest.setTimeout(10000)
+
+expect.extend({
+  toHoverCodeEqual(
+    hover: Hover | undefined, expectedCode: string,
+  ) {
+    expect(hover).toBeDefined()
+    if (hover === undefined) neverReach()
+
+    if (MarkupContent.is(hover.contents)
+      && (hover.contents as MarkupContent).kind === "markdown" &&
+      (hover.contents as MarkupContent).value === expectedCode) {
+      return {
+        pass: true,
+        message: () =>
+          `expected not to equal Hover code ${expectedCode}`,
+      }
+    }
+    else {
+      return {
+        pass: false,
+        message: () =>
+          `expected to equal Hover code ${expectedCode}`,
+      }
+    }
+  },
+})
 
 describe("Hover Tests", () => {
   let settings: Settings
@@ -67,28 +93,13 @@ describe("Hover Tests", () => {
     })
   }
 
-  function validateHoverContent(
-    hover: Hover | undefined, expectedCode: string,
-  ) {
-    expect(hover).toBeDefined()
-    if (hover === undefined) neverReach()
-
-    assert.strictEqual(MarkupContent.is(hover.contents), true)
-    assert.strictEqual((hover.contents as MarkupContent).kind, "markdown")
-    assert.strictEqual(
-      (hover.contents as MarkupContent).value,
-      expectedCode,
-    )
-  }
-
   describe("Hover", function () {
     it("Hover on table", async () => {
       updateFileDefinitions("definitions/table/companies.pgsql")
 
       const hover = await onHover("companies")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         dedent`
           \`\`\`postgres
           TABLE public.companies(
@@ -112,8 +123,7 @@ describe("Hover Tests", () => {
 
       const hover = await onHover("public.users")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         dedent`
         \`\`\`postgres
         TABLE public.users(
@@ -149,8 +159,7 @@ describe("Hover Tests", () => {
 
       const hover = await onHover("schedule")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         dedent`
           \`\`\`postgres
           TABLE public.schedule(
@@ -174,8 +183,7 @@ describe("Hover Tests", () => {
 
       const hover = await onHover("campaign.participants")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         dedent`
           \`\`\`postgres
           TABLE campaign.participants(
@@ -198,8 +206,7 @@ describe("Hover Tests", () => {
     it("Hover on table with empty column", async () => {
       const hover = await onHover("empty_table")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             TABLE public.empty_table()
@@ -211,8 +218,7 @@ describe("Hover Tests", () => {
     it("Hover on view", async () => {
       const hover = await onHover("deleted_users")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             VIEW public.deleted_users
@@ -224,8 +230,7 @@ describe("Hover Tests", () => {
     it("Hover on view with default schema", async () => {
       const hover = await onHover("public.deleted_users")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             VIEW public.deleted_users
@@ -237,8 +242,7 @@ describe("Hover Tests", () => {
     it("Hover on view with non-default schema", async () => {
       const hover = await onHover("campaign.deleted_participants")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             VIEW campaign.deleted_participants
@@ -250,8 +254,7 @@ describe("Hover Tests", () => {
     it("Hover on materialized view", async () => {
       const hover = await onHover("my_users")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             MATERIALIZED VIEW public.my_users
@@ -263,8 +266,7 @@ describe("Hover Tests", () => {
     it("Hover on positional argument function", async () => {
       const hover = await onHover("positional_argument_function")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             FUNCTION public.positional_argument_function(
@@ -282,8 +284,7 @@ describe("Hover Tests", () => {
     it("Hover on positional argument function with default schema", async () => {
       const hover = await onHover("public.positional_argument_function")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             FUNCTION public.positional_argument_function(
@@ -301,8 +302,7 @@ describe("Hover Tests", () => {
     it("Hover on keyword argument function", async () => {
       const hover = await onHover("keyword_argument_function")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             FUNCTION public.keyword_argument_function(
@@ -319,8 +319,7 @@ describe("Hover Tests", () => {
     it("Hover on built-in function", async () => {
       const hover = await onHover("jsonb_build_object")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             FUNCTION pg_catalog.jsonb_build_object()
@@ -342,8 +341,7 @@ describe("Hover Tests", () => {
     it("Hover on proceduren", async () => {
       const hover = await onHover("correct_procedure")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             FUNCTION public.correct_procedure(
@@ -360,8 +358,7 @@ describe("Hover Tests", () => {
     it("Hover on constant function", async () => {
       const hover = await onHover("constant_function")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             FUNCTION public.constant_function()
@@ -376,8 +373,7 @@ describe("Hover Tests", () => {
     it("Hover on type", async () => {
       const hover = await onHover("type_user")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             TYPE public.type_user(
@@ -392,8 +388,7 @@ describe("Hover Tests", () => {
     it("Hover on type with default schema", async () => {
       const hover = await onHover("public.type_user")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             TYPE public.type_user(
@@ -408,8 +403,7 @@ describe("Hover Tests", () => {
     it("Hover on the single field type", async () => {
       const hover = await onHover("type_single_field")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             TYPE public.type_single_field(
@@ -423,8 +417,7 @@ describe("Hover Tests", () => {
     it("Hover on type with empty column", async () => {
       const hover = await onHover("public.type_empty")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             TYPE public.type_empty()
@@ -436,8 +429,7 @@ describe("Hover Tests", () => {
     it("Hover on domain", async () => {
       const hover = await onHover("us_postal_code")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             DOMAIN public.us_postal_code AS text
@@ -449,8 +441,7 @@ describe("Hover Tests", () => {
     it("Hover on domain with default schema", async () => {
       const hover = await onHover("public.jp_postal_code")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             DOMAIN public.jp_postal_code AS text
@@ -462,8 +453,7 @@ describe("Hover Tests", () => {
     it("Hover on index", async () => {
       const hover = await onHover("users_id_name_index")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             INDEX users_id_name_index

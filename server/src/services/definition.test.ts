@@ -1,4 +1,3 @@
-import * as assert from "assert"
 import dedent from "ts-dedent"
 import {
   DefinitionLink, LocationLink, Position, Range, URI,
@@ -10,7 +9,6 @@ import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
 import { TestTextDocuments } from "@/__tests__/helpers/textDocuments"
 import { Server } from "@/server"
-import { neverReach } from "@/utilities/neverReach"
 import { readTextDocumentFromUri } from "@/utilities/text"
 
 
@@ -52,22 +50,12 @@ describe("Definition Tests", () => {
     })
   }
 
-  function validateDefinitionLinks(
-    definitoins: DefinitionLink[] | undefined,
-    expectedDefinitions: DefinitionLink[],
-  ) {
-    expect(definitoins).toBeDefined()
-    if (definitoins === undefined) neverReach()
-
-    assert.deepEqual(definitoins, expectedDefinitions)
-  }
-
   describe("Definition", function () {
     it("Definition on table", async () => {
       const documentUri = getSampleFileResource("definitions/table/companies.pgsql")
       const definition = await onDefinition(documentUri, "companies")
 
-      validateDefinitionLinks(definition, [
+      expect(definition).toStrictEqual([
         LocationLink.create(
           documentUri,
           Range.create(0, 39, 5, 1),
@@ -80,7 +68,7 @@ describe("Definition Tests", () => {
       const documentUri = getSampleFileResource("definitions/table/public_users.pgsql")
       const definition = await onDefinition(documentUri, "public.users")
 
-      validateDefinitionLinks(definition, [
+      expect(definition).toStrictEqual([
         LocationLink.create(
           documentUri,
           Range.create(0, 42, 9, 1),
@@ -95,7 +83,7 @@ describe("Definition Tests", () => {
       )
       const definition = await onDefinition(documentUri, "campaign.participants")
 
-      validateDefinitionLinks(definition, [
+      expect(definition).toStrictEqual([
         LocationLink.create(
           documentUri,
           Range.create(0, 51, 8, 24),
@@ -108,7 +96,7 @@ describe("Definition Tests", () => {
       const documentUri = getSampleFileResource("definitions/view/deleted_users.pgsql")
       const definition = await onDefinition(documentUri, "deleted_users")
 
-      validateDefinitionLinks(definition, [
+      expect(definition).toStrictEqual([
         LocationLink.create(
           documentUri,
           Range.create(0, 42, 9, 20),

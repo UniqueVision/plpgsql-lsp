@@ -1,4 +1,3 @@
-import * as assert from "assert"
 import { CodeLens } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
@@ -10,7 +9,6 @@ import {
   TestTextDocuments,
 } from "@/__tests__/helpers/textDocuments"
 import { Server } from "@/server"
-import { neverReach } from "@/utilities/neverReach"
 
 import { makeExecuteFileQueryCommandCodeLens } from "./codeLens"
 
@@ -45,19 +43,6 @@ describe("CodeLens Tests", () => {
     return [codeLenses, document]
   }
 
-  function validateCodeLenses(
-    diagnostics: CodeLens[] | undefined,
-    expectedCodeLenss: CodeLens[],
-  ) {
-    expect(diagnostics).toBeDefined()
-    if (diagnostics === undefined) neverReach()
-
-    assert.deepEqual(
-      diagnostics,
-      expectedCodeLenss,
-    )
-  }
-
   describe("Enable Settings", function () {
     beforeEach(() => {
       const settings = new SettingsBuilder().build()
@@ -69,7 +54,7 @@ describe("CodeLens Tests", () => {
         "queries/correct_query.pgsql",
       )
 
-      validateCodeLenses(codeLenses, [makeExecuteFileQueryCommandCodeLens(document)])
+      expect(codeLenses).toStrictEqual([makeExecuteFileQueryCommandCodeLens(document)])
     })
 
     it("is to be empty on the query with positional parameters.", async () => {
@@ -77,7 +62,7 @@ describe("CodeLens Tests", () => {
         "queries/correct_query_with_positional_parameter.pgsql",
       )
 
-      validateCodeLenses(codeLenses, [])
+      expect(codeLenses).toStrictEqual([])
     })
 
     it("is to be undefined on the Language Server disable file.", async () => {
@@ -95,7 +80,7 @@ describe("CodeLens Tests", () => {
         + "syntax_error_query_with_language_server_disable_validation_comment.pgsql",
       )
 
-      validateCodeLenses(codeLenses, [])
+      expect(codeLenses).toStrictEqual([])
     })
   })
 
@@ -112,7 +97,7 @@ describe("CodeLens Tests", () => {
         "queries/correct_query.pgsql",
       )
 
-      validateCodeLenses(codeLenses, [])
+      expect(codeLenses).toStrictEqual([])
     })
   })
 })
