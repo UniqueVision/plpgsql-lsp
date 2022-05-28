@@ -1,5 +1,3 @@
-import glob from "glob-promise"
-import dedent from "ts-dedent"
 import {
   CodeAction,
   CodeActionParams,
@@ -46,8 +44,6 @@ import { Settings } from "@/settings"
 import {
   disableLanguageServer, disableValidation,
 } from "@/utilities/disableLanguageServer"
-import { asyncFlatMap } from "@/utilities/functool"
-import { readTextDocumentFromUri } from "@/utilities/text"
 
 import { CommandExecuter } from "./commandExecuter"
 import { SymbolsManager } from "./symbolsManager"
@@ -123,58 +119,13 @@ export class Handlers {
 
       const settings = await this.settingsManager.get(event.document.uri)
 
-      const files = [
-        ...new Set(
-          await asyncFlatMap(
-            settings.definitionFiles,
-            (filePattern) => glob.promise(filePattern),
-          ),
-        ),
-      ]
+      await this.definitionsManager.loadWorkspaceDefinitions(
+        workspaceFolder, settings, this.logger,
+      )
 
-      this.logger.log(dedent`
-        The "${workspaceFolder.name}" workspace definitions are loading...
-        The "${workspaceFolder.name}" workspace symbols are loading...
-      `)
-
-      for (const file of files) {
-        const document = await readTextDocumentFromUri(`${workspaceFolder.uri}/${file}`)
-
-        if (disableLanguageServer(document)) {
-          continue
-        }
-
-        // Load File Definitions.
-        try {
-          await this.definitionsManager.updateFileDefinitions(
-            document, settings.defaultSchema,
-          )
-        }
-        catch (error: unknown) {
-          this.logger.error(
-            `The definitions of "${document.uri}" cannot load.`
-          + ` ${(error as Error).message}`,
-          )
-        }
-
-        // Load File Symbols.
-        try {
-          await this.symbolsManager.updateFileSymbols(
-            document, settings.defaultSchema,
-          )
-        }
-        catch (error: unknown) {
-          this.logger.error(
-            `The symbols of "${document.uri}" cannot load.`
-          + ` ${(error as Error).message}`,
-          )
-        }
-      }
-
-      this.logger.log(dedent`
-        The definitions have been loaded!! 👍
-        The symbols have been loaded!! 👍
-      `)
+      await this.symbolsManager.loadWorkspaceSymbols(
+        workspaceFolder, settings, this.logger,
+      )
     }
   }
 
@@ -189,26 +140,16 @@ export class Handlers {
 
     await this.validate(document, { isComplete: true })
 
+    const settings = await this.settingsManager.get(document.uri)
+
     // Update File Definitions.
     if (
       this.definitionsManager.hasFileDefinitions(document.uri)
       || await this.settingsManager.isDefinitionTarget(document.uri)
     ) {
-      const settings = await this.settingsManager.get(document.uri)
-
-      this.logger.log("The file definitions are updating...")
-
-      const candidates = await this.definitionsManager.updateFileDefinitions(
-        document, settings.defaultSchema,
+      await this.definitionsManager.updateFileDefinitions(
+        document, settings, this.logger,
       )
-
-      if (candidates !== undefined) {
-        const definitions = candidates.map(candidate => candidate.definition)
-
-        this.logger.log(
-          `The file definitions have been updated!! 😎 ${JSON.stringify(definitions)}`,
-        )
-      }
     }
 
     // Update File Symbols.
@@ -216,21 +157,9 @@ export class Handlers {
       this.symbolsManager.hasFileSymbols(document.uri)
       || await this.settingsManager.isDefinitionTarget(document.uri)
     ) {
-      const settings = await this.settingsManager.get(document.uri)
-
-      this.logger.log("The file definitions are updating...")
-
-      const symbols = await this.symbolsManager.updateFileSymbols(
-        document, settings.defaultSchema,
+      await this.symbolsManager.updateFileSymbols(
+        document, settings, this.logger,
       )
-
-      if (symbols !== undefined) {
-        const symbolNames = symbols.map(symbol => symbol.name)
-
-        this.logger.log(
-          `The file symbols have been updated!! 😎 ${JSON.stringify(symbolNames)}`,
-        )
-      }
     }
   }
 

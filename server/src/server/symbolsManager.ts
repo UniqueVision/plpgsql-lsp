@@ -1,7 +1,10 @@
-import { SymbolInformation, URI } from "vscode-languageserver"
+import { Logger, SymbolInformation, URI, WorkspaceFolder } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { parseDocumentSymbols } from "@/services/symbol"
+import { Settings } from "@/settings"
+import { disableLanguageServer } from "@/utilities/disableLanguageServer"
+import { loadWorkspaceFiles, readTextDocumentFromUri } from "@/utilities/text"
 
 export type Definition = string;
 export type DefinitionCandidate = {
@@ -23,6 +26,53 @@ export class SymbolsManager {
   }
 
   async updateFileSymbols(
+    document: TextDocument,
+    settings: Settings,
+    logger: Logger,
+  ): Promise<void> {
+    logger.log("The file symbols are updating...")
+
+    const symbols = await this.updateDocumentSymbols(document, settings.defaultSchema)
+
+    if (symbols !== undefined) {
+      const symbolNames = symbols.map(symbol => symbol.name)
+
+      logger.log(
+        `The file symbols have been updated!! 😎 ${JSON.stringify(symbolNames)}`,
+      )
+    }
+  }
+
+  async loadWorkspaceSymbols(
+    workspaceFolder: WorkspaceFolder,
+    settings: Settings,
+    logger: Logger,
+  ): Promise<void> {
+    logger.log(`The "${workspaceFolder.name}" workspace symbols are loading...`)
+
+    for (const file of await loadWorkspaceFiles(workspaceFolder, settings)) {
+      const document = await readTextDocumentFromUri(`${workspaceFolder.uri}/${file}`)
+
+      if (disableLanguageServer(document)) {
+        continue
+      }
+
+      try {
+        await this.updateDocumentSymbols(
+          document, settings.defaultSchema,
+        )
+      }
+      catch (error: unknown) {
+        logger.error(
+          `The symbols of "${document.uri}" cannot load. ${(error as Error).message}`,
+        )
+      }
+    }
+
+    logger.log("The symbols have been loaded!! 👍")
+  }
+
+  private async updateDocumentSymbols(
     document: TextDocument,
     defaultSchema: string,
   ): Promise<SymbolInformation[] | undefined> {

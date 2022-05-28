@@ -1,8 +1,12 @@
-import { DefinitionLink, URI } from "vscode-languageserver"
+import { DefinitionLink, Logger, URI, WorkspaceFolder } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { parseDefinitions } from "@/services/definition"
-import { makeDefinitionLinkMarkdown } from "@/utilities/text"
+import { Settings } from "@/settings"
+import { disableLanguageServer } from "@/utilities/disableLanguageServer"
+import {
+  loadWorkspaceFiles, makeDefinitionLinkMarkdown, readTextDocumentFromUri,
+} from "@/utilities/text"
 
 export type Definition = string;
 export type DefinitionCandidate = {
@@ -23,6 +27,55 @@ export class DefinitionsManager {
   }
 
   async updateFileDefinitions(
+    document: TextDocument,
+    settings: Settings,
+    logger: Logger,
+  ): Promise<void> {
+    logger.log("The file definitions are updating...")
+
+    const candidates = await this.updateDocumentDefinitions(
+      document, settings.defaultSchema,
+    )
+
+    if (candidates !== undefined) {
+      const definitions = candidates.map(candidate => candidate.definition)
+
+      logger.log(
+        `The file definitions have been updated!! 😎 ${JSON.stringify(definitions)}`,
+      )
+    }
+  }
+
+  async loadWorkspaceDefinitions(
+    workspaceFolder: WorkspaceFolder,
+    settings: Settings,
+    logger: Logger,
+  ): Promise<void> {
+    logger.log(`The "${workspaceFolder.name}" workspace definitions are loading...`)
+
+    for (const file of await loadWorkspaceFiles(workspaceFolder, settings)) {
+      const document = await readTextDocumentFromUri(`${workspaceFolder.uri}/${file}`)
+
+      if (disableLanguageServer(document)) {
+        continue
+      }
+
+      try {
+        await this.updateDocumentDefinitions(document, settings.defaultSchema)
+      }
+      catch (error: unknown) {
+        const errorMessage = (error as Error).message
+
+        logger.error(
+          `The definitions of "${document.uri}" cannot load. ${errorMessage}`,
+        )
+      }
+    }
+
+    logger.log("The definitions have been loaded!! 👍")
+  }
+
+  private async updateDocumentDefinitions(
     document: TextDocument,
     defaultSchema: string,
   ): Promise<DefinitionCandidate[] | undefined> {

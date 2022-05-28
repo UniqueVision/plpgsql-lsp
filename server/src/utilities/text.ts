@@ -1,8 +1,12 @@
 import { existsSync, promises as fs } from "fs"
-import { Position, Range, uinteger, URI } from "vscode-languageserver"
+import glob from "glob-promise"
+import { Position, Range, uinteger, URI, WorkspaceFolder } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { Definition, DefinitionsManager } from "@/server/definitionsManager"
+import { Settings } from "@/settings"
+
+import { asyncFlatMap } from "./functool"
 
 export function getWordRangeAtPosition(
   document: TextDocument, position: Position,
@@ -194,4 +198,17 @@ export async function readTextDocumentFromUri(uri: URI): Promise<TextDocument> {
   return TextDocument.create(
     uri, "postgres", 1, await readFileFromUri(uri) || "",
   )
+}
+
+export async function loadWorkspaceFiles(
+  _workspaceFolder: WorkspaceFolder, settings: Settings,
+) {
+  return [
+    ...new Set(
+      await asyncFlatMap(
+        settings.definitionFiles,
+        (filePattern) => glob.promise(filePattern),
+      ),
+    ),
+  ]
 }

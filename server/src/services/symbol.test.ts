@@ -57,7 +57,8 @@ describe("Definition Tests", () => {
 
     await server.symbolsManager.updateFileSymbols(
       await readTextDocumentFromUri(documentUri),
-      (await server.settingsManager.get(textDocument.uri)).defaultSchema,
+      await server.settingsManager.get(textDocument.uri),
+      server.logger,
     )
 
     if (server.handlers === undefined) {

@@ -70,8 +70,7 @@ describe("Hover Tests", () => {
 
   async function updateFileDefinitions(targetFile: string) {
     server.definitionsManager.updateFileDefinitions(
-      await loadSampleTextDocument(targetFile),
-      settings.defaultSchema,
+      await loadSampleTextDocument(targetFile), settings, server.logger,
     )
   }
 

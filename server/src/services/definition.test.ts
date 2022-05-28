@@ -59,7 +59,8 @@ describe("Definition Tests", () => {
 
     await server.definitionsManager.updateFileDefinitions(
       await readTextDocumentFromUri(documentUri),
-      (await server.settingsManager.get(document.uri)).defaultSchema,
+      await server.settingsManager.get(document.uri),
+      server.logger,
     )
 
     if (server.handlers === undefined) {
