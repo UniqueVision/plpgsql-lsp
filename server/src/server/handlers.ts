@@ -119,13 +119,14 @@ export class Handlers {
 
       const settings = await this.settingsManager.get(event.document.uri)
 
-      await this.definitionsManager.loadWorkspaceDefinitions(
-        workspaceFolder, settings, this.logger,
-      )
-
-      await this.symbolsManager.loadWorkspaceSymbols(
-        workspaceFolder, settings, this.logger,
-      )
+      await Promise.all([
+        this.definitionsManager.loadWorkspaceDefinitions(
+          workspaceFolder, settings, this.logger,
+        ),
+        this.symbolsManager.loadWorkspaceSymbols(
+          workspaceFolder, settings, this.logger,
+        ),
+      ])
     }
   }
 
