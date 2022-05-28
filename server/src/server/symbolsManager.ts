@@ -32,7 +32,9 @@ export class SymbolsManager {
   ): Promise<void> {
     logger.log("The file symbols are updating...")
 
-    const symbols = await this._updateDocumentSymbols(document, settings.defaultSchema)
+    const symbols = await this.innerUpdateDocumentSymbols(
+      document, settings.defaultSchema,
+    )
 
     if (symbols !== undefined) {
       const symbolNames = symbols.map(symbol => symbol.name)
@@ -58,7 +60,7 @@ export class SymbolsManager {
       }
 
       try {
-        await this._updateDocumentSymbols(
+        await this.innerUpdateDocumentSymbols(
           document, settings.defaultSchema,
         )
       }
@@ -72,7 +74,7 @@ export class SymbolsManager {
     logger.log("The symbols have been loaded!! 👍")
   }
 
-  private async _updateDocumentSymbols(
+  private async innerUpdateDocumentSymbols(
     document: TextDocument,
     defaultSchema: string,
   ): Promise<SymbolInformation[] | undefined> {

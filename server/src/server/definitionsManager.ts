@@ -33,7 +33,7 @@ export class DefinitionsManager {
   ): Promise<void> {
     logger.log("The file definitions are updating...")
 
-    const candidates = await this._updateDocumentDefinitions(
+    const candidates = await this.innerUpdateDocumentDefinitions(
       document, settings.defaultSchema,
     )
 
@@ -61,7 +61,7 @@ export class DefinitionsManager {
       }
 
       try {
-        await this._updateDocumentDefinitions(document, settings.defaultSchema)
+        await this.innerUpdateDocumentDefinitions(document, settings.defaultSchema)
       }
       catch (error: unknown) {
         const errorMessage = (error as Error).message
@@ -75,7 +75,7 @@ export class DefinitionsManager {
     logger.log("The definitions have been loaded!! 👍")
   }
 
-  private async _updateDocumentDefinitions(
+  private async innerUpdateDocumentDefinitions(
     document: TextDocument,
     defaultSchema: string,
   ): Promise<DefinitionCandidate[] | undefined> {
