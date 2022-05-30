@@ -15,7 +15,7 @@ import {
 } from "@/errors"
 import { Server } from "@/server"
 
-import { FILE_QUERY_COMMAND_INFO } from "./executeFileQuery"
+import { FILE_QUERY_COMMAND } from "./executeFileQuery"
 
 describe("CommandExecuter.executeFileQuery Tests", () => {
   let server: Server
@@ -46,7 +46,7 @@ describe("CommandExecuter.executeFileQuery Tests", () => {
 
     await server.commandExecuter?.execute(
       {
-        command: FILE_QUERY_COMMAND_INFO.command,
+        command: FILE_QUERY_COMMAND.name,
         arguments: [document.uri],
       },
     )

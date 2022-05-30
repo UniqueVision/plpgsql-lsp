@@ -4,13 +4,13 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 import { PostgresPool } from "@/postgres"
 
 
-export const FILE_QUERY_COMMAND_INFO = {
+export const FILE_QUERY_COMMAND = {
   title: "PL/pgSQL: Execute the Current File Query",
-  command: "plpgsql-lsp.executeFileQuery",
+  name: "plpgsql-lsp.executeFileQuery",
   execute: executeFileQuery,
 } as const
 
-export async function executeFileQuery(
+async function executeFileQuery(
   pgPool: PostgresPool, document: TextDocument, logger: Logger,
 ): Promise<void> {
   const pgClient = await pgPool.connect()

@@ -4,7 +4,8 @@ import {
 } from "vscode-languageserver/node"
 import { TextDocument } from "vscode-languageserver-textdocument/lib/umd/main"
 
-import { FILE_QUERY_COMMAND_INFO } from "@/commands/executeFileQuery"
+import { CommandName } from "@/commands"
+import { FILE_QUERY_COMMAND } from "@/commands/executeFileQuery"
 import {
   CannotExecuteCommandWithQueryParametersError,
   CommandNotFoundError,
@@ -29,11 +30,16 @@ export class CommandExecuter {
   ) { }
 
   async execute(params: ExecuteCommandParams): Promise<void> {
-    if (params.command === FILE_QUERY_COMMAND_INFO.command) {
-      return this.executeFileQueryCommand(params)
-    }
-    else {
-      throw new CommandNotFoundError(params.command)
+    const commandName = params.command as CommandName
+
+    switch (commandName) {
+      case FILE_QUERY_COMMAND.name: {
+        return this.executeFileQueryCommand(params)
+      }
+      default: {
+        const unknownCommand: never = commandName
+        throw new CommandNotFoundError(unknownCommand)
+      }
     }
   }
 
@@ -68,6 +74,6 @@ export class CommandExecuter {
       throw new PostgresPoolNotFoundError()
     }
 
-    await FILE_QUERY_COMMAND_INFO.execute(pgPool, document, this.logger)
+    await FILE_QUERY_COMMAND.execute(pgPool, document, this.logger)
   }
 }
