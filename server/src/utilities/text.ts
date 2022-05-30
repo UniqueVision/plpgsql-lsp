@@ -3,7 +3,7 @@ import glob from "glob-promise"
 import { Position, Range, uinteger, URI, WorkspaceFolder } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { Definition, DefinitionsManager } from "@/server/definitionsManager"
+import { DefinitionName, DefinitionsManager } from "@/server/definitionsManager"
 import { Settings } from "@/settings"
 
 import { asyncFlatMap } from "./functool"
@@ -133,12 +133,14 @@ export function makeListMarkdown(items: string[]): string {
 }
 
 export function makeDefinitionLinkMarkdown(
-  target: string, definitionsManager: DefinitionsManager, definition?: Definition,
+  target: string,
+  definitionsManager: DefinitionsManager,
+  definitionName?: DefinitionName,
 ): string | undefined {
-  if (definition === undefined) {
-    definition = target
+  if (definitionName === undefined) {
+    definitionName = target
   }
-  const definitionLinks = definitionsManager.getDefinitionLinks(definition)
+  const definitionLinks = definitionsManager.getDefinitionLinks(definitionName)
   if (definitionLinks && definitionLinks.length >= 1) {
     const link = [
       definitionLinks[0].targetUri,

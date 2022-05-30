@@ -6,12 +6,6 @@ import { Settings } from "@/settings"
 import { disableLanguageServer } from "@/utilities/disableLanguageServer"
 import { loadWorkspaceFiles, readTextDocumentFromUri } from "@/utilities/text"
 
-export type Definition = string;
-export type DefinitionCandidate = {
-  definition: Definition,
-  definitionLink: SymbolInformation
-};
-
 export class SymbolsManager {
   private fileSymbols: Map<URI, SymbolInformation[]> = new Map()
 

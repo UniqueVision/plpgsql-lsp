@@ -9,7 +9,9 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { parseCreateStatements } from "@/postgres/parsers/parseCreateStatements"
 import { parseStmtements } from "@/postgres/parsers/statement"
-import { DefinitionCandidate, DefinitionsManager } from "@/server/definitionsManager"
+import {
+  Definition, DefinitionName, DefinitionsManager,
+} from "@/server/definitionsManager"
 import { sanitizeWordCandidates } from "@/utilities/sanitizeWord"
 import { getWordRangeAtPosition } from "@/utilities/text"
 
@@ -45,7 +47,7 @@ export async function parseDefinitions(
   fileText: string,
   uri: URI,
   defaultSchema: string,
-): Promise< DefinitionCandidate[] | undefined> {
+): Promise<Definition[] | undefined> {
   const statements = await parseStmtements(fileText)
   if (statements === undefined) {
     return undefined
@@ -54,7 +56,7 @@ export async function parseDefinitions(
 
   return parseCreateStatements(fileText, statements).flatMap(
     (statementInfo) => {
-      return makeMultiSchemaDefinitionCandidates(
+      return makeMultiSchemaDefinitions(
         statementInfo.name,
         LocationLink.create(
           uri,
@@ -68,26 +70,26 @@ export async function parseDefinitions(
   )
 }
 
-function makeMultiSchemaDefinitionCandidates(
-  definitionName: string,
-  definitionLink: DefinitionLink,
+function makeMultiSchemaDefinitions(
+  name: DefinitionName,
+  link: DefinitionLink,
   schema: string | undefined,
   defaultSchema: string,
-): DefinitionCandidate[] {
-  const candidates = [
+): Definition[] {
+  const definitions = [
     {
-      definition: (schema || defaultSchema) + "." + definitionName,
-      definitionLink,
+      name: (schema || defaultSchema) + "." + name,
+      link,
     },
   ]
 
-  // On the default schema, add candidate without schema.
+  // On the default schema, add definition without schema.
   if (schema === undefined || schema === defaultSchema) {
-    candidates.push({
-      definition: definitionName,
-      definitionLink,
+    definitions.push({
+      name,
+      link,
     })
   }
 
-  return candidates
+  return definitions
 }
