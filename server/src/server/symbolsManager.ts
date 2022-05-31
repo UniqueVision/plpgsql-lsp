@@ -27,7 +27,7 @@ export class SymbolsManager {
     logger.log("The file symbols are updating...")
 
     const symbols = await this.innerUpdateDocumentSymbols(
-      document, settings.defaultSchema,
+      document, settings.defaultSchema, logger,
     )
 
     if (symbols !== undefined) {
@@ -53,16 +53,9 @@ export class SymbolsManager {
         continue
       }
 
-      try {
-        await this.innerUpdateDocumentSymbols(
-          document, settings.defaultSchema,
-        )
-      }
-      catch (error: unknown) {
-        logger.error(
-          `The symbols of "${document.uri}" cannot load. ${(error as Error).message}`,
-        )
-      }
+      await this.innerUpdateDocumentSymbols(
+        document, settings.defaultSchema, logger,
+      )
     }
 
     logger.log("The symbols have been loaded!! 👍")
@@ -71,9 +64,10 @@ export class SymbolsManager {
   private async innerUpdateDocumentSymbols(
     document: TextDocument,
     defaultSchema: string,
+    logger: Logger,
   ): Promise<SymbolInformation[] | undefined> {
     const symbols = await parseDocumentSymbols(
-      document.getText(), document.uri, defaultSchema,
+      document.uri, document.getText(), defaultSchema, logger,
     )
     this.fileSymbols.set(document.uri, symbols || [])
 

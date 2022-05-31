@@ -44,11 +44,12 @@ export async function getDefinitionLinks(
 
 
 export async function parseDefinitions(
-  fileText: string,
   uri: URI,
+  fileText: string,
   defaultSchema: string,
+  logger: Logger,
 ): Promise<Definition[] | undefined> {
-  const statements = await parseStmtements(fileText)
+  const statements = await parseStmtements(uri, fileText, logger)
   if (statements === undefined) {
     return undefined
   }

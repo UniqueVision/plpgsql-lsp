@@ -25,7 +25,7 @@ export async function parseFunctions(
     fileText, queryParameterInfo, logger,
   )
 
-  const stmtements = await parseStmtements(sanitizedFileText)
+  const stmtements = await parseStmtements(uri, sanitizedFileText, logger)
   if (stmtements === undefined) {
     return []
   }

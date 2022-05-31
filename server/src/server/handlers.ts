@@ -253,7 +253,7 @@ export class Handlers {
     }
     const settings = await this.settingsManager.get(document.uri)
 
-    return getDocumentSymbols(document, settings)
+    return getDocumentSymbols(document, settings, this.logger)
   }
 
   async onExecuteCommand(params: ExecuteCommandParams): Promise<void> {

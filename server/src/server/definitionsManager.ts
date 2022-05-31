@@ -34,7 +34,7 @@ export class DefinitionsManager {
     logger.log("The file definitions are updating...")
 
     const definitions = await this.innerUpdateDocumentDefinitions(
-      document, settings.defaultSchema,
+      document, settings.defaultSchema, logger,
     )
 
     if (definitions !== undefined) {
@@ -60,16 +60,9 @@ export class DefinitionsManager {
         continue
       }
 
-      try {
-        await this.innerUpdateDocumentDefinitions(document, settings.defaultSchema)
-      }
-      catch (error: unknown) {
-        const errorMessage = (error as Error).message
-
-        logger.error(
-          `The definitions of "${document.uri}" cannot load. ${errorMessage}`,
-        )
-      }
+      await this.innerUpdateDocumentDefinitions(
+        document, settings.defaultSchema, logger,
+      )
     }
 
     logger.log("The definitions have been loaded!! 👍")
@@ -78,12 +71,13 @@ export class DefinitionsManager {
   private async innerUpdateDocumentDefinitions(
     document: TextDocument,
     defaultSchema: string,
+    logger: Logger,
   ): Promise<Definition[] | undefined> {
     const fileText = document.getText()
 
 
     const definitions = await parseDefinitions(
-      fileText, document.uri, defaultSchema,
+      document.uri, fileText, defaultSchema, logger,
     )
     if (definitions === undefined) {
       return undefined
