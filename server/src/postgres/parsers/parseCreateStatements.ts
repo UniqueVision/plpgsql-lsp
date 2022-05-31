@@ -4,7 +4,7 @@ import { PostgresKind } from "@/postgres/kind"
 import { Statement } from "@/postgres/parsers/statement"
 import { findIndexFromBuffer, getRangeFromBuffer } from "@/utilities/text"
 
-export interface CreateStatementInfo{
+export interface CreateStatementInfo {
   kind: PostgresKind
   schema: string | undefined,
   name: string,
@@ -43,13 +43,9 @@ export function parseCreateStatements(
         if (statement?.stmt?.CreateTableAsStmt?.relkind === "OBJECT_MATVIEW") {
           return parseMaterializedViewCreateStatements(fileText, statement)
         }
-        else {
-          return []
-        }
       }
-      else {
-        return []
-      }
+
+      return []
     },
   )
 }
