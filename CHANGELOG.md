@@ -1,6 +1,10 @@
 # Change Log
 
 ## Unreleased - TDB
+## [v2.7.1](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.7.1) - 2022/06/01
+
+- Refactoring. [#38](https://github.com/UniqueVision/plpgsql-lsp/pull/39)
+
 ## [v2.7.0](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.7.0) - 2022/05/17
 
 - Support Document/Workspace symbols. [#38](https://github.com/UniqueVision/plpgsql-lsp/pull/38)
