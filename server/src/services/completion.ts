@@ -9,6 +9,7 @@ import {
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { PostgresPool } from "@/postgres"
+import { PostgresKind } from "@/postgres/kind"
 import {
   makeDomainDefinitionText,
   queryDomainDefinitions,
@@ -35,11 +36,11 @@ import {
   makeViewDefinitionText,
   queryViewDefinitions,
 } from "@/postgres/queries/queryViewDefinitions"
+import { neverReach } from "@/utilities/neverReach"
 import {
   getWordRangeAtPosition,
   isFirstCommentLine,
 } from "@/utilities/text"
-
 
 export async function getCompletionItems(
   pgPool: PostgresPool,
@@ -87,6 +88,33 @@ export async function getCompletionItems(
         return item
       },
     )
+}
+
+function convertToCompletionItemKind(kind: PostgresKind): CompletionItemKind {
+  switch (kind) {
+    case PostgresKind.Schema:
+      return CompletionItemKind.Module
+    case PostgresKind.Table:
+      return CompletionItemKind.Class
+    case PostgresKind.View:
+      return CompletionItemKind.Class
+    case PostgresKind.MaterializedView:
+      return CompletionItemKind.Class
+    case PostgresKind.Type:
+      return CompletionItemKind.Struct
+    case PostgresKind.Domain:
+      return CompletionItemKind.Struct
+    case PostgresKind.Index:
+      return CompletionItemKind.Struct
+    case PostgresKind.Function:
+      return CompletionItemKind.Function
+    case PostgresKind.Trigger:
+      return CompletionItemKind.Event
+    default: {
+      const unknownKind: never = kind
+      neverReach( `"${unknownKind}" is unknown "PostgresKind".` )
+    }
+  }
 }
 
 function findSchema(
@@ -159,7 +187,7 @@ async function getSchemaCompletionItems(
     (schema, index) => {
       return {
         label: schema,
-        kind: CompletionItemKind.Module,
+        kind: convertToCompletionItemKind(PostgresKind.Schema),
         data: index,
         detail: `Schema ${schema}`,
       }
@@ -181,7 +209,7 @@ async function getTableCompletionItems(
     .map(
       (definition, index) => ({
         label: definition.tableName,
-        kind: CompletionItemKind.Class,
+        kind: convertToCompletionItemKind(PostgresKind.Table),
         data: index,
         detail: makeTableDefinitionText(definition),
       }),
@@ -202,7 +230,7 @@ async function getViewCompletionItems(
     .map(
       (definition, index) => ({
         label: definition.viewName,
-        kind: CompletionItemKind.Class,
+        kind: convertToCompletionItemKind(PostgresKind.View),
         data: index,
         detail: makeViewDefinitionText(definition),
       }),
@@ -223,7 +251,7 @@ async function getMaterializedViewCompletionItems(
     .map(
       (definition, index) => ({
         label: definition.viewName,
-        kind: CompletionItemKind.Class,
+        kind: convertToCompletionItemKind(PostgresKind.MaterializedView),
         data: index,
         detail: makeMaterializedViewDefinitionText(definition),
       }),
@@ -244,7 +272,7 @@ async function getFunctionCompletionItems(
     .map(
       (definition, index) => ({
         label: definition.functionName,
-        kind: CompletionItemKind.Function,
+        kind: convertToCompletionItemKind(PostgresKind.Function),
         data: index,
         detail: makeFunctionDefinitionText(definition),
         insertText: makeInsertFunctionText(definition),
@@ -258,7 +286,7 @@ function getBuiltinFunctionCompletionItems(): CompletionItem[] {
     .map(
       (functionName, index) => ({
         label: functionName,
-        kind: CompletionItemKind.Function,
+        kind: convertToCompletionItemKind(PostgresKind.Function),
         data: index,
         detail: dedent`
           FUNCTION ${functionName}(value [, ...])
@@ -271,7 +299,7 @@ function getBuiltinFunctionCompletionItems(): CompletionItem[] {
       .map(
         (functionName, index) => ({
           label: functionName,
-          kind: CompletionItemKind.Function,
+          kind: convertToCompletionItemKind(PostgresKind.Function),
           data: index,
           detail: dedent`
           FUNCTION ${functionName}(value1, value2)
@@ -297,7 +325,7 @@ async function getDomainCompletionItems(
     .map(
       (definition, index) => ({
         label: definition.domainName,
-        kind: CompletionItemKind.Struct,
+        kind: convertToCompletionItemKind(PostgresKind.Domain),
         data: index,
         detail: makeDomainDefinitionText(definition),
       }),
@@ -318,7 +346,7 @@ async function getTypeCompletionItems(
     .map(
       (definition, index) => ({
         label: definition.typeName,
-        kind: CompletionItemKind.Struct,
+        kind: convertToCompletionItemKind(PostgresKind.Type),
         data: index,
         detail: makeTypeDefinitionText(definition),
       }),

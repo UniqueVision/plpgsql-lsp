@@ -22,11 +22,11 @@ export class TestTextDocuments extends TextDocuments<TextDocument> {
   }
 }
 
-export function makeSampleTextDocument(
+export async function loadSampleTextDocument(
   file: string,
   options: LoadFileOptions = DEFAULT_LOAD_FILE_OPTIONS,
-): TextDocument {
-  let context = loadSampleFile(file)
+): Promise<TextDocument> {
+  let context = await loadSampleFile(file)
 
   if (options.skipDisableComment) {
     context = context.split("\n").slice(1).join("\n")

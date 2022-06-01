@@ -1,4 +1,3 @@
-import * as assert from "assert"
 import { CodeAction, Range } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
@@ -6,11 +5,10 @@ import { DEFAULT_LOAD_FILE_OPTIONS, LoadFileOptions } from "@/__tests__/helpers/
 import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
 import {
-  makeSampleTextDocument,
+  loadSampleTextDocument,
   TestTextDocuments,
 } from "@/__tests__/helpers/textDocuments"
 import { Server } from "@/server"
-import { neverReach } from "@/utilities/neverReach"
 
 import { makeExecuteFileQueryCommandCodeAction } from "./codeAction"
 
@@ -27,7 +25,7 @@ describe("CodeAction Tests", () => {
     file: string,
     options: LoadFileOptions = DEFAULT_LOAD_FILE_OPTIONS,
   ): Promise<[CodeAction[] | undefined, TextDocument]> {
-    const document = makeSampleTextDocument(
+    const document = await loadSampleTextDocument(
       file,
       options,
     );
@@ -47,19 +45,6 @@ describe("CodeAction Tests", () => {
     return [codeLenses, document]
   }
 
-  function validateCodeActions(
-    diagnostics: CodeAction[] | undefined,
-    expectedCodeActions: CodeAction[],
-  ) {
-    expect(diagnostics).toBeDefined()
-    if (diagnostics === undefined) neverReach()
-
-    assert.deepEqual(
-      diagnostics,
-      expectedCodeActions,
-    )
-  }
-
   describe("Enable Settings", function () {
     beforeEach(() => {
       const settings = new SettingsBuilder().build()
@@ -71,7 +56,9 @@ describe("CodeAction Tests", () => {
         "queries/correct_query.pgsql",
       )
 
-      validateCodeActions(codeLenses, [makeExecuteFileQueryCommandCodeAction(document)])
+      expect(codeLenses).toStrictEqual(
+        [makeExecuteFileQueryCommandCodeAction(document)],
+      )
     })
 
     it("succeed on the query with positional parameters.", async () => {
@@ -79,7 +66,7 @@ describe("CodeAction Tests", () => {
         "queries/correct_query_with_positional_parameter.pgsql",
       )
 
-      validateCodeActions(codeLenses, [])
+      expect(codeLenses).toStrictEqual([])
     })
 
     it("is to be undefined on the Language Server disable file.", async () => {
@@ -97,7 +84,7 @@ describe("CodeAction Tests", () => {
         + "syntax_error_query_with_language_server_disable_validation_comment.pgsql",
       )
 
-      validateCodeActions(codeLenses, [])
+      expect(codeLenses).toStrictEqual([])
     })
   })
 
@@ -114,7 +101,7 @@ describe("CodeAction Tests", () => {
         "queries/correct_query.pgsql",
       )
 
-      validateCodeActions(codeLenses, [])
+      expect(codeLenses).toStrictEqual([])
     })
   })
 })

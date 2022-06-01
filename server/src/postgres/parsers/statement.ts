@@ -1,5 +1,5 @@
 import { parseQuery } from "libpg-query"
-import { integer, uinteger } from "vscode-languageserver"
+import { integer, Logger, uinteger, URI } from "vscode-languageserver"
 
 export interface Statement {
   stmt: StatementItem
@@ -137,11 +137,19 @@ export interface CreateTableAsStmtRelation {
   relpersistence: string
 }
 
-export async function parseStmtements(query: string): Promise<Statement[] | undefined> {
+export async function parseStmtements(
+  uri: URI, query: string, logger: Logger,
+): Promise<Statement[] | undefined> {
   try {
     return (await parseQuery(query))?.["stmts"]
   }
   catch (error: unknown) {
+    const errorMessage = (error as Error).message
+
+    logger.error(
+      `The "${uri}" cannot parse. ${errorMessage}`,
+    )
+
     return undefined
   }
 }

@@ -1,4 +1,4 @@
-import * as assert from "assert"
+import deepEqual from "deep-equal"
 import dedent from "ts-dedent"
 import {
   CompletionItem,
@@ -16,6 +16,30 @@ import { neverReach } from "@/utilities/neverReach"
 
 import { getLanguageServerCommentCompletionItems } from "./completion"
 
+expect.extend({
+  completionItemContaining(
+    completions: CompletionItem[] | undefined,
+    expected: CompletionItem,
+  ) {
+    const completion = completions?.find(x => x.label === expected.label)
+    if (completion === undefined) neverReach()
+
+    if (deepEqual((({ data: _data, ...target }) => target)(completion), expected)) {
+      return {
+        pass: true,
+        message: () =>
+          `expected not to contain CompletionItem ${expected.label}`,
+      }
+    }
+    else {
+      return {
+        pass: false,
+        message: () =>
+          `expected ${completion} to contain CompletionItem ${expected.label}`,
+      }
+    }
+  },
+})
 
 describe("Completion Tests", () => {
   let server: Server
@@ -48,39 +72,12 @@ describe("Completion Tests", () => {
     })
   }
 
-  function validateCompletionItem(
-    completions: CompletionItem[] | undefined,
-    expected: CompletionItem,
-  ) {
-    expect(completions).toBeDefined()
-    if (completions === undefined) neverReach()
-
-    const completion = completions?.find(x => x.label === expected.label)
-    if (completion === undefined) neverReach()
-
-    assert.deepEqual(
-      (({ data: _data, ...target }) => target)(completion),
-      expected,
-    )
-  }
-
-  function validateCompletionItems(
-    definitoins: CompletionItem[] | undefined,
-    expected: CompletionItem[],
-  ) {
-    expect(definitoins).toBeDefined()
-    if (definitoins === undefined) neverReach()
-
-    assert.deepEqual(definitoins, expected)
-  }
-
   describe("Completion", function () {
     it("Completion on table", async () => {
       const completions = await onCompletion(
         "companies", Position.create(1, 1),
       )
-      validateCompletionItem(
-        completions,
+      expect(completions).completionItemContaining(
         {
           label: "companies",
           kind: CompletionItemKind.Class,
@@ -98,8 +95,7 @@ describe("Completion Tests", () => {
       const completions = await onCompletion(
         "public.users", Position.create(1, 10),
       )
-      validateCompletionItem(
-        completions,
+      expect(completions).completionItemContaining(
         {
           label: "users",
           kind: CompletionItemKind.Class,
@@ -117,12 +113,11 @@ describe("Completion Tests", () => {
       )
     })
 
-    it("Completion on table with exclude index", async () => {
+    it("Completion on table without index", async () => {
       const completions = await onCompletion(
         "schedule", Position.create(1, 1),
       )
-      validateCompletionItem(
-        completions,
+      expect(completions).completionItemContaining(
         {
           label: "schedule",
           kind: CompletionItemKind.Class,
@@ -141,8 +136,7 @@ describe("Completion Tests", () => {
       const completions = await onCompletion(
         "campaign.participants", Position.create(1, 10),
       )
-      validateCompletionItem(
-        completions,
+      expect(completions).completionItemContaining(
         {
           label: "participants",
           kind: CompletionItemKind.Class,
@@ -158,12 +152,11 @@ describe("Completion Tests", () => {
       )
     })
 
-    it("Completion on table with empty column", async () => {
+    it("Completion on empty column table", async () => {
       const completions = await onCompletion(
         "empty_table", Position.create(1, 1),
       )
-      validateCompletionItem(
-        completions,
+      expect(completions).completionItemContaining(
         {
           label: "empty_table",
           kind: CompletionItemKind.Class,
@@ -178,8 +171,7 @@ describe("Completion Tests", () => {
       const completions = await onCompletion(
         "deleted_users", Position.create(1, 1),
       )
-      validateCompletionItem(
-        completions,
+      expect(completions).completionItemContaining(
         {
           label: "deleted_users",
           kind: CompletionItemKind.Class,
@@ -194,8 +186,7 @@ describe("Completion Tests", () => {
       const completions = await onCompletion(
         "public.deleted_users", Position.create(1, 10),
       )
-      validateCompletionItem(
-        completions,
+      expect(completions).completionItemContaining(
         {
           label: "deleted_users",
           kind: CompletionItemKind.Class,
@@ -210,8 +201,7 @@ describe("Completion Tests", () => {
       const completions = await onCompletion(
         "campaign.deleted_participants", Position.create(1, 10),
       )
-      validateCompletionItem(
-        completions,
+      expect(completions).completionItemContaining(
         {
           label: "deleted_participants",
           kind: CompletionItemKind.Class,
@@ -226,8 +216,7 @@ describe("Completion Tests", () => {
       const completions = await onCompletion(
         "my_users", Position.create(1, 1),
       )
-      validateCompletionItem(
-        completions,
+      expect(completions).completionItemContaining(
         {
           label: "my_users",
           kind: CompletionItemKind.Class,
@@ -242,8 +231,7 @@ describe("Completion Tests", () => {
       const completions = await onCompletion(
         "positional_argument_function", Position.create(1, 1),
       )
-      validateCompletionItem(
-        completions,
+      expect(completions).completionItemContaining(
         {
           label: "positional_argument_function",
           kind: CompletionItemKind.Function,
@@ -271,8 +259,7 @@ describe("Completion Tests", () => {
       const completions = await onCompletion(
         "public.positional_argument_function", Position.create(1, 10),
       )
-      validateCompletionItem(
-        completions,
+      expect(completions).completionItemContaining(
         {
           label: "positional_argument_function",
           kind: CompletionItemKind.Function,
@@ -300,8 +287,7 @@ describe("Completion Tests", () => {
       const completions = await onCompletion(
         "keyword_argument_function", Position.create(1, 1),
       )
-      validateCompletionItem(
-        completions,
+      expect(completions).completionItemContaining(
         {
           label: "keyword_argument_function",
           kind: CompletionItemKind.Function,
@@ -327,8 +313,7 @@ describe("Completion Tests", () => {
       const completions = await onCompletion(
         "jsonb_build_object", Position.create(1, 1),
       )
-      validateCompletionItem(
-        completions,
+      expect(completions).completionItemContaining(
         {
           label: "jsonb_build_object",
           kind: CompletionItemKind.Function,
@@ -354,8 +339,7 @@ describe("Completion Tests", () => {
       const completions = await onCompletion(
         "correct_procedure", Position.create(1, 1),
       )
-      validateCompletionItem(
-        completions,
+      expect(completions).completionItemContaining(
         {
           label: "correct_procedure",
           kind: CompletionItemKind.Function,
@@ -381,8 +365,7 @@ describe("Completion Tests", () => {
       const completions = await onCompletion(
         "constant_function", Position.create(1, 1),
       )
-      validateCompletionItem(
-        completions,
+      expect(completions).completionItemContaining(
         {
           label: "constant_function",
           kind: CompletionItemKind.Function,
@@ -404,8 +387,7 @@ describe("Completion Tests", () => {
       const completions = await onCompletion(
         "type_user", Position.create(1, 1),
       )
-      validateCompletionItem(
-        completions,
+      expect(completions).completionItemContaining(
         {
           label: "type_user",
           kind: CompletionItemKind.Struct,
@@ -423,8 +405,7 @@ describe("Completion Tests", () => {
       const completions = await onCompletion(
         "public.type_user", Position.create(1, 10),
       )
-      validateCompletionItem(
-        completions,
+      expect(completions).completionItemContaining(
         {
           label: "type_user",
           kind: CompletionItemKind.Struct,
@@ -442,8 +423,7 @@ describe("Completion Tests", () => {
       const completions = await onCompletion(
         "type_single_field", Position.create(1, 1),
       )
-      validateCompletionItem(
-        completions,
+      expect(completions).completionItemContaining(
         {
           label: "type_single_field",
           kind: CompletionItemKind.Struct,
@@ -460,8 +440,7 @@ describe("Completion Tests", () => {
       const completions = await onCompletion(
         "public.type_empty", Position.create(1, 10),
       )
-      validateCompletionItem(
-        completions,
+      expect(completions).completionItemContaining(
         {
           label: "type_empty",
           kind: CompletionItemKind.Struct,
@@ -476,8 +455,7 @@ describe("Completion Tests", () => {
       const completions = await onCompletion(
         "us_postal_code", Position.create(1, 1),
       )
-      validateCompletionItem(
-        completions,
+      expect(completions).completionItemContaining(
         {
           label: "us_postal_code",
           kind: CompletionItemKind.Struct,
@@ -492,8 +470,7 @@ describe("Completion Tests", () => {
       const completions = await onCompletion(
         "public.jp_postal_code", Position.create(1, 10),
       )
-      validateCompletionItem(
-        completions,
+      expect(completions).completionItemContaining(
         {
           label: "jp_postal_code",
           kind: CompletionItemKind.Struct,
@@ -509,8 +486,7 @@ describe("Completion Tests", () => {
         "-- ", Position.create(0, 0),
       )
 
-      validateCompletionItems(
-        completions,
+      expect(completions).toStrictEqual(
         getLanguageServerCommentCompletionItems(),
       )
     })
@@ -520,8 +496,7 @@ describe("Completion Tests", () => {
         "/* ", Position.create(0, 0),
       )
 
-      validateCompletionItems(
-        completions,
+      expect(completions).toStrictEqual(
         getLanguageServerCommentCompletionItems(),
       )
     })

@@ -13,7 +13,7 @@ import {
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { COMMANDS } from "@/commands"
+import { COMMAND_NAMES } from "@/commands"
 import { PostgresPoolMap } from "@/postgres"
 
 import { DEFAULT_SETTINGS } from "../settings"
@@ -46,7 +46,7 @@ export class Server {
 
   constructor(
     private connection: Connection,
-    private logger: Logger,
+    public logger: Logger,
   ) {
     this.documents.listen(this.connection)
     this.settingsManager = new SettingsManager(
@@ -130,7 +130,7 @@ export class Server {
         completionProvider: { resolveProvider: false },
         hoverProvider: true,
         definitionProvider: true,
-        executeCommandProvider: { commands: COMMANDS },
+        executeCommandProvider: { commands: COMMAND_NAMES },
         codeActionProvider: true,
         codeLensProvider: {
           resolveProvider: false,

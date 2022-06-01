@@ -1,8 +1,5 @@
-import * as assert from "assert"
 import dedent from "ts-dedent"
-import {
-  DefinitionLink, LocationLink, Position, Range, URI,
-} from "vscode-languageserver"
+import { DefinitionLink, Position, URI } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { getSampleFileResource } from "@/__tests__/helpers/file"
@@ -13,6 +10,29 @@ import { Server } from "@/server"
 import { neverReach } from "@/utilities/neverReach"
 import { readTextDocumentFromUri } from "@/utilities/text"
 
+expect.extend({
+  toDefinitionUriEqual(
+    definitions: DefinitionLink[] | undefined, expectedUri: URI,
+  ) {
+    expect(definitions).toBeDefined()
+    if (definitions === undefined) neverReach()
+
+    if (definitions.length !== 0 && definitions[0].targetUri === expectedUri) {
+      return {
+        pass: true,
+        message: () =>
+          `expected not to equal Definition URI ${expectedUri}`,
+      }
+    }
+    else {
+      return {
+        pass: false,
+        message: () =>
+          `expected to equal Definition URI ${expectedUri}`,
+      }
+    }
+  },
+})
 
 describe("Definition Tests", () => {
   let server: Server
@@ -37,9 +57,10 @@ describe("Definition Tests", () => {
 
     (server.documents as TestTextDocuments).set(document)
 
-    await server.definitionsManager.updateFileDefinitions(
-      readTextDocumentFromUri(documentUri),
-      (await server.settingsManager.get(document.uri)).defaultSchema,
+    await server.definitionsManager.updateDocumentDefinitions(
+      await readTextDocumentFromUri(documentUri),
+      await server.settingsManager.get(document.uri),
+      server.logger,
     )
 
     if (server.handlers === undefined) {
@@ -52,70 +73,80 @@ describe("Definition Tests", () => {
     })
   }
 
-  function validateDefinitionLinks(
-    definitoins: DefinitionLink[] | undefined,
-    expectedDefinitions: DefinitionLink[],
-  ) {
-    expect(definitoins).toBeDefined()
-    if (definitoins === undefined) neverReach()
-
-    assert.deepEqual(definitoins, expectedDefinitions)
-  }
-
   describe("Definition", function () {
-    it("Definition on table", async () => {
-      const documentUri = getSampleFileResource("definitions/table/companies.pgsql")
-      const definition = await onDefinition(documentUri, "companies")
+    test.each([
+      ["definitions/table/companies.pgsql", "companies"],
+      ["definitions/table/public_users.pgsql", "public.users"],
+      ["definitions/table/schedule.pgsql", "schedule"],
+      ["definitions/table/campaign_participants.pgsql", "campaign.participants"],
+      ["definitions/table/empty_table.pgsql", "empty_table"],
+      ["definitions/view/deleted_users.pgsql", "deleted_users"],
+      ["definitions/view/deleted_users.pgsql", "public.deleted_users"],
+      [
+        "definitions/view/campaign_deleted_participants.pgsql",
+        "campaign.deleted_participants",
+      ],
+      ["definitions/materialized_view/my_users.pgsql", "my_users"],
+      [
+        "definitions/function/positional_argument_function.pgsql",
+        "positional_argument_function",
+      ],
+      [
+        "definitions/function/positional_argument_function.pgsql",
+        "public.positional_argument_function",
+      ],
+      [
+        "definitions/function/keyword_argument_function.pgsql",
+        "keyword_argument_function",
+      ],
+      [
+        "definitions/procedure/correct_procedure.pgsql",
+        "correct_procedure",
+      ],
+      [
+        "definitions/function/constant_function.pgsql",
+        "constant_function",
+      ],
+      [
+        "definitions/type/type_user.pgsql",
+        "type_user",
+      ],
+      [
+        "definitions/type/type_user.pgsql",
+        "public.type_user",
+      ],
+      [
+        "definitions/type/type_single_field.pgsql",
+        "type_single_field",
+      ],
+      [
+        "definitions/type/type_single_field.pgsql",
+        "type_single_field",
+      ],
+      [
+        "definitions/type/type_empty.pgsql",
+        "type_empty",
+      ],
+      [
+        "definitions/domain/us_postal_code.pgsql",
+        "us_postal_code",
+      ],
+      [
+        "definitions/domain/jp_postal_code.pgsql",
+        "public.jp_postal_code",
+      ],
+      [
+        "definitions/index/users_id_name_index.pgsql",
+        "users_id_name_index",
+      ],
+    ])(
+      "can go to definition (%s)", async (source, target) => {
+        const documentUri = getSampleFileResource(source)
+        const definition = await onDefinition(documentUri, target)
 
-      validateDefinitionLinks(definition, [
-        LocationLink.create(
-          documentUri,
-          Range.create(0, 39, 5, 1),
-          Range.create(2, 13, 2, 22),
-        ),
-      ])
-    })
-
-    it("Definition on table with default schema", async () => {
-      const documentUri = getSampleFileResource("definitions/table/public_users.pgsql")
-      const definition = await onDefinition(documentUri, "public.users")
-
-      validateDefinitionLinks(definition, [
-        LocationLink.create(
-          documentUri,
-          Range.create(0, 42, 9, 1),
-          Range.create(2, 13, 2, 25),
-        ),
-      ])
-    })
-
-    it("Definition on table with non-default schema", async () => {
-      const documentUri = getSampleFileResource(
-        "definitions/table/campaign_participants.pgsql",
-      )
-      const definition = await onDefinition(documentUri, "campaign.participants")
-
-      validateDefinitionLinks(definition, [
-        LocationLink.create(
-          documentUri,
-          Range.create(0, 51, 8, 24),
-          Range.create(2, 13, 2, 34),
-        ),
-      ])
-    })
-
-    it("Definition on view", async () => {
-      const documentUri = getSampleFileResource("definitions/view/deleted_users.pgsql")
-      const definition = await onDefinition(documentUri, "deleted_users")
-
-      validateDefinitionLinks(definition, [
-        LocationLink.create(
-          documentUri,
-          Range.create(0, 42, 9, 20),
-          Range.create(2, 12, 2, 25),
-        ),
-      ])
-    })
+        expect(definition).toDefinitionUriEqual(documentUri)
+      },
+    )
 
     it("Definition with language server disable comment", async () => {
       const documentUri = getSampleFileResource("definitions/table/companies.pgsql")

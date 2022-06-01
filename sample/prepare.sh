@@ -13,6 +13,7 @@ sql_file=$(mktemp)
     cat definitions/view/*.pgsql
     cat definitions/materialized_view/*.pgsql
     cat definitions/type/*.pgsql
+    cat definitions/index/*.pgsql
     cat definitions/procedure/*.pgsql
     cat definitions/function/*.pgsql
     cat definitions/trigger/*.pgsql

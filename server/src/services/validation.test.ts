@@ -1,18 +1,16 @@
-import * as assert from "assert"
 import { Diagnostic, DiagnosticSeverity, Range } from "vscode-languageserver"
 
 import { DEFAULT_LOAD_FILE_OPTIONS, LoadFileOptions } from "@/__tests__/helpers/file"
 import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
 import {
-  makeSampleTextDocument,
+  loadSampleTextDocument,
   TestTextDocuments,
 } from "@/__tests__/helpers/textDocuments"
 import {
   KeywordQueryParameterPatternNotDefinedError,
 } from "@/postgres/parameters/keywordParameters"
 import { Server } from "@/server"
-import { neverReach } from "@/utilities/neverReach"
 
 describe("Validate Tests", () => {
   let server: Server
@@ -27,7 +25,7 @@ describe("Validate Tests", () => {
     file: string,
     options: LoadFileOptions = DEFAULT_LOAD_FILE_OPTIONS,
   ): Promise<Diagnostic[] | undefined> {
-    const document = makeSampleTextDocument(
+    const document = await loadSampleTextDocument(
       file,
       options,
     );
@@ -41,19 +39,6 @@ describe("Validate Tests", () => {
     return server.handlers.validate(document)
   }
 
-  function validateDiagnostics(
-    diagnostics: Diagnostic[] | undefined,
-    expectedDiagnostics: Diagnostic[],
-  ) {
-    expect(diagnostics).toBeDefined()
-    if (diagnostics === undefined) neverReach()
-
-    assert.deepEqual(
-      diagnostics,
-      expectedDiagnostics,
-    )
-  }
-
   describe("File Validation", function () {
     beforeEach(() => {
       const settings = new SettingsBuilder().build()
@@ -65,7 +50,7 @@ describe("Validate Tests", () => {
         "definitions/function/correct_function.pgsql",
       )
 
-      validateDiagnostics(diagnostics, [])
+      expect(diagnostics).toStrictEqual([])
     })
 
     it("FUNCTION has unused variable", async () => {
@@ -73,7 +58,7 @@ describe("Validate Tests", () => {
         "definitions/function/static_analysis_warning_function_unused_variable.pgsql",
       )
 
-      validateDiagnostics(diagnostics, [
+      expect(diagnostics).toStrictEqual([
         {
           severity: DiagnosticSeverity.Warning,
           message: 'unused variable "w_id"',
@@ -88,7 +73,7 @@ describe("Validate Tests", () => {
         { skipDisableComment: true },
       )
 
-      validateDiagnostics(diagnostics, [
+      expect(diagnostics).toStrictEqual([
         {
           severity: DiagnosticSeverity.Error,
           message: 'column "tags" does not exist',
@@ -102,7 +87,7 @@ describe("Validate Tests", () => {
         "queries/correct_query.pgsql",
       )
 
-      validateDiagnostics(diagnostics, [])
+      expect(diagnostics).toStrictEqual([])
     })
 
     it("Syntax error query", async () => {
@@ -111,7 +96,7 @@ describe("Validate Tests", () => {
         { skipDisableComment: true },
       )
 
-      validateDiagnostics(diagnostics, [
+      expect(diagnostics).toStrictEqual([
         {
           severity: DiagnosticSeverity.Error,
           message: 'column "tags" does not exist',
@@ -167,7 +152,7 @@ describe("Validate Tests", () => {
           "queries/correct_query_with_keyword_parameter.pgsql",
         )
 
-        validateDiagnostics(diagnostics, [
+        expect(diagnostics).toStrictEqual([
           {
             severity: DiagnosticSeverity.Error,
             message: new KeywordQueryParameterPatternNotDefinedError().message,
@@ -190,7 +175,7 @@ describe("Validate Tests", () => {
         "queries/correct_query_with_default_positional_parameter.pgsql",
       )
 
-      validateDiagnostics(diagnostics, [])
+      expect(diagnostics).toStrictEqual([])
     })
   })
 
@@ -208,7 +193,7 @@ describe("Validate Tests", () => {
         { skipDisableComment: true },
       )
 
-      validateDiagnostics(diagnostics, [])
+      expect(diagnostics).toStrictEqual([])
     })
   })
 
@@ -223,7 +208,7 @@ describe("Validate Tests", () => {
         "queries/correct_query_with_positional_parameter.pgsql",
       )
 
-      validateDiagnostics(diagnostics, [])
+      expect(diagnostics).toStrictEqual([])
     })
 
     it("Correct query with arbitory positional parameters", async () => {
@@ -231,7 +216,7 @@ describe("Validate Tests", () => {
         "queries/correct_query_with_arbitory_positional_parameter.pgsql",
       )
 
-      validateDiagnostics(diagnostics, [])
+      expect(diagnostics).toStrictEqual([])
     })
   })
 
@@ -248,7 +233,7 @@ describe("Validate Tests", () => {
         "queries/correct_query_with_keyword_parameter.pgsql",
       )
 
-      validateDiagnostics(diagnostics, [])
+      expect(diagnostics).toStrictEqual([])
     })
 
     it("Correct query with arbitory keyword parameters", async () => {
@@ -256,7 +241,7 @@ describe("Validate Tests", () => {
         "queries/correct_query_with_arbitory_keyword_parameter.pgsql",
       )
 
-      validateDiagnostics(diagnostics, [])
+      expect(diagnostics).toStrictEqual([])
     })
   })
 })

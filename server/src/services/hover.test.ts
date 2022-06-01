@@ -1,5 +1,4 @@
 /* eslint-disable max-len */
-import * as assert from "assert"
 import dedent from "ts-dedent"
 import { Hover, MarkupContent, Position } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
@@ -7,7 +6,7 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
 import {
-  makeSampleTextDocument,
+  loadSampleTextDocument,
   TestTextDocuments,
 } from "@/__tests__/helpers/textDocuments"
 import { Server } from "@/server"
@@ -15,6 +14,33 @@ import { Settings } from "@/settings"
 import { neverReach } from "@/utilities/neverReach"
 import { makeDefinitionLinkMarkdown, makePostgresCodeMarkdown } from "@/utilities/text"
 
+jest.setTimeout(10000)
+
+expect.extend({
+  toHoverCodeEqual(
+    hover: Hover | undefined, expectedCode: string,
+  ) {
+    expect(hover).toBeDefined()
+    if (hover === undefined) neverReach()
+
+    if (MarkupContent.is(hover.contents)
+      && (hover.contents as MarkupContent).kind === "markdown" &&
+      (hover.contents as MarkupContent).value === expectedCode) {
+      return {
+        pass: true,
+        message: () =>
+          `expected not to equal Hover code ${expectedCode}`,
+      }
+    }
+    else {
+      return {
+        pass: false,
+        message: () =>
+          `expected to equal Hover code ${expectedCode}`,
+      }
+    }
+  },
+})
 
 describe("Hover Tests", () => {
   let settings: Settings
@@ -42,10 +68,9 @@ describe("Hover Tests", () => {
     return linkMarkdown
   }
 
-  function updateFileDefinitions(targetFile: string) {
-    server.definitionsManager.updateFileDefinitions(
-      makeSampleTextDocument(targetFile),
-      settings.defaultSchema,
+  async function updateDocumentDefinitions(targetFile: string) {
+    server.definitionsManager.updateDocumentDefinitions(
+      await loadSampleTextDocument(targetFile), settings, server.logger,
     )
   }
 
@@ -67,28 +92,13 @@ describe("Hover Tests", () => {
     })
   }
 
-  function validateHoverContent(
-    hover: Hover | undefined, expectedCode: string,
-  ) {
-    expect(hover).toBeDefined()
-    if (hover === undefined) neverReach()
-
-    assert.strictEqual(MarkupContent.is(hover.contents), true)
-    assert.strictEqual((hover.contents as MarkupContent).kind, "markdown")
-    assert.strictEqual(
-      (hover.contents as MarkupContent).value,
-      expectedCode,
-    )
-  }
-
   describe("Hover", function () {
     it("Hover on table", async () => {
-      updateFileDefinitions("definitions/table/companies.pgsql")
+      await updateDocumentDefinitions("definitions/table/companies.pgsql")
 
       const hover = await onHover("companies")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         dedent`
           \`\`\`postgres
           TABLE public.companies(
@@ -107,13 +117,13 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on table with default schema", async () => {
-      updateFileDefinitions("definitions/table/public_users.pgsql")
-      updateFileDefinitions("definitions/trigger/user_update.pgsql")
+      await updateDocumentDefinitions("definitions/table/public_users.pgsql")
+      await updateDocumentDefinitions("definitions/trigger/user_update.pgsql")
+      await updateDocumentDefinitions("definitions/index/users_id_name_index.pgsql")
 
       const hover = await onHover("public.users")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         dedent`
         \`\`\`postgres
         TABLE public.users(
@@ -144,13 +154,12 @@ describe("Hover Tests", () => {
       )
     })
 
-    it("Hover on table with exclude index", async () => {
-      updateFileDefinitions("definitions/table/schedule.pgsql")
+    it("Hover on table without index", async () => {
+      await updateDocumentDefinitions("definitions/table/schedule.pgsql")
 
       const hover = await onHover("schedule")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         dedent`
           \`\`\`postgres
           TABLE public.schedule(
@@ -170,12 +179,11 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on table with non-default schema", async () => {
-      updateFileDefinitions("definitions/table/campaign_participants.pgsql")
+      await updateDocumentDefinitions("definitions/table/campaign_participants.pgsql")
 
       const hover = await onHover("campaign.participants")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         dedent`
           \`\`\`postgres
           TABLE campaign.participants(
@@ -195,11 +203,12 @@ describe("Hover Tests", () => {
       )
     })
 
-    it("Hover on table with empty column", async () => {
+    it("Hover on empty column table", async () => {
+      await updateDocumentDefinitions("definitions/table/empty_table.pgsql")
+
       const hover = await onHover("empty_table")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             TABLE public.empty_table()
@@ -209,10 +218,11 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on view", async () => {
+      await updateDocumentDefinitions("definitions/view/deleted_users.pgsql")
+
       const hover = await onHover("deleted_users")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             VIEW public.deleted_users
@@ -222,10 +232,11 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on view with default schema", async () => {
+      await updateDocumentDefinitions("definitions/view/deleted_users.pgsql")
+
       const hover = await onHover("public.deleted_users")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             VIEW public.deleted_users
@@ -235,10 +246,11 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on view with non-default schema", async () => {
+      await updateDocumentDefinitions("definitions/view/campaign_deleted_participants.pgsql")
+
       const hover = await onHover("campaign.deleted_participants")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             VIEW campaign.deleted_participants
@@ -248,10 +260,11 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on materialized view", async () => {
+      await updateDocumentDefinitions("definitions/materialized_view/my_users.pgsql")
+
       const hover = await onHover("my_users")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             MATERIALIZED VIEW public.my_users
@@ -261,10 +274,11 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on positional argument function", async () => {
+      await updateDocumentDefinitions("definitions/function/positional_argument_function.pgsql")
+
       const hover = await onHover("positional_argument_function")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             FUNCTION public.positional_argument_function(
@@ -280,10 +294,11 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on positional argument function with default schema", async () => {
+      await updateDocumentDefinitions("definitions/function/positional_argument_function.pgsql")
+
       const hover = await onHover("public.positional_argument_function")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             FUNCTION public.positional_argument_function(
@@ -299,10 +314,11 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on keyword argument function", async () => {
+      await updateDocumentDefinitions("definitions/function/keyword_argument_function.pgsql")
+
       const hover = await onHover("keyword_argument_function")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             FUNCTION public.keyword_argument_function(
@@ -319,8 +335,7 @@ describe("Hover Tests", () => {
     it("Hover on built-in function", async () => {
       const hover = await onHover("jsonb_build_object")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             FUNCTION pg_catalog.jsonb_build_object()
@@ -340,10 +355,11 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on proceduren", async () => {
+      await updateDocumentDefinitions("definitions/procedure/correct_procedure.pgsql")
+
       const hover = await onHover("correct_procedure")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             FUNCTION public.correct_procedure(
@@ -358,10 +374,11 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on constant function", async () => {
+      await updateDocumentDefinitions("definitions/function/constant_function.pgsql")
+
       const hover = await onHover("constant_function")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             FUNCTION public.constant_function()
@@ -374,10 +391,11 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on type", async () => {
+      await updateDocumentDefinitions("definitions/type/type_user.pgsql")
+
       const hover = await onHover("type_user")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             TYPE public.type_user(
@@ -390,10 +408,11 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on type with default schema", async () => {
+      await updateDocumentDefinitions("definitions/type/type_user.pgsql")
+
       const hover = await onHover("public.type_user")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             TYPE public.type_user(
@@ -406,10 +425,11 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on the single field type", async () => {
+      await updateDocumentDefinitions("definitions/type/type_single_field.pgsql")
+
       const hover = await onHover("type_single_field")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             TYPE public.type_single_field(
@@ -421,10 +441,11 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on type with empty column", async () => {
+      await updateDocumentDefinitions("definitions/type/type_empty.pgsql")
+
       const hover = await onHover("public.type_empty")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             TYPE public.type_empty()
@@ -434,10 +455,11 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on domain", async () => {
+      await updateDocumentDefinitions("definitions/domain/us_postal_code.pgsql")
+
       const hover = await onHover("us_postal_code")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             DOMAIN public.us_postal_code AS text
@@ -447,10 +469,11 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on domain with default schema", async () => {
+      await updateDocumentDefinitions("definitions/domain/jp_postal_code.pgsql")
+
       const hover = await onHover("public.jp_postal_code")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             DOMAIN public.jp_postal_code AS text
@@ -460,10 +483,11 @@ describe("Hover Tests", () => {
     })
 
     it("Hover on index", async () => {
+      await updateDocumentDefinitions("definitions/table/public_users.pgsql")
+
       const hover = await onHover("users_id_name_index")
 
-      validateHoverContent(
-        hover,
+      expect(hover).toHoverCodeEqual(
         makePostgresCodeMarkdown(
           dedent`
             INDEX users_id_name_index

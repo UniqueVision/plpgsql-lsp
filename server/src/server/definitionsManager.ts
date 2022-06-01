@@ -1,54 +1,49 @@
-import { sync as glob } from "glob"
 import { DefinitionLink, Logger, URI, WorkspaceFolder } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { parseDefinitions } from "@/postgres/parsers/parseDefinitions"
-import { parseStmtements } from "@/postgres/parsers/statement"
+import { parseDefinitions } from "@/services/definition"
 import { Settings } from "@/settings"
 import { disableLanguageServer } from "@/utilities/disableLanguageServer"
-import { makeDefinitionLinkMarkdown, readTextDocumentFromUri } from "@/utilities/text"
+import {
+  loadWorkspaceFiles, makeDefinitionLinkMarkdown, readTextDocumentFromUri,
+} from "@/utilities/text"
 
-export type Definition = string;
-export type DefinitionCandidate = {
-  definition: Definition,
-  definitionLink: DefinitionLink
+export type DefinitionName = string;
+export type Definition = {
+  name: DefinitionName,
+  link: DefinitionLink
 };
 
 export class DefinitionsManager {
-  private workspaceFolderUris: Set<URI> = new Set()
-  private candidates: Map<Definition, DefinitionLink[]> = new Map()
-  private fileDefinitions: Map<URI, Definition[]> = new Map()
-
-  hasWorkspaceFolder(workspaceFolder: WorkspaceFolder): boolean {
-    return this.workspaceFolderUris.has(workspaceFolder.uri)
-  }
+  private definitions: Map<DefinitionName, DefinitionLink[]> = new Map()
+  private fileDefinitions: Map<URI, DefinitionName[]> = new Map()
 
   hasFileDefinitions(uri: URI): boolean {
     return this.fileDefinitions.has(uri)
   }
 
-  getDefinitionLinks(definition: Definition): DefinitionLink[] | undefined {
-    return this.candidates.get(definition)
+  getDefinitionLinks(name: DefinitionName): DefinitionLink[] | undefined {
+    return this.definitions.get(name)
   }
 
-  async updateFileDefinitions(
+  async updateDocumentDefinitions(
     document: TextDocument,
-    defaultSchema: string,
-  ): Promise<DefinitionCandidate[] | undefined> {
-    const fileText = document.getText()
+    settings: Settings,
+    logger: Logger,
+  ): Promise<void> {
+    logger.log("The file definitions are updating...")
 
-    const statements = await parseStmtements(fileText)
-    if (statements === undefined) {
-      return undefined
-    }
-
-    const definitions = parseDefinitions(
-      fileText, statements, document.uri, defaultSchema,
+    const definitions = await this.innerUpdateDocumentDefinitions(
+      document, settings.defaultSchema, logger,
     )
 
-    this.updateCandidates(document.uri, definitions)
+    if (definitions !== undefined) {
+      const names = definitions.map(definition => definition.name)
 
-    return definitions
+      logger.log(
+        `The file definitions have been updated!! 😎 ${JSON.stringify(names)}`,
+      )
+    }
   }
 
   async loadWorkspaceDefinitions(
@@ -56,51 +51,58 @@ export class DefinitionsManager {
     settings: Settings,
     logger: Logger,
   ): Promise<void> {
-    this.workspaceFolderUris.add(workspaceFolder.uri)
+    logger.log(`The "${workspaceFolder.name}" workspace definitions are loading...`)
 
-    const files = [
-      ...new Set(
-        settings.definitionFiles.flatMap((filePattern) => glob(filePattern)),
-      ),
-    ]
-
-    for (const file of files) {
-      const documentUri = `${workspaceFolder.uri}/${file}`
-      const document = readTextDocumentFromUri(documentUri)
+    for (const file of await loadWorkspaceFiles(workspaceFolder, settings)) {
+      const document = await readTextDocumentFromUri(`${workspaceFolder.uri}/${file}`)
 
       if (disableLanguageServer(document)) {
         continue
       }
 
-      try {
-        await this.updateFileDefinitions(
-          document, settings.defaultSchema,
-        )
-      }
-      catch (error: unknown) {
-        logger.error(
-          `The definitions of "${documentUri}" cannot load.`
-          + ` ${(error as Error).message}`,
-        )
-      }
+      await this.innerUpdateDocumentDefinitions(
+        document, settings.defaultSchema, logger,
+      )
     }
+
+    logger.log("The definitions have been loaded!! 👍")
   }
 
-  private updateCandidates(
-    uri: URI, candidates: DefinitionCandidate[] | undefined,
+  private async innerUpdateDocumentDefinitions(
+    document: TextDocument,
+    defaultSchema: string,
+    logger: Logger,
+  ): Promise<Definition[] | undefined> {
+    const fileText = document.getText()
+
+
+    const definitions = await parseDefinitions(
+      document.uri, fileText, defaultSchema, logger,
+    )
+    if (definitions === undefined) {
+      return undefined
+    }
+
+    this.updateDefinitions(document.uri, definitions)
+
+    return definitions
+  }
+
+  private updateDefinitions(
+    uri: URI, definitions: Definition[] | undefined,
   ): void {
     const oldDefinitions = this.fileDefinitions.get(uri)
 
     // Remove old definition of a target uri.
     if (oldDefinitions !== undefined) {
-      for (const candidate of oldDefinitions) {
-        const oldDefinitionLinks = this.candidates.get(candidate)
+      for (const definition of oldDefinitions) {
+        const oldDefinitionLinks = this.definitions.get(definition)
         if (oldDefinitionLinks === undefined) {
           continue
         }
 
-        this.candidates.set(
-          candidate,
+        this.definitions.set(
+          definition,
           oldDefinitionLinks.filter(
             (definition) => definition.targetUri !== uri,
           ),
@@ -109,20 +111,20 @@ export class DefinitionsManager {
       this.fileDefinitions.delete(uri)
     }
 
-    if (candidates === undefined || candidates.length === 0) {
+    if (definitions === undefined || definitions.length === 0) {
       return
     }
 
     // Update new definition of a target uri.
-    for (const { definition, definitionLink } of candidates) {
-      const definitionLinks = this.candidates.get(definition) || []
-      definitionLinks.push(definitionLink)
-      this.candidates.set(definition, definitionLinks)
+    for (const { name, link } of definitions) {
+      const links = this.definitions.get(name) || []
+      links.push(link)
+      this.definitions.set(name, links)
     }
 
     this.fileDefinitions.set(
       uri,
-      candidates.map((candidate) => candidate.definition),
+      definitions.map((definition) => definition.name),
     )
   }
 }

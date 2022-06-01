@@ -4,7 +4,7 @@ import { DEFAULT_LOAD_FILE_OPTIONS, LoadFileOptions } from "@/__tests__/helpers/
 import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
 import {
-  makeSampleTextDocument,
+  loadSampleTextDocument,
   TestTextDocuments,
 } from "@/__tests__/helpers/textDocuments"
 import {
@@ -15,7 +15,7 @@ import {
 } from "@/errors"
 import { Server } from "@/server"
 
-import { FILE_QUERY_COMMAND_INFO } from "./executeFileQuery"
+import { FILE_QUERY_COMMAND } from "./executeFileQuery"
 
 describe("CommandExecuter.executeFileQuery Tests", () => {
   let server: Server
@@ -30,7 +30,7 @@ describe("CommandExecuter.executeFileQuery Tests", () => {
     file: string,
     options: LoadFileOptions = DEFAULT_LOAD_FILE_OPTIONS,
   ): Promise<void> {
-    const document = makeSampleTextDocument(
+    const document = await loadSampleTextDocument(
       file,
       options,
     );
@@ -46,7 +46,7 @@ describe("CommandExecuter.executeFileQuery Tests", () => {
 
     await server.commandExecuter?.execute(
       {
-        command: FILE_QUERY_COMMAND_INFO.command,
+        command: FILE_QUERY_COMMAND.name,
         arguments: [document.uri],
       },
     )

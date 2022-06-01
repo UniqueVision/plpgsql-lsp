@@ -21,6 +21,7 @@ import {
   TextDocumentChangeEvent,
   TextDocumentIdentifier,
   TextDocuments,
+  URI,
   WorkspaceSymbolParams,
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
@@ -53,6 +54,8 @@ export type HandlersOptions = {
 }
 
 export class Handlers {
+  private workspaceFolderUris: Set<URI> = new Set()
+
   constructor(
     private readonly connection: Connection,
     private readonly pgPools: PostgresPoolMap,
@@ -111,36 +114,19 @@ export class Handlers {
       return
     }
 
-    if (!this.definitionsManager.hasWorkspaceFolder(workspaceFolder)) {
+    if (!this.workspaceFolderUris.has(workspaceFolder.uri)) {
+      this.workspaceFolderUris.add(workspaceFolder.uri)
+
       const settings = await this.settingsManager.get(event.document.uri)
 
-      this.logger.log(
-        `The "${workspaceFolder.name}" workspace definitions are loading...`,
-      )
-
-      await this.definitionsManager.loadWorkspaceDefinitions(
-        workspaceFolder,
-        settings,
-        this.logger,
-      )
-
-      this.logger.log("The definitions have been loaded!! 👍")
-    }
-
-    if (!this.symbolsManager.hasWorkspaceFolder(workspaceFolder)) {
-      const settings = await this.settingsManager.get(event.document.uri)
-
-      this.logger.log(
-        `The "${workspaceFolder.name}" workspace symbols are loading...`,
-      )
-
-      await this.symbolsManager.loadWorkspaceSymbols(
-        workspaceFolder,
-        settings,
-        this.logger,
-      )
-
-      this.logger.log("The symbols have been loaded!! 👍")
+      await Promise.all([
+        this.definitionsManager.loadWorkspaceDefinitions(
+          workspaceFolder, settings, this.logger,
+        ),
+        this.symbolsManager.loadWorkspaceSymbols(
+          workspaceFolder, settings, this.logger,
+        ),
+      ])
     }
   }
 
@@ -155,46 +141,26 @@ export class Handlers {
 
     await this.validate(document, { isComplete: true })
 
+    const settings = await this.settingsManager.get(document.uri)
+
+    // Update File Definitions.
     if (
       this.definitionsManager.hasFileDefinitions(document.uri)
       || await this.settingsManager.isDefinitionTarget(document.uri)
     ) {
-      const settings = await this.settingsManager.get(document.uri)
-
-      this.logger.log("The file definitions are updating...")
-
-      const candidates = await this.definitionsManager.updateFileDefinitions(
-        document, settings.defaultSchema,
+      await this.definitionsManager.updateDocumentDefinitions(
+        document, settings, this.logger,
       )
-
-      if (candidates !== undefined) {
-        const definitions = candidates.map(candidate => candidate.definition)
-
-        this.logger.log(
-          `The file definitions have been updated!! 😎 ${JSON.stringify(definitions)}`,
-        )
-      }
     }
 
+    // Update File Symbols.
     if (
       this.symbolsManager.hasFileSymbols(document.uri)
       || await this.settingsManager.isDefinitionTarget(document.uri)
     ) {
-      const settings = await this.settingsManager.get(document.uri)
-
-      this.logger.log("The file definitions are updating...")
-
-      const symbols = await this.symbolsManager.updateFileSymbols(
-        document, settings.defaultSchema,
+      await this.symbolsManager.updateDocumentSymbols(
+        document, settings, this.logger,
       )
-
-      if (symbols !== undefined) {
-        const symbolNames = symbols.map(symbol => symbol.name)
-
-        this.logger.log(
-          `The file symbols have been updated!! 😎 ${JSON.stringify(symbolNames)}`,
-        )
-      }
     }
   }
 
@@ -287,7 +253,7 @@ export class Handlers {
     }
     const settings = await this.settingsManager.get(document.uri)
 
-    return getDocumentSymbols(document, settings)
+    return getDocumentSymbols(document, settings, this.logger)
   }
 
   async onExecuteCommand(params: ExecuteCommandParams): Promise<void> {

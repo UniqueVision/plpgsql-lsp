@@ -1,25 +1,13 @@
-import { sync as glob } from "glob"
 import { Logger, SymbolInformation, URI, WorkspaceFolder } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { parseDocumentSymbols } from "@/postgres/parsers/parseSymbols"
+import { parseDocumentSymbols } from "@/services/symbol"
 import { Settings } from "@/settings"
 import { disableLanguageServer } from "@/utilities/disableLanguageServer"
-import { readTextDocumentFromUri } from "@/utilities/text"
-
-export type Definition = string;
-export type DefinitionCandidate = {
-  definition: Definition,
-  definitionLink: SymbolInformation
-};
+import { loadWorkspaceFiles, readTextDocumentFromUri } from "@/utilities/text"
 
 export class SymbolsManager {
-  private workspaceFolderUris: Set<URI> = new Set()
   private fileSymbols: Map<URI, SymbolInformation[]> = new Map()
-
-  hasWorkspaceFolder(workspaceFolder: WorkspaceFolder): boolean {
-    return this.workspaceFolderUris.has(workspaceFolder.uri)
-  }
 
   hasFileSymbols(uri: URI): boolean {
     return this.fileSymbols.has(uri)
@@ -31,16 +19,24 @@ export class SymbolsManager {
       .sort((a, b) => (a.name > b.name ? -1 : 1))
   }
 
-  async updateFileSymbols(
+  async updateDocumentSymbols(
     document: TextDocument,
-    defaultSchema: string,
-  ): Promise<SymbolInformation[] | undefined> {
-    const symbols = await parseDocumentSymbols(
-      document.getText(), document.uri, defaultSchema,
-    )
-    this.fileSymbols.set(document.uri, symbols || [])
+    settings: Settings,
+    logger: Logger,
+  ): Promise<void> {
+    logger.log("The file symbols are updating...")
 
-    return symbols
+    const symbols = await this.innerUpdateDocumentSymbols(
+      document, settings.defaultSchema, logger,
+    )
+
+    if (symbols !== undefined) {
+      const symbolNames = symbols.map(symbol => symbol.name)
+
+      logger.log(
+        `The file symbols have been updated!! 😎 ${JSON.stringify(symbolNames)}`,
+      )
+    }
   }
 
   async loadWorkspaceSymbols(
@@ -48,33 +44,33 @@ export class SymbolsManager {
     settings: Settings,
     logger: Logger,
   ): Promise<void> {
-    this.workspaceFolderUris.add(workspaceFolder.uri)
+    logger.log(`The "${workspaceFolder.name}" workspace symbols are loading...`)
 
-    const files = [
-      ...new Set(
-        settings.definitionFiles.flatMap((filePattern) => glob(filePattern)),
-      ),
-    ]
-
-    for (const file of files) {
-      const documentUri = `${workspaceFolder.uri}/${file}`
-      const document = readTextDocumentFromUri(documentUri)
+    for (const file of await loadWorkspaceFiles(workspaceFolder, settings)) {
+      const document = await readTextDocumentFromUri(`${workspaceFolder.uri}/${file}`)
 
       if (disableLanguageServer(document)) {
         continue
       }
 
-      try {
-        await this.updateFileSymbols(
-          document, settings.defaultSchema,
-        )
-      }
-      catch (error: unknown) {
-        logger.error(
-          `The symbols of "${documentUri}" cannot load.`
-          + ` ${(error as Error).message}`,
-        )
-      }
+      await this.innerUpdateDocumentSymbols(
+        document, settings.defaultSchema, logger,
+      )
     }
+
+    logger.log("The symbols have been loaded!! 👍")
+  }
+
+  private async innerUpdateDocumentSymbols(
+    document: TextDocument,
+    defaultSchema: string,
+    logger: Logger,
+  ): Promise<SymbolInformation[] | undefined> {
+    const symbols = await parseDocumentSymbols(
+      document.uri, document.getText(), defaultSchema, logger,
+    )
+    this.fileSymbols.set(document.uri, symbols || [])
+
+    return symbols
   }
 }

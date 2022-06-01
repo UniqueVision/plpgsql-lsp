@@ -1,8 +1,12 @@
-import { existsSync, readFileSync } from "fs"
-import { Position, Range, uinteger, URI } from "vscode-languageserver"
+import { existsSync, promises as fs } from "fs"
+import glob from "glob-promise"
+import { Position, Range, uinteger, URI, WorkspaceFolder } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { Definition, DefinitionsManager } from "@/server/definitionsManager"
+import { DefinitionName, DefinitionsManager } from "@/server/definitionsManager"
+import { Settings } from "@/settings"
+
+import { asyncFlatMap } from "./functool"
 
 export function getWordRangeAtPosition(
   document: TextDocument, position: Position,
@@ -129,12 +133,14 @@ export function makeListMarkdown(items: string[]): string {
 }
 
 export function makeDefinitionLinkMarkdown(
-  target: string, definitionsManager: DefinitionsManager, definition?: Definition,
+  target: string,
+  definitionsManager: DefinitionsManager,
+  definitionName?: DefinitionName,
 ): string | undefined {
-  if (definition === undefined) {
-    definition = target
+  if (definitionName === undefined) {
+    definitionName = target
   }
-  const definitionLinks = definitionsManager.getDefinitionLinks(definition)
+  const definitionLinks = definitionsManager.getDefinitionLinks(definitionName)
   if (definitionLinks && definitionLinks.length >= 1) {
     const link = [
       definitionLinks[0].targetUri,
@@ -180,18 +186,31 @@ export function isFirstCommentLine(
   )
 }
 
-export function readFileFromUri(uri: URI): string | null {
+export async function readFileFromUri(uri: URI): Promise<string | null> {
   const filePath = uri.replace(/^file:\/\//, "")
   if (existsSync(filePath)) {
-    return readFileSync(filePath).toString()
+    return (await fs.readFile(filePath)).toString()
   }
   else {
     return null
   }
 }
 
-export function readTextDocumentFromUri(uri: URI): TextDocument {
+export async function readTextDocumentFromUri(uri: URI): Promise<TextDocument> {
   return TextDocument.create(
-    uri, "postgres", 1, readFileFromUri(uri) || "",
+    uri, "postgres", 1, await readFileFromUri(uri) || "",
   )
+}
+
+export async function loadWorkspaceFiles(
+  _workspaceFolder: WorkspaceFolder, settings: Settings,
+) {
+  return [
+    ...new Set(
+      await asyncFlatMap(
+        settings.definitionFiles,
+        (filePattern) => glob.promise(filePattern),
+      ),
+    ),
+  ]
 }

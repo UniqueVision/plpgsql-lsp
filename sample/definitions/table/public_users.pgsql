@@ -8,5 +8,3 @@ CREATE TABLE public.users (
   updated_at timestamp with time zone not null DEFAULT now(),
   deleted_at timestamp with time zone CHECK (deleted_at > created_at)
 );
-
-CREATE INDEX users_id_name_index ON public.users (id, name);
