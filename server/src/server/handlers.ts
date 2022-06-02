@@ -141,9 +141,9 @@ export class Handlers {
 
     await this.validate(document, { isComplete: true })
 
-    const settings = await this.settingsManager.get(document.uri)
-
     if (await this.settingsManager.isDefinitionTarget(document.uri)) {
+      const settings = await this.settingsManager.get(document.uri)
+
       await Promise.all([
         this.definitionsManager.updateDocumentDefinitions(
           document, settings, this.logger,
