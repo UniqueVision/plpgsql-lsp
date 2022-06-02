@@ -18,10 +18,6 @@ export class DefinitionsManager {
   private definitions: Map<DefinitionName, DefinitionLink[]> = new Map()
   private fileDefinitions: Map<URI, DefinitionName[]> = new Map()
 
-  hasFileDefinitions(uri: URI): boolean {
-    return this.fileDefinitions.has(uri)
-  }
-
   getDefinitionLinks(name: DefinitionName): DefinitionLink[] | undefined {
     return this.definitions.get(name)
   }

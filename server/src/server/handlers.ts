@@ -143,24 +143,15 @@ export class Handlers {
 
     const settings = await this.settingsManager.get(document.uri)
 
-    // Update File Definitions.
-    if (
-      this.definitionsManager.hasFileDefinitions(document.uri)
-      || await this.settingsManager.isDefinitionTarget(document.uri)
-    ) {
-      await this.definitionsManager.updateDocumentDefinitions(
-        document, settings, this.logger,
-      )
-    }
-
-    // Update File Symbols.
-    if (
-      this.symbolsManager.hasFileSymbols(document.uri)
-      || await this.settingsManager.isDefinitionTarget(document.uri)
-    ) {
-      await this.symbolsManager.updateDocumentSymbols(
-        document, settings, this.logger,
-      )
+    if (await this.settingsManager.isDefinitionTarget(document.uri)) {
+      await Promise.all([
+        this.definitionsManager.updateDocumentDefinitions(
+          document, settings, this.logger,
+        ),
+        this.symbolsManager.updateDocumentSymbols(
+          document, settings, this.logger,
+        ),
+      ])
     }
   }
 

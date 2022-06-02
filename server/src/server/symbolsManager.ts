@@ -9,10 +9,6 @@ import { loadWorkspaceFiles, readTextDocumentFromUri } from "@/utilities/text"
 export class SymbolsManager {
   private fileSymbols: Map<URI, SymbolInformation[]> = new Map()
 
-  hasFileSymbols(uri: URI): boolean {
-    return this.fileSymbols.has(uri)
-  }
-
   getSymbols(): SymbolInformation[] | undefined {
     return Array.from(this.fileSymbols.values())
       .flat()
