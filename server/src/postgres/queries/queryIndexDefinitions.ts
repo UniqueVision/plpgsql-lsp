@@ -3,7 +3,7 @@ import { Logger } from "vscode-languageserver"
 
 import { PostgresPool } from "@/postgres"
 
-interface IndexDefinition {
+export interface IndexDefinition {
   indexName: string
   tableName: string
   indexDefinition: string

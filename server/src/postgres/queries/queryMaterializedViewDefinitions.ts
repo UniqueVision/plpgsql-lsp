@@ -4,7 +4,7 @@ import { Logger } from "vscode-languageserver"
 import { PostgresPool } from "@/postgres"
 import { makeSchemas } from "@/utilities/schema"
 
-interface MaterializedViewDefinition {
+export interface MaterializedViewDefinition {
   viewName: string
   schemaName: string
 }

@@ -3,7 +3,7 @@ import { Logger } from "vscode-languageserver"
 
 import { PostgresPool } from "@/postgres"
 
-interface TriggerDefinition {
+export interface TriggerDefinition {
   triggerName: string
   actionStatement: string
 }

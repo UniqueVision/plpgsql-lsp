@@ -2,7 +2,7 @@ import dedent from "ts-dedent"
 import { Hover, Logger, MarkupKind, Position } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { PostgresPool } from "@/postgres"
+import { PostgresDefinition, PostgresPool } from "@/postgres"
 import {
   makeDomainDefinitionText,
   queryDomainDefinitions,
@@ -61,6 +61,20 @@ import {
   makePostgresCodeMarkdown,
 } from "@/utilities/text"
 
+type HoverHelperMethods<T> = {
+  queryDefinitions: (
+    pgPool: PostgresPool,
+    schema: string | undefined,
+    candidate: string,
+    defaultSchema: string,
+    logger: Logger
+  ) => Promise<T[]>,
+
+  makeDefininitionText: (
+    definition: T
+  ) => string,
+}
+
 export async function getHover(
   pgPool: PostgresPool,
   definitionsManager: DefinitionsManager,
@@ -92,60 +106,47 @@ export async function getHover(
       return tableHover
     }
 
-    // Check as View
-    const viewHover = await getViewHover(
-      pgPool, schema, candidate, defaultSchema, logger,
-    )
-    if (viewHover !== undefined) {
-      return viewHover
-    }
-
-    // Check as Materialized View
-    const materializedViewHover = await getMaterializedViewHover(
-      pgPool, schema, candidate, defaultSchema, logger,
-    )
-    if (materializedViewHover !== undefined) {
-      return materializedViewHover
-    }
-
-    // Check as Function
-    const functionHover = await getFunctionHover(
-      pgPool, schema, candidate, defaultSchema, logger,
-    )
-    if (functionHover !== undefined) {
-      return functionHover
-    }
-
-    // Check as Type
-    const typeHover = await getTypeHover(
-      pgPool, schema, candidate, defaultSchema, logger,
-    )
-    if (typeHover !== undefined) {
-      return typeHover
-    }
-
-    // Check as Domain
-    const domainHover = await getDomainHover(
-      pgPool, schema, candidate, defaultSchema, logger,
-    )
-    if (domainHover !== undefined) {
-      return domainHover
-    }
-
-    // Check as Index
-    const indexHover = await getIndexHover(
-      pgPool, schema, candidate, defaultSchema, logger,
-    )
-    if (indexHover !== undefined) {
-      return indexHover
-    }
-
-    // Check as Trigger
-    const triggerHover = await getTriggerHover(
-      pgPool, schema, candidate, defaultSchema, logger,
-    )
-    if (triggerHover !== undefined) {
-      return triggerHover
+    for (const hoverMethods of [
+      {
+        queryDefinitions: queryViewDefinitions,
+        makeDefininitionText: makeViewDefinitionText,
+      },
+      {
+        queryDefinitions: queryMaterializedViewDefinitions,
+        makeDefininitionText: makeMaterializedViewDefinitionText,
+      },
+      {
+        queryDefinitions: queryFunctionDefinitions,
+        makeDefininitionText: makeFunctionDefinitionText,
+      },
+      {
+        queryDefinitions: queryTypeDefinitions,
+        makeDefininitionText: makeTypeDefinitionText,
+      },
+      {
+        queryDefinitions: queryDomainDefinitions,
+        makeDefininitionText: makeDomainDefinitionText,
+      },
+      {
+        queryDefinitions: queryIndexDefinitions,
+        makeDefininitionText: makeIndexDefinitionText,
+      },
+      {
+        queryDefinitions: queryTriggerDefinitions,
+        makeDefininitionText: makeTriggerDefinitionText,
+      },
+    ]) {
+      const hover = await makeHover(
+        pgPool,
+        schema,
+        candidate,
+        defaultSchema,
+        logger,
+        hoverMethods as HoverHelperMethods<PostgresDefinition>,
+      )
+      if (hover !== undefined) {
+        return hover
+      }
     }
   }
 
@@ -270,135 +271,21 @@ async function getTableHover(
   }
 }
 
-async function getViewHover(
-  pgPool: PostgresPool,
-  schema: string | undefined,
-  viewName: string,
-  defaultSchema: string,
-  logger: Logger,
-): Promise<Hover | undefined> {
-  const definitions = await queryViewDefinitions(
-    pgPool, schema, viewName, defaultSchema, logger,
-  )
-
-  return await makeHover(
-    definitions.map(
-      (definition) => makeViewDefinitionText(definition),
-    ),
-  )
-}
-
-async function getMaterializedViewHover(
-  pgPool: PostgresPool,
-  schema: string | undefined,
-  viewName: string,
-  defaultSchema: string,
-  logger: Logger,
-): Promise<Hover | undefined> {
-  const definitions = await queryMaterializedViewDefinitions(
-    pgPool, schema, viewName, defaultSchema, logger,
-  )
-
-  return await makeHover(
-    definitions.map(
-      (definition) => makeMaterializedViewDefinitionText(definition),
-    ),
-  )
-}
-
-async function getFunctionHover(
-  pgPool: PostgresPool,
-  schema: string | undefined,
-  functionName: string,
-  defaultSchema: string,
-  logger: Logger,
-): Promise<Hover | undefined> {
-  const definitions = await queryFunctionDefinitions(
-    pgPool, schema, functionName, defaultSchema, logger,
-  )
-
-  return await makeHover(
-    definitions.map(
-      (definition) => makeFunctionDefinitionText(definition),
-    ),
-  )
-}
-
-async function getTypeHover(
-  pgPool: PostgresPool,
-  schema: string | undefined,
-  typeName: string,
-  defaultSchema: string,
-  logger: Logger,
-): Promise<Hover | undefined> {
-  const definitions = await queryTypeDefinitions(
-    pgPool, schema, typeName, defaultSchema, logger,
-  )
-
-  return await makeHover(
-    definitions.map(
-      (definition) => makeTypeDefinitionText(definition),
-    ),
-  )
-}
-
-async function getDomainHover(
-  pgPool: PostgresPool,
-  schema: string | undefined,
-  domainName: string,
-  defaultSchema: string,
-  logger: Logger,
-): Promise<Hover | undefined> {
-  const definitions = await queryDomainDefinitions(
-    pgPool, schema, domainName, defaultSchema, logger,
-  )
-
-  return await makeHover(
-    definitions.map(
-      (definition) => makeDomainDefinitionText(definition),
-    ),
-  )
-}
-
-async function getIndexHover(
-  pgPool: PostgresPool,
-  schema: string | undefined,
-  triggerName: string,
-  defaultSchema: string,
-  logger: Logger,
-): Promise<Hover | undefined> {
-  const definitions = await queryIndexDefinitions(
-    pgPool, schema, triggerName, defaultSchema, logger,
-  )
-
-  return await makeHover(
-    definitions.map(
-      (definition) => makeIndexDefinitionText(definition),
-    ),
-  )
-}
-
-async function getTriggerHover(
-  pgPool: PostgresPool,
-  schema: string | undefined,
-  triggerName: string,
-  defaultSchema: string,
-  logger: Logger,
-): Promise<Hover | undefined> {
-  const definitions = await queryTriggerDefinitions(
-    pgPool, schema, triggerName, defaultSchema, logger,
-  )
-
-  return await makeHover(
-    definitions.map(
-      (definition) => makeTriggerDefinitionText(definition),
-    ),
-  )
-}
-
 async function makeHover(
-  definitionTexts: string[],
+  pgPool: PostgresPool,
+  schema: string | undefined,
+  candidate: string,
+  defaultSchema: string,
+  logger: Logger,
+  { queryDefinitions, makeDefininitionText }: HoverHelperMethods<PostgresDefinition>,
 ): Promise<Hover | undefined> {
+  const definitions = await queryDefinitions(
+    pgPool, schema, candidate, defaultSchema, logger,
+  )
+  const definitionTexts = definitions.map(
+    (definition) => makeDefininitionText(definition),
+  )
+
   if (definitionTexts.length === 0) {
     return undefined
   }
