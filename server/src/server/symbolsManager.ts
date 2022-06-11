@@ -65,7 +65,7 @@ export class SymbolsManager {
     const symbols = await parseDocumentSymbols(
       document.uri, document.getText(), defaultSchema, logger,
     )
-    this.fileSymbols.set(document.uri, symbols || [])
+    this.fileSymbols.set(document.uri, symbols ?? [])
 
     return symbols
   }

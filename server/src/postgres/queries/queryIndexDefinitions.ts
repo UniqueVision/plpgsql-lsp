@@ -35,7 +35,7 @@ export async function queryIndexDefinitions(
         tablename,
         indexname
       `,
-      [schema || defaultSchema, indexName?.toLowerCase()],
+      [schema ?? defaultSchema, indexName?.toLowerCase()],
     )
 
     definitions = results.rows.map(

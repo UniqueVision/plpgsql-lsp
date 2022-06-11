@@ -30,7 +30,7 @@ export async function queryTriggerDefinitions(
         trigger_schema = $1
         AND trigger_name = $2
       `,
-      [schema || defaultSchema, triggerName?.toLowerCase()],
+      [schema ?? defaultSchema, triggerName?.toLowerCase()],
     )
 
     definitions = results.rows.map(

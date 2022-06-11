@@ -26,7 +26,7 @@ export async function queryTablePartitionKeyDefinition(
           AND pg_class.relname = $2
       LIMIT 1
       `,
-      [schema || defaultSchema, tableName.toLowerCase()],
+      [schema ?? defaultSchema, tableName.toLowerCase()],
     )
 
     partitionKeyDefinition = results.rows[0].partition_key_definition

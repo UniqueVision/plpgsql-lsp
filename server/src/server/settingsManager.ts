@@ -29,7 +29,7 @@ export class SettingsManager {
           section: "plpgsqlLanguageServer",
         })
         this.settings.documentSettingsMap.set(
-          uri, newSettings || DEFAULT_SETTINGS,
+          uri, newSettings ?? DEFAULT_SETTINGS,
         )
       }
 
@@ -51,7 +51,7 @@ export class SettingsManager {
       this.settings.documentSettingsMap.clear()
     }
     else {
-      this.settings.globalSettings = settings || DEFAULT_SETTINGS
+      this.settings.globalSettings = settings ?? DEFAULT_SETTINGS
     }
   }
 

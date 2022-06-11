@@ -51,7 +51,7 @@ export class Server {
   ) {
     this.documents.listen(this.connection)
     this.settingsManager = new SettingsManager(
-      connection, { globalSettings: settings || DEFAULT_SETTINGS },
+      connection, { globalSettings: settings ?? DEFAULT_SETTINGS },
     )
 
     this.connection.onInitialize(params => this.onInitialize(params))
@@ -73,7 +73,7 @@ export class Server {
 
   private onInitialize(params: InitializeParams): InitializeResult {
     this.capabilities = params.capabilities
-    this.workspaceFolders = params.workspaceFolders || []
+    this.workspaceFolders = params.workspaceFolders ?? []
 
     const textDocument = this.capabilities.textDocument
     const workspace = this.capabilities.workspace

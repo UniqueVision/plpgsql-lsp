@@ -318,7 +318,7 @@ export class Handlers {
 
     this.connection.sendDiagnostics({
       uri: document.uri,
-      diagnostics: diagnostics || [],
+      diagnostics: diagnostics ?? [],
     })
 
     return diagnostics

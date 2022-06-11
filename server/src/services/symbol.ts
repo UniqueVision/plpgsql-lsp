@@ -56,7 +56,7 @@ export async function parseDocumentSymbols(
   return parseCreateStatements(fileText, statements).map(
     (statementInfo) => {
       return {
-        name: `${statementInfo.schema || defaultSchema}.${statementInfo.name}`,
+        name: `${statementInfo.schema ?? defaultSchema}.${statementInfo.name}`,
         kind: convertToSymbleKind(PostgresKind.Table),
         location: {
           uri,

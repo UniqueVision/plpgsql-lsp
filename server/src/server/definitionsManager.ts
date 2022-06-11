@@ -113,7 +113,7 @@ export class DefinitionsManager {
 
     // Update new definition of a target uri.
     for (const { name, link } of definitions) {
-      const links = this.definitions.get(name) || []
+      const links = this.definitions.get(name) ?? []
       links.push(link)
       this.definitions.set(name, links)
     }

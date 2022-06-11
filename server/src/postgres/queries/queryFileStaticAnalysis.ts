@@ -102,7 +102,7 @@ export async function queryFileStaticAnalysis(
               fileText,
               location,
               row.lineno ? row.lineno - 1 : 0,
-            ) || getTextAllRange(document)
+            ) ?? getTextAllRange(document)
           }
 
           errors.push({
