@@ -329,7 +329,7 @@
             </dict>
           </dict>
           <key>match</key>
-          <string>(?xi)\b(array|bigint|bigserial|binary|bit|boolean|box|bytea|char|character|cidr|circle|date|day|dec|decimal|double|false|float|inet|int|integer|interval|json|jsonb|line|lseg|macaddr|minute|money|nchar|null|numeric|path|point|polygon|precision|real|smallint|smallserial|text|time|timestamp|timestamptz|true|tsquery|tsvector|txid_snapshot|uuid|varchar|varying|varying|without|xml|year|zone)\b</string>
+          <string>(?xi)\b(array|bigint|bigserial|binary|bit|boolean|box|bytea|char|character|cidr|circle|date|day|dec|decimal|double|false|float|inet|int|integer|interval|json|jsonb|line|lseg|macaddr|minute|money|nchar|null|numeric|path|point|polygon|precision|real|serial|smallint|smallserial|text|time|timestamp|timestamptz|true|tsquery|tsvector|txid_snapshot|uuid|varchar|varying|varying|without|xml|year|zone)\b</string>
         </dict>
       </array>
     </dict>
