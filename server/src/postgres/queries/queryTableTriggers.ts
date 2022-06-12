@@ -22,7 +22,7 @@ export async function queryTableTriggers(
   logger: Logger,
 ): Promise<TableTrigger[]> {
   let tableTriggers: TableTrigger[] = []
-  const tableSchemaName = schema || defaultSchema
+  const tableSchemaName = schema ?? defaultSchema
 
   const pgClient = await pgPool.connect()
   try {

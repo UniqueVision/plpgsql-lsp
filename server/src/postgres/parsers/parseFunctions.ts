@@ -64,7 +64,7 @@ function getCreateFunctions(
       return [
         {
           functionName,
-          location: locationCandidates?.[0] || undefined,
+          location: locationCandidates?.[0] ?? undefined,
         },
       ]
     },

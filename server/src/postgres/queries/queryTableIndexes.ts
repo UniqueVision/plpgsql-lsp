@@ -25,7 +25,7 @@ export async function queryTableIndexes(
   logger: Logger,
 ): Promise<TableIndex[]> {
   let tableIndexes: TableIndex[] = []
-  const schemaName = schema || defaultSchema
+  const schemaName = schema ?? defaultSchema
 
   const pgClient = await pgPool.connect()
   try {

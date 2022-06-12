@@ -141,26 +141,17 @@ export class Handlers {
 
     await this.validate(document, { isComplete: true })
 
-    const settings = await this.settingsManager.get(document.uri)
+    if (await this.settingsManager.isDefinitionTarget(document.uri)) {
+      const settings = await this.settingsManager.get(document.uri)
 
-    // Update File Definitions.
-    if (
-      this.definitionsManager.hasFileDefinitions(document.uri)
-      || await this.settingsManager.isDefinitionTarget(document.uri)
-    ) {
-      await this.definitionsManager.updateDocumentDefinitions(
-        document, settings, this.logger,
-      )
-    }
-
-    // Update File Symbols.
-    if (
-      this.symbolsManager.hasFileSymbols(document.uri)
-      || await this.settingsManager.isDefinitionTarget(document.uri)
-    ) {
-      await this.symbolsManager.updateDocumentSymbols(
-        document, settings, this.logger,
-      )
+      await Promise.all([
+        this.definitionsManager.updateDocumentDefinitions(
+          document, settings, this.logger,
+        ),
+        this.symbolsManager.updateDocumentSymbols(
+          document, settings, this.logger,
+        ),
+      ])
     }
   }
 
@@ -327,7 +318,7 @@ export class Handlers {
 
     this.connection.sendDiagnostics({
       uri: document.uri,
-      diagnostics: diagnostics || [],
+      diagnostics: diagnostics ?? [],
     })
 
     return diagnostics

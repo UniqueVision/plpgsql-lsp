@@ -22,7 +22,7 @@ export async function queryTableConstraints(
   logger: Logger,
 ): Promise<TableConstraint[]> {
   let tableConstraints: TableConstraint[] = []
-  const schemaName = schema || defaultSchema
+  const schemaName = schema ?? defaultSchema
 
   const pgClient = await pgPool.connect()
   try {

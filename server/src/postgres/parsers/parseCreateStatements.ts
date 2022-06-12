@@ -61,7 +61,7 @@ export function parseTableCreateStatements(
 
   const schemaName = createStmt.relation.schemaname
   const relationName = createStmt.relation.relname
-  const stmtLocation = statement.stmt_location || 0
+  const stmtLocation = statement.stmt_location ?? 0
 
   return [
     {
@@ -95,7 +95,7 @@ export function parseViewCreateStatements(
 
   const schemaName = createStmt.view.schemaname
   const relationName = createStmt.view.relname
-  const stmtLocation = statement.stmt_location || 0
+  const stmtLocation = statement.stmt_location ?? 0
 
   return [
     {
@@ -128,7 +128,7 @@ export function parseTypeCreateStatements(
   }
   const relationName = compositTypeStmt.typevar.relname
   const schemaName = compositTypeStmt.typevar.schemaname
-  const stmtLocation = statement.stmt_location || 0
+  const stmtLocation = statement.stmt_location ?? 0
 
   return [
     {
@@ -180,7 +180,7 @@ export function parseDomainCreateStatements(
   const domainNameLocation = findIndexFromBuffer(
     fileText, definition, statement.stmt_location,
   )
-  const stmtLocation = statement.stmt_location || 0
+  const stmtLocation = statement.stmt_location ?? 0
 
   return [
     {
@@ -232,7 +232,7 @@ export function parseFunctionCreateStatements(
   const functionNameLocation = findIndexFromBuffer(
     fileText, definition, statement.stmt_location,
   )
-  const stmtLocation = statement.stmt_location || 0
+  const stmtLocation = statement.stmt_location ?? 0
 
   return [
     {
@@ -266,7 +266,7 @@ export function parseIndexCreateStatements(
   const indexNameLocation = findIndexFromBuffer(
     fileText, indexName, statement.stmt_location,
   )
-  const stmtLocation = statement.stmt_location || 0
+  const stmtLocation = statement.stmt_location ?? 0
 
   return [
     {
@@ -300,7 +300,7 @@ export function parseTriggerCreateStatements(
   const triggerNameLocation = findIndexFromBuffer(
     fileText, triggerName, statement.stmt_location,
   )
-  const stmtLocation = statement.stmt_location || 0
+  const stmtLocation = statement.stmt_location ?? 0
 
   return [
     {
@@ -335,7 +335,7 @@ export function parseMaterializedViewCreateStatements(
   const viewNameLocation = findIndexFromBuffer(
     fileText, viewName, statement.stmt_location,
   )
-  const stmtLocation = statement.stmt_location || 0
+  const stmtLocation = statement.stmt_location ?? 0
 
   return [
     {

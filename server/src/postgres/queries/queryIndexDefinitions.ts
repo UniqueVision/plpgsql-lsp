@@ -3,7 +3,7 @@ import { Logger } from "vscode-languageserver"
 
 import { PostgresPool } from "@/postgres"
 
-interface IndexDefinition {
+export interface IndexDefinition {
   indexName: string
   tableName: string
   indexDefinition: string
@@ -35,7 +35,7 @@ export async function queryIndexDefinitions(
         tablename,
         indexname
       `,
-      [schema || defaultSchema, indexName?.toLowerCase()],
+      [schema ?? defaultSchema, indexName?.toLowerCase()],
     )
 
     definitions = results.rows.map(

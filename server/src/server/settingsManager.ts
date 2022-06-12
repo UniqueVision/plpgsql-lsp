@@ -5,30 +5,23 @@ import { Connection, URI, WorkspaceFolder } from "vscode-languageserver"
 import { DEFAULT_SETTINGS, Settings } from "@/settings"
 
 type DocumentSettings = {
-  hasConfigurationCapability: true,
   documentSettingsMap: Map<URI, Thenable<Settings>>
 }
 
 type GlobalSettings = {
-  hasConfigurationCapability: false,
   globalSettings: Settings
-}
-
-type UninitializedSettings = {
-  hasConfigurationCapability: undefined
 }
 
 export class SettingsManager {
 
   constructor(
     private connection: Connection,
-    private settings: DocumentSettings | GlobalSettings | UninitializedSettings,
+    private settings: DocumentSettings | GlobalSettings,
   ) {
-
   }
 
   async get(uri: URI): Promise<Settings> {
-    if (this.settings.hasConfigurationCapability) {
+    if (isDocumentSettings(this.settings)) {
       let newSettings = this.settings.documentSettingsMap.get(uri)
       if (newSettings === undefined) {
         newSettings = this.connection.workspace.getConfiguration({
@@ -36,34 +29,29 @@ export class SettingsManager {
           section: "plpgsqlLanguageServer",
         })
         this.settings.documentSettingsMap.set(
-          uri, newSettings || DEFAULT_SETTINGS,
+          uri, newSettings ?? DEFAULT_SETTINGS,
         )
       }
 
       return newSettings
     }
-    else if (this.settings.hasConfigurationCapability !== undefined) {
-      return this.settings.globalSettings
-    }
     else {
-      return DEFAULT_SETTINGS
+      return this.settings.globalSettings
     }
   }
 
   delete(uri: URI): void {
-    if (this.settings.hasConfigurationCapability) {
+    if (isDocumentSettings(this.settings)) {
       this.settings.documentSettingsMap.delete(uri)
     }
   }
 
   reset(settings?: Settings): void {
-    if (this.settings.hasConfigurationCapability) {
-
+    if (isDocumentSettings(this.settings)) {
       this.settings.documentSettingsMap.clear()
     }
-    else if (this.settings.hasConfigurationCapability !== undefined) {
-
-      this.settings.globalSettings = settings || DEFAULT_SETTINGS
+    else {
+      this.settings.globalSettings = settings ?? DEFAULT_SETTINGS
     }
   }
 
@@ -74,6 +62,7 @@ export class SettingsManager {
     if (workspaces === null) {
       return undefined
     }
+
     const workspaceCandidates = workspaces.filter(
       workspace => uri.startsWith(workspace.uri),
     )
@@ -104,4 +93,10 @@ export class SettingsManager {
       },
     )
   }
+}
+
+function isDocumentSettings(
+  settings: DocumentSettings | GlobalSettings,
+): settings is DocumentSettings {
+  return "documentSettingsMap" in settings
 }

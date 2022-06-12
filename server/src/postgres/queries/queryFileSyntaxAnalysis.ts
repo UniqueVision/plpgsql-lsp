@@ -42,7 +42,7 @@ export async function queryFileSyntaxAnalysis(
     const message = databaseError.message
 
     if (options.isComplete) {
-      logger.error(`SyntaxError code: ${databaseError.code || "unknown"}, ${error}`)
+      logger.error(`SyntaxError code: ${databaseError.code ?? "unknown"}, ${error}`)
     }
 
     let range: Range | undefined = undefined

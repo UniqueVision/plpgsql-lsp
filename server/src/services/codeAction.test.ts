@@ -91,7 +91,7 @@ describe("CodeAction Tests", () => {
   describe("Disable Settings", function () {
     beforeEach(() => {
       const settings = new SettingsBuilder()
-        .withEnableExecuteFileQueryCommand(false)
+        .with({ enableExecuteFileQueryCommand: false })
         .build()
       server = setupTestServer(settings)
     })

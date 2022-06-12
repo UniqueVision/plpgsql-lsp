@@ -102,7 +102,7 @@ describe("CommandExecuter.executeFileQuery Tests", () => {
   describe("Disable Settings", function () {
     beforeEach(() => {
       const settings = new SettingsBuilder()
-        .withEnableExecuteFileQueryCommand(false)
+        .with({ enableExecuteFileQueryCommand: false })
         .build()
       server = setupTestServer(settings)
     })
@@ -120,8 +120,10 @@ describe("CommandExecuter.executeFileQuery Tests", () => {
   describe("Wrong Postgres Settings", function () {
     beforeEach(() => {
       const settings = new SettingsBuilder()
-        .withDatabase("NonExistentDatabase")
-        .withEnableExecuteFileQueryCommand(true)
+        .with({
+          database: "NonExistentDatabase",
+          enableExecuteFileQueryCommand: true,
+        })
         .build()
 
       server = setupTestServer(settings)

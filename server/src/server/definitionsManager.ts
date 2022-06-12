@@ -18,10 +18,6 @@ export class DefinitionsManager {
   private definitions: Map<DefinitionName, DefinitionLink[]> = new Map()
   private fileDefinitions: Map<URI, DefinitionName[]> = new Map()
 
-  hasFileDefinitions(uri: URI): boolean {
-    return this.fileDefinitions.has(uri)
-  }
-
   getDefinitionLinks(name: DefinitionName): DefinitionLink[] | undefined {
     return this.definitions.get(name)
   }
@@ -117,7 +113,7 @@ export class DefinitionsManager {
 
     // Update new definition of a target uri.
     for (const { name, link } of definitions) {
-      const links = this.definitions.get(name) || []
+      const links = this.definitions.get(name) ?? []
       links.push(link)
       this.definitions.set(name, links)
     }

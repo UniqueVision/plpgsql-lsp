@@ -16,7 +16,7 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 import { COMMAND_NAMES } from "@/commands"
 import { PostgresPoolMap } from "@/postgres"
 
-import { DEFAULT_SETTINGS } from "../settings"
+import { DEFAULT_SETTINGS, Settings } from "../settings"
 import { CommandExecuter } from "./commandExecuter"
 import { DefinitionsManager } from "./definitionsManager"
 import { Handlers } from "./handlers"
@@ -47,10 +47,11 @@ export class Server {
   constructor(
     private connection: Connection,
     public logger: Logger,
+    settings?: Settings,
   ) {
     this.documents.listen(this.connection)
     this.settingsManager = new SettingsManager(
-      connection, { hasConfigurationCapability: undefined },
+      connection, { globalSettings: settings ?? DEFAULT_SETTINGS },
     )
 
     this.connection.onInitialize(params => this.onInitialize(params))
@@ -72,7 +73,7 @@ export class Server {
 
   private onInitialize(params: InitializeParams): InitializeResult {
     this.capabilities = params.capabilities
-    this.workspaceFolders = params.workspaceFolders || []
+    this.workspaceFolders = params.workspaceFolders ?? []
 
     const textDocument = this.capabilities.textDocument
     const workspace = this.capabilities.workspace
@@ -99,7 +100,11 @@ export class Server {
       params.capabilities.textDocument.publishDiagnostics.relatedInformation
     )
 
-    this.initializeSettingsManager()
+    if (this.hasConfigurationCapability) {
+      this.settingsManager = new SettingsManager(this.connection, {
+        documentSettingsMap: new Map(),
+      })
+    }
 
     this.commandExecuter = new CommandExecuter(
       this.pgPools,
@@ -173,21 +178,6 @@ export class Server {
           )
         },
       )
-    }
-  }
-
-  private initializeSettingsManager(): void {
-    if (this.hasConfigurationCapability) {
-      this.settingsManager = new SettingsManager(this.connection, {
-        hasConfigurationCapability: this.hasConfigurationCapability,
-        documentSettingsMap: new Map(),
-      })
-    }
-    else {
-      this.settingsManager = new SettingsManager(this.connection, {
-        hasConfigurationCapability: this.hasConfigurationCapability,
-        globalSettings: DEFAULT_SETTINGS,
-      })
     }
   }
 

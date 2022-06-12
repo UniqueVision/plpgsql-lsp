@@ -29,7 +29,7 @@ describe("Postgres Pool Tests", () => {
 
     it("Wrong Settings", async () => {
       const settings = new SettingsBuilder()
-        .withDatabase("NonExistentDatabase")
+        .with({ database: "NonExistentDatabase" })
         .build()
 
       const pool = await createPool(settings)

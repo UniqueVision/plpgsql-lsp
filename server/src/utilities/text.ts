@@ -198,7 +198,7 @@ export async function readFileFromUri(uri: URI): Promise<string | null> {
 
 export async function readTextDocumentFromUri(uri: URI): Promise<TextDocument> {
   return TextDocument.create(
-    uri, "postgres", 1, await readFileFromUri(uri) || "",
+    uri, "postgres", 1, await readFileFromUri(uri) ?? "",
   )
 }
 

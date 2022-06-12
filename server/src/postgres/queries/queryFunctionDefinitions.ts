@@ -4,7 +4,7 @@ import { Logger } from "vscode-languageserver"
 import { PostgresPool } from "@/postgres"
 import { makeSchemas } from "@/utilities/schema"
 
-interface FunctionDefinition {
+export interface FunctionDefinition {
   schema: string
   functionName: string
   functionArgs: string[]

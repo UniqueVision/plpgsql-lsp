@@ -1,7 +1,6 @@
 import { createConnection } from "vscode-languageserver/node"
 
 import { Server } from "@/server"
-import { SettingsManager } from "@/server/settingsManager"
 import { Settings } from "@/settings"
 import { ConsoleLogger } from "@/utilities/logger"
 
@@ -12,21 +11,9 @@ export function setupTestServer(settings: Settings): Server {
 
   const connection = createConnection()
   const logger = new ConsoleLogger(connection)
-
-  const server = new Server(
-    connection,
-    logger,
-  )
+  const server = new Server(connection, logger, settings)
 
   server.documents = new TestTextDocuments()
-  server.settingsManager = new SettingsManager(
-    connection,
-    {
-      hasConfigurationCapability: false,
-      globalSettings: settings,
-    },
-  )
-
   server.initialize({
     processId: null,
     capabilities: {},

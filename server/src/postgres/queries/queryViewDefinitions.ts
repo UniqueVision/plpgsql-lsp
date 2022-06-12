@@ -3,7 +3,7 @@ import { Logger } from "vscode-languageserver"
 import { PostgresPool } from "@/postgres"
 import { makeSchemas } from "@/utilities/schema"
 
-interface ViewDefinition {
+export interface ViewDefinition {
   schema: string
   viewName: string
 }

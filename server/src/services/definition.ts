@@ -79,7 +79,7 @@ function makeMultiSchemaDefinitions(
 ): Definition[] {
   const definitions = [
     {
-      name: (schema || defaultSchema) + "." + name,
+      name: (schema ?? defaultSchema) + "." + name,
       link,
     },
   ]

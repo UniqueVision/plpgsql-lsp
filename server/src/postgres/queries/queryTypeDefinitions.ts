@@ -4,7 +4,7 @@ import { Logger } from "vscode-languageserver"
 import { PostgresPool } from "@/postgres"
 import { makeSchemas } from "@/utilities/schema"
 
-interface TypeDefinition {
+export interface TypeDefinition {
   schema: string
   typeName: string
   fields: {

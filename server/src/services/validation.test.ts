@@ -182,7 +182,7 @@ describe("Validate Tests", () => {
   describe("Default Keyword Query Parameter File Validation", function () {
     beforeEach(() => {
       const settings = new SettingsBuilder()
-        .withQueryParameterPattern(/:[A-Za-z_][A-Za-z0-9_]*/)
+        .with({ queryParameterPattern: /:[A-Za-z_][A-Za-z0-9_]*/.source })
         .build()
       server = setupTestServer(settings)
     })
@@ -223,7 +223,7 @@ describe("Validate Tests", () => {
   describe("Keyword Query Parameter File Validation", function () {
     beforeEach(() => {
       const settings = new SettingsBuilder()
-        .withKeywordQueryParameterPattern("@{keyword}")
+        .with({ keywordQueryParameterPattern: "@{keyword}" })
         .build()
       server = setupTestServer(settings)
     })
