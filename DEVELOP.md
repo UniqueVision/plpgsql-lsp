@@ -43,7 +43,7 @@ npm run test
 
 ## Release
 
-> :warning: Since [libpg-query](https://github.com/pyramation/libpg-query-node) is a [native node module](https://github.com/microsoft/vscode/issues/658), separate Windows/Linux and MacOS installations are required.
+> :warning: Since [libpg-query](https://github.com/pyramation/libpg-query-node) is a [native node module](https://github.com/microsoft/vscode/issues/658), separate Linux and MacOS installations are required. In Windows, cannot build libpg-query, so it is excluded from the release target.
 
 > :warning: The current strategy is to use a Mac when compiling a build for MacOS.
 
