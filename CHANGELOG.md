@@ -1,6 +1,11 @@
 # Change Log
 
 ## Unreleased - TDB
+## [v2.7.2](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.7.2) - 2022/06/12
+
+- Refactoring. [#41](https://github.com/UniqueVision/plpgsql-lsp/pull/41)
+- Add type 'serial' to syntax color. [#40](https://github.com/UniqueVision/plpgsql-lsp/pull/40)
+
 ## [v2.7.1](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.7.1) - 2022/06/01
 
 - Refactoring. [#38](https://github.com/UniqueVision/plpgsql-lsp/pull/39)
