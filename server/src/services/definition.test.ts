@@ -1,8 +1,9 @@
 import dedent from "ts-dedent"
-import { DefinitionLink, Position, URI } from "vscode-languageserver"
+import { DefinitionLink, Logger, Position, URI } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { getSampleFileResource } from "@/__tests__/helpers/file"
+import { RecordLogger } from "@/__tests__/helpers/logger"
 import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
 import { TestTextDocuments } from "@/__tests__/helpers/textDocuments"
@@ -35,11 +36,13 @@ expect.extend({
 })
 
 describe("Definition Tests", () => {
+  let logger: Logger
   let server: Server
 
   beforeEach(() => {
     const settings = new SettingsBuilder().build()
-    server = setupTestServer(settings)
+    logger = new RecordLogger()
+    server = setupTestServer(settings, logger)
   })
 
   afterEach(async () => {
@@ -60,7 +63,7 @@ describe("Definition Tests", () => {
     await server.definitionsManager.updateDocumentDefinitions(
       await readTextDocumentFromUri(documentUri),
       await server.settingsManager.get(document.uri),
-      server.logger,
+      logger,
     )
 
     if (server.handlers === undefined) {

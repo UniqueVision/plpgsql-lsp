@@ -2,6 +2,7 @@ import { CodeLens } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { DEFAULT_LOAD_FILE_OPTIONS, LoadFileOptions } from "@/__tests__/helpers/file"
+import { RecordLogger } from "@/__tests__/helpers/logger"
 import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
 import {
@@ -46,7 +47,7 @@ describe("CodeLens Tests", () => {
   describe("Enable Settings", function () {
     beforeEach(() => {
       const settings = new SettingsBuilder().build()
-      server = setupTestServer(settings)
+      server = setupTestServer(settings, new RecordLogger())
     })
 
     it("succeed on the correct query.", async () => {
@@ -89,7 +90,7 @@ describe("CodeLens Tests", () => {
       const settings = new SettingsBuilder()
         .with({ enableExecuteFileQueryCommand: false })
         .build()
-      server = setupTestServer(settings)
+      server = setupTestServer(settings, new RecordLogger())
     })
 
     it("is to be empty on the correct query.", async () => {

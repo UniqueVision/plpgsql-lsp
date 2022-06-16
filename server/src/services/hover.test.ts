@@ -1,8 +1,9 @@
 /* eslint-disable max-len */
 import dedent from "ts-dedent"
-import { Hover, MarkupContent, Position } from "vscode-languageserver"
+import { Hover, Logger, MarkupContent, Position } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
+import { RecordLogger } from "@/__tests__/helpers/logger"
 import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
 import {
@@ -44,11 +45,13 @@ expect.extend({
 
 describe("Hover Tests", () => {
   let settings: Settings
+  let logger: Logger
   let server: Server
 
   beforeEach(() => {
     settings = new SettingsBuilder().build()
-    server = setupTestServer(settings)
+    logger = new RecordLogger()
+    server = setupTestServer(settings, logger)
   })
 
   afterEach(async () => {
@@ -70,7 +73,7 @@ describe("Hover Tests", () => {
 
   async function updateDocumentDefinitions(targetFile: string) {
     server.definitionsManager.updateDocumentDefinitions(
-      await loadSampleTextDocument(targetFile), settings, server.logger,
+      await loadSampleTextDocument(targetFile), settings, logger,
     )
   }
 

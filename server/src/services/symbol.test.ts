@@ -1,6 +1,7 @@
-import { SymbolInformation, URI } from "vscode-languageserver"
+import { Logger, SymbolInformation, URI } from "vscode-languageserver"
 
 import { getSampleFileResource } from "@/__tests__/helpers/file"
+import { RecordLogger } from "@/__tests__/helpers/logger"
 import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
 import {
@@ -35,11 +36,13 @@ expect.extend({
 })
 
 describe("Definition Tests", () => {
+  let logger: Logger
   let server: Server
 
   beforeEach(() => {
     const settings = new SettingsBuilder().build()
-    server = setupTestServer(settings)
+    logger = new RecordLogger()
+    server = setupTestServer(settings, logger)
   })
 
   afterEach(async () => {
@@ -58,7 +61,7 @@ describe("Definition Tests", () => {
     await server.symbolsManager.updateDocumentSymbols(
       await readTextDocumentFromUri(documentUri),
       await server.settingsManager.get(textDocument.uri),
-      server.logger,
+      logger,
     )
 
     if (server.handlers === undefined) {

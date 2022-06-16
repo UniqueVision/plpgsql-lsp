@@ -8,6 +8,7 @@ import {
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
+import { RecordLogger } from "@/__tests__/helpers/logger"
 import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
 import { TestTextDocuments } from "@/__tests__/helpers/textDocuments"
@@ -46,7 +47,7 @@ describe("Completion Tests", () => {
 
   beforeEach(() => {
     const settings = new SettingsBuilder().build()
-    server = setupTestServer(settings)
+    server = setupTestServer(settings, new RecordLogger())
   })
 
   afterEach(async () => {
