@@ -38,7 +38,7 @@ import {
   getDefinitionLinks,
 } from "@/services/definition"
 import { getHover } from "@/services/hover"
-import { getDocumentSymbols } from "@/services/symbol"
+import { getDocumentSymbols, getWorkspaceSymbols } from "@/services/symbol"
 import { validateTextDocument } from "@/services/validation"
 import { Settings } from "@/settings"
 import {
@@ -279,7 +279,7 @@ export class Handlers {
   async onWorkspaceSymbol(
     _params: WorkspaceSymbolParams,
   ): Promise<SymbolInformation[] | undefined> {
-    return this.symbolsManager.getSymbols()
+    return getWorkspaceSymbols(this.symbolsManager, this.logger)
   }
 
   async validate(

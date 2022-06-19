@@ -1,7 +1,7 @@
 import { Logger, SymbolInformation } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { parseDocumentSymbols } from "@/server/symbolsManager"
+import { parseDocumentSymbols, SymbolsManager } from "@/server/symbolsManager"
 import { Settings } from "@/settings"
 
 export async function getDocumentSymbols(
@@ -10,4 +10,10 @@ export async function getDocumentSymbols(
   return parseDocumentSymbols(
     document.uri, document.getText(), settings.defaultSchema, logger,
   )
+}
+
+export async function getWorkspaceSymbols(
+  symbolsManager: SymbolsManager, _logger: Logger,
+): Promise<SymbolInformation[] | undefined> {
+  return symbolsManager.getSymbols()
 }
