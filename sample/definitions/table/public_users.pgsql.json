@@ -319,38 +319,5 @@
       },
       "stmt_len": 352
     }
-  },
-  {
-    "RawStmt": {
-      "stmt": {
-        "IndexStmt": {
-          "idxname": "users_id_name_index",
-          "relation": {
-            "schemaname": "public",
-            "relname": "users",
-            "inh": true,
-            "relpersistence": "p"
-          },
-          "accessMethod": "btree",
-          "indexParams": [
-            {
-              "IndexElem": {
-                "name": "id",
-                "ordering": "SORTBY_DEFAULT",
-                "nulls_ordering": "SORTBY_NULLS_DEFAULT"
-              }
-            },
-            {
-              "IndexElem": {
-                "name": "name",
-                "ordering": "SORTBY_DEFAULT",
-                "nulls_ordering": "SORTBY_NULLS_DEFAULT"
-              }
-            }
-          ]
-        }
-      },
-      "stmt_len": 61
-    }
   }
 ]

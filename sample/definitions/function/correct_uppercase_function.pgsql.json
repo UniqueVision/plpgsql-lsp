@@ -1,0 +1,81 @@
+[
+  {
+    "RawStmt": {
+      "stmt": {
+        "CreateFunctionStmt": {
+          "replace": true,
+          "funcname": [
+            {
+              "String": {
+                "str": "constant_value"
+              }
+            }
+          ],
+          "returnType": {
+            "names": [
+              {
+                "String": {
+                  "str": "text"
+                }
+              }
+            ],
+            "typemod": -1
+          },
+          "options": [
+            {
+              "DefElem": {
+                "defname": "as",
+                "arg": {
+                  "List": {
+                    "items": [
+                      {
+                        "String": {
+                          "str": "SELECT TEXT '00001'"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "defaction": "DEFELEM_UNSPEC"
+              }
+            },
+            {
+              "DefElem": {
+                "defname": "language",
+                "arg": {
+                  "String": {
+                    "str": "sql"
+                  }
+                },
+                "defaction": "DEFELEM_UNSPEC"
+              }
+            },
+            {
+              "DefElem": {
+                "defname": "volatility",
+                "arg": {
+                  "String": {
+                    "str": "immutable"
+                  }
+                },
+                "defaction": "DEFELEM_UNSPEC"
+              }
+            },
+            {
+              "DefElem": {
+                "defname": "parallel",
+                "arg": {
+                  "String": {
+                    "str": "safe"
+                  }
+                },
+                "defaction": "DEFELEM_UNSPEC"
+              }
+            }
+          ]
+        }
+      },
+      "stmt_len": 122
+    }
+  }
+]

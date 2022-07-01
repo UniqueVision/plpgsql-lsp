@@ -111,6 +111,10 @@ describe("Definition Tests", () => {
         "constant_function",
       ],
       [
+        "definitions/function/correct_uppercase_function.pgsql",
+        "CONSTANT_VALUE",
+      ],
+      [
         "definitions/type/type_user.pgsql",
         "type_user",
       ],
