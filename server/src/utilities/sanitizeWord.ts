@@ -4,7 +4,7 @@ export function sanitizeWordCandidates(word: string): string[] {
     sanitizeQuotedTable(sanitizeDynamicPartitionTable(word)),
     // Specific partition table match.
     sanitizeUuidPartitionTable(sanitizeNumberPartitionTable(word)),
-  ]
+  ].map(candidate => candidate.toLowerCase())
 }
 
 /**

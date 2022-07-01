@@ -38,9 +38,17 @@ export function getWordRangeAtPosition(
 export function findIndexFromBuffer(
   fileText: string, searchWord: string, byteOffset?: uinteger,
 ): number {
-  return Buffer.from(fileText).indexOf(
+  const index = Buffer.from(fileText).indexOf(
     searchWord, byteOffset,
   )
+  if (index !== -1) {
+    return index
+  }
+  else {
+    return Buffer.from(fileText.toLowerCase()).indexOf(
+      searchWord, byteOffset,
+    )
+  }
 }
 
 export function getPositionFromBuffer(fileText: string, index: uinteger): Position {
