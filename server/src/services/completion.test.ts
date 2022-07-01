@@ -36,7 +36,8 @@ expect.extend({
       return {
         pass: false,
         message: () =>
-          `expected ${completion} to contain CompletionItem ${expected.label}`,
+          `expected ${JSON.stringify(completion)} `
+          + `to contain CompletionItem ${expected.label}`,
       }
     }
   },
@@ -319,19 +320,13 @@ describe("Completion Tests", () => {
           label: "jsonb_build_object",
           kind: CompletionItemKind.Function,
           detail: dedent`
-            FUNCTION pg_catalog.jsonb_build_object(
-              VARIADIC \"any\"
-            )
+            FUNCTION pg_catalog.jsonb_build_object()
               RETURNS jsonb
               LANGUAGE internal
               STABLE PARALLEL SAFE
           `,
           insertTextFormat: InsertTextFormat.Snippet,
-          insertText: dedent`
-            jsonb_build_object(
-              $\{1:VARIADIC}
-            )
-          `,
+          insertText: dedent`jsonb_build_object()`,
         },
       )
     })
