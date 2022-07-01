@@ -36,7 +36,8 @@ expect.extend({
       return {
         pass: false,
         message: () =>
-          `expected ${completion} to contain CompletionItem ${expected.label}`,
+          `expected ${JSON.stringify(completion)} `
+          + `to contain CompletionItem ${expected.label}`,
       }
     }
   },
