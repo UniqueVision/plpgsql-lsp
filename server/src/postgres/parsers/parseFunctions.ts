@@ -33,7 +33,7 @@ export async function parseFunctions(
   return stmtements.flatMap(
     (statement) => {
       if (statement?.stmt?.CreateFunctionStmt !== undefined) {
-        return getCreateFunctions(statement)
+        return getCreateFunctions(statement, logger)
       }
       else {
         return []
@@ -44,20 +44,33 @@ export async function parseFunctions(
 
 function getCreateFunctions(
   statement: Statement,
+  logger: Logger,
 ): FunctionInfo[] {
   const createFunctionStmt = statement?.stmt?.CreateFunctionStmt
   if (createFunctionStmt === undefined) {
     return []
   }
+  const funcname = createFunctionStmt.funcname
+  const options = createFunctionStmt.options
+  if (funcname === undefined) {
+    logger.warn("createFunctionStmt.funcname is undefined!")
 
-  return createFunctionStmt.funcname.flatMap(
+    return []
+  }
+  if (options === undefined) {
+    logger.warn("createFunctionStmt.options is undefined!")
+
+    return []
+  }
+
+  return funcname.flatMap(
     (funcname) => {
       const functionName = funcname.String.str
       if (functionName === undefined) {
         return []
       }
 
-      const locationCandidates = createFunctionStmt.options
+      const locationCandidates = options
         .filter((option) => option.DefElem.defname === "as")
         .map((option) => option.DefElem.location)
 

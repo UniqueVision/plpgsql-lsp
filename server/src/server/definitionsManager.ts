@@ -74,7 +74,6 @@ export class DefinitionsManager {
   ): Promise<Definition[] | undefined> {
     const fileText = document.getText()
 
-
     const definitions = await parseDefinitions(
       document.uri, fileText, defaultSchema, logger,
     )
@@ -158,7 +157,7 @@ async function parseDefinitions(
     return undefined
   }
 
-  return parseCreateStatements(fileText, statements).flatMap(
+  return parseCreateStatements(fileText, statements, logger).flatMap(
     (statementInfo) => {
       return makeMultiSchemaDefinitions(
         statementInfo.name,
