@@ -1,6 +1,10 @@
 # Change Log
 
-## Unreleased - TDB
+## Unreleased - TBD
+## [v2.7.3](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.7.3) - 2022/07/01
+- Support the uppercase definition. [#45](https://github.com/UniqueVision/plpgsql-lsp/pull/45)
+- Refactoring. [#44](https://github.com/UniqueVision/plpgsql-lsp/pull/44)
+
 ## [v2.7.2](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.7.2) - 2022/06/12
 
 - Refactoring. [#41](https://github.com/UniqueVision/plpgsql-lsp/pull/41)
