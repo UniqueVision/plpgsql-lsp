@@ -24,8 +24,8 @@ export interface CreateStmt {
 
 export interface CreateStmtRelation {
   schemaname?: string
-  relname: string
-  location: uinteger
+  relname?: string // Expected to be required
+  location: uinteger // Expected to be required
 }
 
 export interface ViewStmt {
@@ -34,8 +34,8 @@ export interface ViewStmt {
 
 export interface ViewStmtRelation {
   schemaname?: string
-  relname: string
-  location: uinteger
+  relname?: string // Expected to be required
+  location?: uinteger // Expected to be required
 }
 
 export interface CompositeTypeStmt {
@@ -44,14 +44,14 @@ export interface CompositeTypeStmt {
 
 export interface CompositeTypeStmtTypevar {
   schemaname?: string
-  relname: string
-  relpersistence: string
-  location: uinteger
+  relname?: string // Expected to be required
+  relpersistence?: string // Expected to be required
+  location?: uinteger // Expected to be required
 }
 
 export interface CreateDomainStmt {
-  domainname: Name[]
-  typeName: CreateDomainStmtTypeName
+  domainname?: Name[] // Expected to be required
+  typeName?: CreateDomainStmtTypeName // Expected to be required
 }
 
 export interface CreateDomainStmtTypeName {
@@ -60,10 +60,10 @@ export interface CreateDomainStmtTypeName {
 
 export interface CreateFunctionStmt {
   is_procedure?: boolean
-  replace: boolean
-  funcname: Name[]
-  returnType: CreateFunctionStmtReturnType
-  options: CreateFunctionStmtOption[]
+  replace?: boolean // Expected to be required
+  funcname?: Name[] // Expected to be required
+  returnType?: CreateFunctionStmtReturnType // Expected to be required
+  options?: CreateFunctionStmtOption[] // Expected to be required
 }
 
 export interface Name {
@@ -104,11 +104,11 @@ export interface CreateFunctionStmtOptionsDefElemArgListItemString {
 }
 
 export interface CreateTrigStmt {
-  trigname: string
-  relation: CreateTrigStmtRelation
-  funcname: Name[]
-  row: boolean
-  events: integer
+  trigname?: string // Expected to be required
+  relation?: CreateTrigStmtRelation // Expected to be required
+  funcname?: Name[] // Expected to be required
+  row?: boolean // Expected to be required
+  events?: integer // Expected to be required
 }
 
 export interface CreateTrigStmtRelation {
@@ -118,7 +118,7 @@ export interface CreateTrigStmtRelation {
 }
 
 export interface IndexStmt {
-  idxname: string
+  idxname?: string // Expected to be required
 }
 
 export interface CreateTableAsStmt {
@@ -131,10 +131,10 @@ export interface CreateTableAsStmtInto {
 }
 
 export interface CreateTableAsStmtRelation {
-  schemaname: string | undefined
-  relname: string
-  inh: boolean
-  relpersistence: string
+  schemaname?: string
+  relname?: string // Expected to be required
+  inh?: boolean // Expected to be required
+  relpersistence?: string // Expected to be required
 }
 
 export async function parseStmtements(

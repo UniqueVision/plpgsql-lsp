@@ -114,7 +114,7 @@ export async function parseDocumentSymbols(
     return undefined
   }
 
-  return parseCreateStatements(fileText, statements).map(
+  return parseCreateStatements(fileText, statements, logger).map(
     (statementInfo) => {
       return {
         name: `${statementInfo.schema ?? defaultSchema}.${statementInfo.name}`,
