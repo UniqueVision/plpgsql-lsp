@@ -313,20 +313,26 @@ describe("Completion Tests", () => {
 
     it("Completion on built-in function", async () => {
       const completions = await onCompletion(
-        "jsonb_build_object", Position.create(1, 1),
+        "jsonb_agg", Position.create(1, 1),
       )
       expect(completions).completionItemContaining(
         {
-          label: "jsonb_build_object",
+          label: "jsonb_agg",
           kind: CompletionItemKind.Function,
           detail: dedent`
-            FUNCTION pg_catalog.jsonb_build_object()
+            FUNCTION pg_catalog.jsonb_agg(
+              anyelement
+            )
               RETURNS jsonb
               LANGUAGE internal
               STABLE PARALLEL SAFE
           `,
           insertTextFormat: InsertTextFormat.Snippet,
-          insertText: dedent`jsonb_build_object()`,
+          insertText: dedent`
+            jsonb_agg(
+              $\{1:anyelement}
+            )
+          `,
         },
       )
     })
