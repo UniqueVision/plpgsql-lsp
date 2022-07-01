@@ -46,7 +46,7 @@ export class Server {
 
   constructor(
     private connection: Connection,
-    public logger: Logger,
+    private logger: Logger,
     settings?: Settings,
   ) {
     this.documents.listen(this.connection)

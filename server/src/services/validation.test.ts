@@ -1,6 +1,7 @@
 import { Diagnostic, DiagnosticSeverity, Range } from "vscode-languageserver"
 
 import { DEFAULT_LOAD_FILE_OPTIONS, LoadFileOptions } from "@/__tests__/helpers/file"
+import { RecordLogger } from "@/__tests__/helpers/logger"
 import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
 import {
@@ -42,7 +43,7 @@ describe("Validate Tests", () => {
   describe("File Validation", function () {
     beforeEach(() => {
       const settings = new SettingsBuilder().build()
-      server = setupTestServer(settings)
+      server = setupTestServer(settings, new RecordLogger())
     })
 
     it("Correct function", async () => {
@@ -167,7 +168,7 @@ describe("Validate Tests", () => {
     beforeEach(() => {
       const settings = new SettingsBuilder()
         .build()
-      server = setupTestServer(settings)
+      server = setupTestServer(settings, new RecordLogger())
     })
 
     it("Correct query with default positional parameters", async () => {
@@ -184,7 +185,7 @@ describe("Validate Tests", () => {
       const settings = new SettingsBuilder()
         .with({ queryParameterPattern: /:[A-Za-z_][A-Za-z0-9_]*/.source })
         .build()
-      server = setupTestServer(settings)
+      server = setupTestServer(settings, new RecordLogger())
     })
 
     it("Correct query with default keyword parameters", async () => {
@@ -200,7 +201,7 @@ describe("Validate Tests", () => {
   describe("Positional Query Parameter File Validation", function () {
     beforeEach(() => {
       const settings = new SettingsBuilder().build()
-      server = setupTestServer(settings)
+      server = setupTestServer(settings, new RecordLogger())
     })
 
     it("Correct query with positional parameters", async () => {
@@ -225,7 +226,7 @@ describe("Validate Tests", () => {
       const settings = new SettingsBuilder()
         .with({ keywordQueryParameterPattern: "@{keyword}" })
         .build()
-      server = setupTestServer(settings)
+      server = setupTestServer(settings, new RecordLogger())
     })
 
     it("Correct query with keyword parameters", async () => {

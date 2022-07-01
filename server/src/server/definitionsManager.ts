@@ -1,7 +1,10 @@
-import { DefinitionLink, Logger, URI, WorkspaceFolder } from "vscode-languageserver"
+import {
+  DefinitionLink, LocationLink, Logger, URI, WorkspaceFolder,
+} from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { parseDefinitions } from "@/services/definition"
+import { parseCreateStatements } from "@/postgres/parsers/parseCreateStatements"
+import { parseStmtements } from "@/postgres/parsers/statement"
 import { Settings } from "@/settings"
 import { disableLanguageServer } from "@/utilities/disableLanguageServer"
 import {
@@ -142,4 +145,55 @@ export function makeTargetRelatedTableLink(
   }
 
   return targetLink
+}
+
+async function parseDefinitions(
+  uri: URI,
+  fileText: string,
+  defaultSchema: string,
+  logger: Logger,
+): Promise<Definition[] | undefined> {
+  const statements = await parseStmtements(uri, fileText, logger)
+  if (statements === undefined) {
+    return undefined
+  }
+
+  return parseCreateStatements(fileText, statements).flatMap(
+    (statementInfo) => {
+      return makeMultiSchemaDefinitions(
+        statementInfo.name,
+        LocationLink.create(
+          uri,
+          statementInfo.targetRange,
+          statementInfo.targetSelectionRange,
+        ),
+        statementInfo.schema,
+        defaultSchema,
+      )
+    },
+  )
+}
+
+function makeMultiSchemaDefinitions(
+  name: DefinitionName,
+  link: DefinitionLink,
+  schema: string | undefined,
+  defaultSchema: string,
+): Definition[] {
+  const definitions = [
+    {
+      name: (schema ?? defaultSchema) + "." + name,
+      link,
+    },
+  ]
+
+  // On the default schema, add definition without schema.
+  if (schema === undefined || schema === defaultSchema) {
+    definitions.push({
+      name,
+      link,
+    })
+  }
+
+  return definitions
 }
