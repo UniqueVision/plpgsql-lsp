@@ -107,9 +107,14 @@ export class Server {
     }
 
     this.commandExecuter = new CommandExecuter(
+      this.connection,
       this.pgPools,
       this.documents,
       this.settingsManager,
+      {
+        hasDiagnosticRelatedInformationCapability:
+          this.hasDiagnosticRelatedInformationCapability,
+      },
       this.logger,
     )
 

@@ -16,6 +16,12 @@ export class NotCoveredFileError extends PlpgsqlLanguageServerError {
   }
 }
 
+export class WorkspaceNotFound extends PlpgsqlLanguageServerError {
+  constructor() {
+    super("Workspace not found.")
+  }
+}
+
 export class DisableLanguageServerError extends PlpgsqlLanguageServerError {
   constructor() {
     super("Disable Language Server.")

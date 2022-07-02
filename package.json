@@ -22,7 +22,8 @@
   },
   "activationEvents": [
     "onLanguage:postgres",
-    "onCommand:plpgsql-lsp.executeFileQuery"
+    "onCommand:plpgsql-lsp.executeFileQuery",
+    "onCommand:plpgsql-lsp.validateWorkspace"
   ],
   "main": "./client/out/extension",
   "scripts": {
@@ -47,12 +48,20 @@
       {
         "command": "plpgsql-lsp.executeFileQuery",
         "title": "PL/pgSQL: Execute the Current File Query"
+      },
+      {
+        "command": "plpgsql-lsp.validateWorkspace",
+        "title": "PL/pgSQL: Validate on the Workspace Files"
       }
     ],
     "menus": {
       "commandPalette": [
         {
           "command": "plpgsql-lsp.executeFileQuery",
+          "when": "editorLangId == postgres"
+        },
+        {
+          "command": "plpgsql-lsp.validateWorkspace",
           "when": "editorLangId == postgres"
         }
       ]
