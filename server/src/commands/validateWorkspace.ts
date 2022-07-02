@@ -1,0 +1,74 @@
+import { Logger } from "vscode-jsonrpc/node"
+import { Connection, Diagnostic, WorkspaceFolder } from "vscode-languageserver"
+import { TextDocument } from "vscode-languageserver-textdocument"
+
+import { PostgresPool } from "@/postgres"
+import { getQueryParameterInfo } from "@/postgres/parameters"
+import { validateTextDocument } from "@/services/validation"
+import { Settings } from "@/settings"
+import { disableValidation } from "@/utilities/disableLanguageServer"
+import { loadWorkspaceFiles, readTextDocumentFromUri } from "@/utilities/text"
+
+
+export const FILE_QUERY_COMMAND = {
+  title: "PL/pgSQL: Validate on the Workspace Files",
+  name: "plpgsql-lsp.validateWorkspace",
+  execute: validateWorkspace,
+} as const
+
+export type ValidationOptions = {
+  isComplete: boolean,
+  hasDiagnosticRelatedInformationCapability: boolean
+}
+
+export async function validateWorkspace(
+  connection: Connection,
+  pgPool: PostgresPool,
+  workspaceFolder: WorkspaceFolder,
+  settings: Settings,
+  options: ValidationOptions,
+  logger: Logger,
+): Promise<void> {
+  for (const file of await loadWorkspaceFiles(workspaceFolder, settings)) {
+    const document = await readTextDocumentFromUri(`${workspaceFolder.uri}/${file}`)
+    await validateFile(connection, pgPool, document, settings, options, logger)
+  }
+}
+
+export async function validateFile(
+  connection: Connection,
+  pgPool: PostgresPool,
+  document: TextDocument,
+  settings: Settings,
+  options: ValidationOptions,
+  logger: Logger,
+): Promise<Diagnostic[] | undefined> {
+  let diagnostics: Diagnostic[] | undefined = undefined
+
+  if (!disableValidation(document)) {
+    const queryParameterInfo = getQueryParameterInfo(document, settings, logger)
+    if (queryParameterInfo === null || "type" in queryParameterInfo) {
+      diagnostics = await validateTextDocument(
+        pgPool,
+        document,
+        {
+          isComplete: true,
+          hasDiagnosticRelatedInformationCapability:
+            options.hasDiagnosticRelatedInformationCapability,
+          queryParameterInfo,
+        },
+        logger,
+      )
+    }
+    else {
+      diagnostics = [queryParameterInfo]
+    }
+  }
+
+  connection.sendDiagnostics({
+    uri: document.uri,
+    diagnostics: diagnostics ?? [],
+  })
+
+  return diagnostics
+}

@@ -1,6 +1,6 @@
 import { Logger } from "vscode-jsonrpc/node"
 import {
-  ExecuteCommandParams, TextDocuments, WorkspaceFolder,
+  ExecuteCommandParams, TextDocuments,
 } from "vscode-languageserver/node"
 import { TextDocument } from "vscode-languageserver-textdocument/lib/umd/main"
 
@@ -23,7 +23,6 @@ import { SettingsManager } from "./settingsManager"
 
 export interface CommandResultInfo {
   needWorkspaceValidation?: boolean,
-  workspace?: WorkspaceFolder,
   document: TextDocument,
 }
 
@@ -84,9 +83,6 @@ export class CommandExecuter {
 
     return {
       needWorkspaceValidation: true,
-      workspace: await this.settingsManager.getWorkspaceFolder(
-        document.uri,
-      ),
       document,
     }
   }
