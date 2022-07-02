@@ -124,7 +124,7 @@ export class Handlers {
         this.symbolsManager.loadWorkspaceSymbols(
           workspaceFolder, settings, this.logger,
         ),
-        this.validateWorkspace(workspaceFolder, settings, this.logger),
+        this.validateWorkspace(workspaceFolder, settings),
       ])
     }
     else {
@@ -251,10 +251,14 @@ export class Handlers {
 
   async onExecuteCommand(params: ExecuteCommandParams): Promise<void> {
     try {
-      await this.commaneExecuter.execute(params)
+      const { needWorkspaceValidation, document, workspace } =
+        await this.commaneExecuter.execute(params)
       this.connection.window.showInformationMessage(
         COMMAND_TITLE_MAP[params.command],
       )
+      if (needWorkspaceValidation && workspace !== undefined) {
+        this.validateWorkspace(workspace, await this.settingsManager.get(document.uri))
+      }
     }
     catch (error: unknown) {
       this.connection.window.showErrorMessage("PL/pgSQL: " + (error as Error).message)
@@ -288,26 +292,27 @@ export class Handlers {
     document: TextDocument,
     options: { isComplete: boolean } = { isComplete: false },
   ): Promise<Diagnostic[] | undefined> {
-    return this.validateTextDocument(undefined, document, options)
+    return this.validateTextDocument(
+      undefined, document, await this.settingsManager.get(document.uri), options,
+    )
   }
 
   private async validateTextDocument(
     pgPool: PostgresPool | undefined,
     document: TextDocument,
+    settings: Settings,
     options: { isComplete: boolean } = { isComplete: false },
   ): Promise<Diagnostic[] | undefined> {
     let diagnostics: Diagnostic[] | undefined = undefined
 
     if (!disableValidation(document)) {
       const queryParameterInfo = getQueryParameterInfo(
-        document, await this.settingsManager.get(document.uri), this.logger,
+        document, settings, this.logger,
       )
 
       if (queryParameterInfo === null || "type" in queryParameterInfo) {
         if (pgPool === undefined) {
-          pgPool = await getPool(
-            this.pgPools, await this.settingsManager.get(document.uri), this.logger,
-          )
+          pgPool = await getPool(this.pgPools, settings, this.logger)
         }
 
         if (pgPool !== undefined) {
@@ -340,18 +345,17 @@ export class Handlers {
   private async validateWorkspace(
     workspaceFolder: WorkspaceFolder,
     settings: Settings,
-    logger: Logger,
   ): Promise<void> {
-    logger.log(`The "${workspaceFolder.name}" workspace is validationg...`)
+    this.logger.log(`The "${workspaceFolder.name}" workspace is validationg...`)
 
     const pgPool = await getPool(this.pgPools, settings, this.logger)
 
     for (const file of await loadWorkspaceFiles(workspaceFolder, settings)) {
       const document = await readTextDocumentFromUri(`${workspaceFolder.uri}/${file}`)
-      await this.validateTextDocument(pgPool, document, { isComplete: true })
+      await this.validateTextDocument(pgPool, document, settings, { isComplete: true })
     }
 
-    logger.log("The workspace validation has been completed!! 👍")
+    this.logger.log("The workspace validation has been completed!! 👍")
   }
 
   private async handlePostgresPool<T>(

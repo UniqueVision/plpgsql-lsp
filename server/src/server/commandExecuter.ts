@@ -1,6 +1,6 @@
 import { Logger } from "vscode-jsonrpc/node"
 import {
-  ExecuteCommandParams, TextDocuments,
+  ExecuteCommandParams, TextDocuments, WorkspaceFolder,
 } from "vscode-languageserver/node"
 import { TextDocument } from "vscode-languageserver-textdocument/lib/umd/main"
 
@@ -21,6 +21,12 @@ import { disableLanguageServer } from "@/utilities/disableLanguageServer"
 
 import { SettingsManager } from "./settingsManager"
 
+export interface CommandResultInfo {
+  needWorkspaceValidation?: boolean,
+  workspace?: WorkspaceFolder,
+  document: TextDocument,
+}
+
 export class CommandExecuter {
   constructor(
     private readonly pgPools: PostgresPoolMap,
@@ -29,12 +35,12 @@ export class CommandExecuter {
     private readonly logger: Logger,
   ) { }
 
-  async execute(params: ExecuteCommandParams): Promise<void> {
+  async execute(params: ExecuteCommandParams): Promise<CommandResultInfo> {
     const commandName = params.command as CommandName
 
     switch (commandName) {
       case FILE_QUERY_COMMAND.name: {
-        return this.executeFileQueryCommand(params)
+        return await this.executeFileQueryCommand(params)
       }
       default: {
         const unknownCommand: never = commandName
@@ -45,7 +51,7 @@ export class CommandExecuter {
 
   private async executeFileQueryCommand(
     params: ExecuteCommandParams,
-  ): Promise<void> {
+  ): Promise<CommandResultInfo> {
     if (params.arguments === undefined) {
       throw new WrongCommandArgumentsError()
     }
@@ -75,5 +81,13 @@ export class CommandExecuter {
     }
 
     await FILE_QUERY_COMMAND.execute(pgPool, document, this.logger)
+
+    return {
+      needWorkspaceValidation: true,
+      workspace: await this.settingsManager.getWorkspaceFolder(
+        document.uri,
+      ),
+      document,
+    }
   }
 }
