@@ -109,7 +109,8 @@ Or, if you want to disable only the validation feature, try this
 ```
 
 ## Execute the Current File Query
-You can execute the current file query from VSCode Command.
+You can execute the current file query from VSCode Command
+(and workspace validation when successful).
 
 ![preview](images/execute_file_query_command.png)
 
