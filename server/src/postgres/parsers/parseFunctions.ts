@@ -1,5 +1,6 @@
 import { Logger, URI } from "vscode-languageserver"
 
+import { ParsedTypeError } from "@/errors"
 import {
   QueryParameterInfo, sanitizeFileWithQueryParameters,
 } from "@/postgres/parameters"
@@ -33,18 +34,21 @@ export async function parseFunctions(
   return stmtements.flatMap(
     (statement) => {
       if (statement?.stmt?.CreateFunctionStmt !== undefined) {
-        return getCreateFunctions(statement, logger)
+        try {
+          return getCreateFunctions(statement)
+        }
+        catch (error: unknown) {
+          logger.error(`ParseFunctionError: ${(error as Error).message} (${uri})`)
+        }
       }
-      else {
-        return []
-      }
+
+      return []
     },
   )
 }
 
 function getCreateFunctions(
   statement: Statement,
-  logger: Logger,
 ): FunctionInfo[] {
   const createFunctionStmt = statement?.stmt?.CreateFunctionStmt
   if (createFunctionStmt === undefined) {
@@ -53,14 +57,10 @@ function getCreateFunctions(
   const funcname = createFunctionStmt.funcname
   const options = createFunctionStmt.options
   if (funcname === undefined) {
-    logger.warn("createFunctionStmt.funcname is undefined!")
-
-    return []
+    throw new ParsedTypeError("createFunctionStmt.funcname is undefined!")
   }
   if (options === undefined) {
-    logger.warn("createFunctionStmt.options is undefined!")
-
-    return []
+    throw new ParsedTypeError("createFunctionStmt.options is undefined!")
   }
 
   return funcname.flatMap(

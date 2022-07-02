@@ -163,9 +163,9 @@ export class Server {
         )
       }
       catch (error: unknown) {
+        const message = (error as Error).message
         this.logger.error(
-          "DidChangeConfigurationNotification cannot register."
-          + ` ${(error as Error).message}`,
+          `DidChangeConfigurationNotification cannot register. ${message}`,
         )
       }
     }

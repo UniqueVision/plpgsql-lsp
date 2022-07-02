@@ -144,11 +144,7 @@ export async function parseStmtements(
     return (await parseQuery(query))?.["stmts"]
   }
   catch (error: unknown) {
-    const errorMessage = (error as Error).message
-
-    logger.error(
-      `The "${uri}" cannot parse. ${errorMessage}`,
-    )
+    logger.error(`The "${uri}" cannot parse. ${(error as Error).message}`)
 
     return undefined
   }
