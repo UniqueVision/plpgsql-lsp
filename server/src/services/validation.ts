@@ -56,9 +56,9 @@ export async function isCorrectFileValidation(
   )
 
   // Check file has no validation error.
-  return diagnostics.filter(diagnostic => {
-    return diagnostic.severity === DiagnosticSeverity.Error
-  }).length === 0
+  return diagnostics.filter(
+    diagnostic => diagnostic.severity === DiagnosticSeverity.Error,
+  ).length === 0
 }
 
 async function validateSyntaxAnalysis(
