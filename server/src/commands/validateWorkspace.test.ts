@@ -1,5 +1,5 @@
 import {
-  DEFAULT_LOAD_FILE_OPTIONS, getSampleWorkspaceUri, LoadFileOptions,
+  DEFAULT_LOAD_FILE_OPTIONS, getSampleWorkspace, LoadFileOptions,
 } from "@/__tests__/helpers/file"
 import { RecordLogger } from "@/__tests__/helpers/logger"
 import { setupTestServer } from "@/__tests__/helpers/server"
@@ -29,7 +29,8 @@ describe("CommandExecuter.validateWorkspace Tests", () => {
     const document = await loadSampleTextDocument(
       file,
       options,
-    );
+    )
+    const workspace = getSampleWorkspace();
 
     (server.documents as TestTextDocuments).set(document)
 
@@ -43,7 +44,7 @@ describe("CommandExecuter.validateWorkspace Tests", () => {
     await server.commandExecuter?.execute(
       {
         command: WORKSPACE_VALIDATION_COMMAND.name,
-        arguments: [document.uri, getSampleWorkspaceUri(), "sample"],
+        arguments: [document.uri, workspace.uri, workspace.name],
       },
     )
   }
