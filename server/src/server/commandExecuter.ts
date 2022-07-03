@@ -1,7 +1,7 @@
 import { Logger } from "vscode-jsonrpc/node"
 import {
   Connection,
-  ExecuteCommandParams, TextDocuments,
+  ExecuteCommandParams, TextDocuments, WorkspaceFolder,
 } from "vscode-languageserver/node"
 import { TextDocument } from "vscode-languageserver-textdocument/lib/umd/main"
 
@@ -68,6 +68,9 @@ export class CommandExecuter {
     }
 
     const documentUri = params.arguments[0]
+    if (documentUri === undefined) {
+      throw new WrongCommandArgumentsError()
+    }
     const document = this.documents.get(documentUri)
     if (document === undefined) {
       throw new NotCoveredFileError()
@@ -107,16 +110,22 @@ export class CommandExecuter {
     }
 
     const documentUri = params.arguments[0]
+    if (documentUri === undefined) {
+      throw new WrongCommandArgumentsError()
+    }
     const document = this.documents.get(documentUri)
     if (document === undefined) {
       throw new NotCoveredFileError()
     }
 
-    const workspaceFolder = await this.settingsManager.getWorkspaceFolder(
-      document.uri,
-    )
-    if (workspaceFolder === undefined) {
+    const workspaceFolderUri = params.arguments[1]
+    const workspaceFolderName = params.arguments[2]
+    if (workspaceFolderUri === undefined || workspaceFolderName === undefined) {
       throw new WorkspaceNotFound()
+    }
+    const workspaceFolder: WorkspaceFolder = {
+      uri: workspaceFolderUri,
+      name: workspaceFolderName,
     }
 
     const settings = await this.settingsManager.get(documentUri)

@@ -11,8 +11,12 @@ export const DEFAULT_LOAD_FILE_OPTIONS = {
   skipDisableComment: false,
 }
 
-export function getSampleFileResource(file: string): URI {
+export function getSampleFileUri(file: string): URI {
   return `file://${path.join(sampleDirPath(), file)}`
+}
+
+export function getSampleWorkspaceUri(): URI {
+  return `file://${sampleDirPath()}`
 }
 
 export async function loadSampleFile(

@@ -20,4 +20,6 @@ export default {
 
   // A map from regular expressions to paths to transformers
   transform: { "\\.ts$": ["ts-jest"] },
+
+  testTimeout: 20000,
 }

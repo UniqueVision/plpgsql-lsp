@@ -15,7 +15,6 @@ import { Settings } from "@/settings"
 import { neverReach } from "@/utilities/neverReach"
 import { makeDefinitionLinkMarkdown, makePostgresCodeMarkdown } from "@/utilities/text"
 
-jest.setTimeout(10000)
 
 expect.extend({
   toHoverCodeEqual(

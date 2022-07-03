@@ -17,7 +17,6 @@ import { neverReach } from "@/utilities/neverReach"
 
 import { getLanguageServerCommentCompletionItems } from "./completion"
 
-jest.setTimeout(10000)
 
 expect.extend({
   completionItemContaining(

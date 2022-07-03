@@ -2,7 +2,7 @@ import { TextDocuments, URI } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import {
-  DEFAULT_LOAD_FILE_OPTIONS, getSampleFileResource, LoadFileOptions, loadSampleFile,
+  DEFAULT_LOAD_FILE_OPTIONS, getSampleFileUri, LoadFileOptions, loadSampleFile,
 } from "./file"
 
 
@@ -33,7 +33,7 @@ export async function loadSampleTextDocument(
   }
 
   return TextDocument.create(
-    getSampleFileResource(file),
+    getSampleFileUri(file),
     "postgres",
     0,
     context,
