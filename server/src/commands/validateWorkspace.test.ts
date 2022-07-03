@@ -71,7 +71,6 @@ describe("CommandExecuter.validateWorkspace Tests", () => {
         .build()
 
       server = setupTestServer(settings, new RecordLogger())
-      server.start()
     })
 
     it("throw PostgresPoolNotFoundError on the query file.", async () => {
