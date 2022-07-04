@@ -11,7 +11,7 @@ import { loadDefinitionFiles, readTextDocumentFromUri } from "@/utilities/text"
 
 
 export const WORKSPACE_VALIDATION_COMMAND = {
-  title: "PL/pgSQL: Validate on the Workspace Files",
+  title: "PL/pgSQL: Validate the Workspace Files",
   name: "plpgsql-lsp.validateWorkspace",
   execute: validateWorkspace,
 } as const

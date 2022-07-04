@@ -110,7 +110,6 @@ Or, if you want to disable only the validation feature, try this
 
 ## Execute the Current File Query
 You can execute the current file query from VSCode Command
-(and workspace validation when successful).
 
 ![preview](images/execute_file_query_command.png)
 
@@ -139,6 +138,25 @@ but can be configured by adding the following setting to "keybindings.json".
   }
 ]
 ```
+
+## Workspace validation
+If you want to validate the workspace files in the background,
+please set the settings like this,
+
+```jsonc
+{
+  "plpgsqlLanguageServer.workspaceValidationTargetFiles": [
+    "definitions/**/*.pgsql",
+    // "setup/**/*.pgsql"
+  ]
+}
+```
+
+Validation is executed under the following conditions.
+
+- Start Language Server.
+- "Execute the Current File Query" command was successfull.
+- Execute "Validate the Workspace Files" command.
 
 ## [Experimental Feature] Query Parameters
 In the case of a file that defines a query with parameters,

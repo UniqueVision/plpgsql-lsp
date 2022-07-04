@@ -51,7 +51,7 @@
       },
       {
         "command": "plpgsql-lsp.validateWorkspace",
-        "title": "PL/pgSQL: Validate on the Workspace Files"
+        "title": "PL/pgSQL: Validate the Workspace Files"
       }
     ],
     "menus": {
