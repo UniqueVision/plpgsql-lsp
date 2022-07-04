@@ -1,6 +1,10 @@
 # Change Log
 
 ## Unreleased - TBD
+## [v2.8.0](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.7.3) - 2022/07/04
+- Add workspace validation. [#48](https://github.com/UniqueVision/plpgsql-lsp/pull/48)
+- Add pg parser type check. [#47](https://github.com/UniqueVision/plpgsql-lsp/pull/47)
+
 ## [v2.7.3](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.7.3) - 2022/07/01
 - Support the uppercase definition. [#45](https://github.com/UniqueVision/plpgsql-lsp/pull/45)
 - Refactoring. [#44](https://github.com/UniqueVision/plpgsql-lsp/pull/44)
