@@ -157,7 +157,7 @@ async function parseDefinitions(
     return undefined
   }
 
-  return parseCreateStatements(fileText, statements, logger).flatMap(
+  return parseCreateStatements(uri, fileText, statements, logger).flatMap(
     (statementInfo) => {
       return makeMultiSchemaDefinitions(
         statementInfo.name,

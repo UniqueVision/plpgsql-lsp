@@ -114,7 +114,8 @@ export async function queryFileStaticAnalysis(
   }
   catch (error: unknown) {
     if (options.isComplete) {
-      logger.error(`StaticAnalysisError: ${(error as Error).message}`)
+      const message = (error as Error).message
+      logger.error(`StaticAnalysisError: ${message} (${document.uri})`)
     }
   }
   finally {

@@ -53,4 +53,17 @@ async function executeCommand(
     args.push(window.activeTextEditor.document.uri.toString())
     next(command, args)
   }
+  else if (
+    window.activeTextEditor !== undefined
+    && command === "plpgsql-lsp.validateWorkspace"
+  ) {
+    const documentUri = window.activeTextEditor.document.uri
+    const workspaceFolder = workspace.getWorkspaceFolder(documentUri)
+
+    args.push(documentUri.toString())
+    args.push(workspaceFolder?.uri?.toString())
+    args.push(workspaceFolder?.name?.toString())
+
+    next(command, args)
+  }
 }

@@ -107,9 +107,14 @@ export class Server {
     }
 
     this.commandExecuter = new CommandExecuter(
+      this.connection,
       this.pgPools,
       this.documents,
       this.settingsManager,
+      {
+        hasDiagnosticRelatedInformationCapability:
+          this.hasDiagnosticRelatedInformationCapability,
+      },
       this.logger,
     )
 
@@ -163,9 +168,9 @@ export class Server {
         )
       }
       catch (error: unknown) {
+        const message = (error as Error).message
         this.logger.error(
-          "DidChangeConfigurationNotification cannot register."
-          + ` ${(error as Error).message}`,
+          `DidChangeConfigurationNotification cannot register. ${message}`,
         )
       }
     }

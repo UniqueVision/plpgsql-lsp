@@ -1,13 +1,22 @@
 DROP FUNCTION IF EXISTS correct_function;
 
 CREATE FUNCTION correct_function(
-  p_id uuid
+  p_id integer
 )
-RETURNS SETOF uuid AS $FUNCTION$
+RETURNS SETOF public.users AS $FUNCTION$
 DECLARE
 BEGIN
   RETURN QUERY
   SELECT
-    p_id;
+    id,
+    name,
+    company_id,
+    created_at,
+    updated_at,
+    deleted_at
+  FROM
+    public.users
+  WHERE
+    id = p_id;
 END;
 $FUNCTION$ LANGUAGE plpgsql;

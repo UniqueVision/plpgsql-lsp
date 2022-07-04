@@ -1,6 +1,7 @@
 import { FILE_QUERY_COMMAND } from "./executeFileQuery"
+import { WORKSPACE_VALIDATION_COMMAND } from "./validateWorkspace"
 
-export const COMMANDS = [FILE_QUERY_COMMAND] as const
+export const COMMANDS = [FILE_QUERY_COMMAND, WORKSPACE_VALIDATION_COMMAND] as const
 
 export const COMMAND_NAMES = COMMANDS.map(command => command.name)
 

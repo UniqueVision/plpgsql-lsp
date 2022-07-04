@@ -1,5 +1,6 @@
-import { Logger, Range } from "vscode-languageserver"
+import { Logger, Range, URI } from "vscode-languageserver"
 
+import { ParsedTypeError } from "@/errors"
 import { PostgresKind } from "@/postgres/kind"
 import { Statement } from "@/postgres/parsers/statement"
 import { findIndexFromBuffer, getRangeFromBuffer } from "@/utilities/text"
@@ -13,37 +14,43 @@ export interface CreateStatementInfo {
 }
 
 export function parseCreateStatements(
+  uri: URI,
   fileText: string,
   statements: Statement[],
   logger: Logger,
 ): CreateStatementInfo[] {
   return statements.flatMap(
     (statement) => {
-      if (statement?.stmt?.CreateStmt !== undefined) {
-        return parseTableCreateStatements(fileText, statement, logger)
-      }
-      else if (statement?.stmt?.ViewStmt !== undefined) {
-        return parseViewCreateStatements(fileText, statement, logger)
-      }
-      else if (statement?.stmt?.CompositeTypeStmt !== undefined) {
-        return parseTypeCreateStatements(fileText, statement, logger)
-      }
-      else if (statement?.stmt?.CreateDomainStmt !== undefined) {
-        return parseDomainCreateStatements(fileText, statement, logger)
-      }
-      else if (statement?.stmt?.CreateFunctionStmt !== undefined) {
-        return parseFunctionCreateStatements(fileText, statement, logger)
-      }
-      else if (statement?.stmt?.CreateTrigStmt !== undefined) {
-        return parseTriggerCreateStatements(fileText, statement, logger)
-      }
-      else if (statement?.stmt?.IndexStmt !== undefined) {
-        return parseIndexCreateStatements(fileText, statement, logger)
-      }
-      else if (statement?.stmt?.CreateTableAsStmt !== undefined) {
-        if (statement?.stmt?.CreateTableAsStmt?.relkind === "OBJECT_MATVIEW") {
-          return parseMaterializedViewCreateStatements(fileText, statement, logger)
+      try {
+        if (statement?.stmt?.CreateStmt !== undefined) {
+          return parseTableCreateStatements(fileText, statement)
         }
+        else if (statement?.stmt?.ViewStmt !== undefined) {
+          return parseViewCreateStatements(fileText, statement)
+        }
+        else if (statement?.stmt?.CompositeTypeStmt !== undefined) {
+          return parseTypeCreateStatements(fileText, statement)
+        }
+        else if (statement?.stmt?.CreateDomainStmt !== undefined) {
+          return parseDomainCreateStatements(fileText, statement)
+        }
+        else if (statement?.stmt?.CreateFunctionStmt !== undefined) {
+          return parseFunctionCreateStatements(fileText, statement)
+        }
+        else if (statement?.stmt?.CreateTrigStmt !== undefined) {
+          return parseTriggerCreateStatements(fileText, statement)
+        }
+        else if (statement?.stmt?.IndexStmt !== undefined) {
+          return parseIndexCreateStatements(fileText, statement)
+        }
+        else if (statement?.stmt?.CreateTableAsStmt !== undefined) {
+          if (statement?.stmt?.CreateTableAsStmt?.relkind === "OBJECT_MATVIEW") {
+            return parseMaterializedViewCreateStatements(fileText, statement)
+          }
+        }
+      }
+      catch (error: unknown) {
+        logger.error(`ParseCreateStatementError: ${(error as Error).message} (${uri})`)
       }
 
       return []
@@ -54,7 +61,6 @@ export function parseCreateStatements(
 export function parseTableCreateStatements(
   fileText: string,
   statement: Statement,
-  logger: Logger,
 ): CreateStatementInfo[] {
   const createStmt = statement?.stmt?.CreateStmt
   if (createStmt === undefined) {
@@ -66,9 +72,7 @@ export function parseTableCreateStatements(
   const stmtLocation = statement.stmt_location ?? 0
 
   if (relname === undefined) {
-    logger.warn("CreateStmt.relation.relname is undefined!")
-
-    return []
+    throw new ParsedTypeError("CreateStmt.relation.relname is undefined!")
   }
 
   return [
@@ -95,7 +99,6 @@ export function parseTableCreateStatements(
 export function parseViewCreateStatements(
   fileText: string,
   statement: Statement,
-  logger: Logger,
 ): CreateStatementInfo[] {
   const createStmt = statement?.stmt?.ViewStmt
   if (createStmt === undefined) {
@@ -108,14 +111,10 @@ export function parseViewCreateStatements(
   const stmtLocation = statement.stmt_location ?? 0
 
   if (relname === undefined) {
-    logger.warn("ViewStmt.view.relname is undefined!")
-
-    return []
+    throw new ParsedTypeError("ViewStmt.view.relname is undefined!")
   }
   else if (location === undefined) {
-    logger.warn("ViewStmt.view.location is undefined!")
-
-    return []
+    throw new ParsedTypeError("ViewStmt.view.location is undefined!")
   }
 
   return [
@@ -142,7 +141,6 @@ export function parseViewCreateStatements(
 export function parseTypeCreateStatements(
   fileText: string,
   statement: Statement,
-  logger: Logger,
 ): CreateStatementInfo[] {
   const compositTypeStmt = statement?.stmt?.CompositeTypeStmt
   if (compositTypeStmt === undefined) {
@@ -154,14 +152,10 @@ export function parseTypeCreateStatements(
   const stmtLocation = statement.stmt_location ?? 0
 
   if (relname === undefined) {
-    logger.warn("CompositeTypeStmt.typevar.relname is undefined!")
-
-    return []
+    throw new ParsedTypeError("CompositeTypeStmt.typevar.relname is undefined!")
   }
   else if (location === undefined) {
-    logger.warn("CompositeTypeStmt.typevar.location is undefined!")
-
-    return []
+    throw new ParsedTypeError("CompositeTypeStmt.typevar.location is undefined!")
   }
 
   return [
@@ -186,7 +180,6 @@ export function parseTypeCreateStatements(
 export function parseDomainCreateStatements(
   fileText: string,
   statement: Statement,
-  logger: Logger,
 ): CreateStatementInfo[] {
   const createDomainStmt = statement?.stmt?.CreateDomainStmt
   if (createDomainStmt === undefined) {
@@ -200,9 +193,7 @@ export function parseDomainCreateStatements(
     .map((name) => name.String.str)
 
   if (nameList === undefined) {
-    logger.warn("CreateDomainStmt.domainname is undefined!")
-
-    return []
+    throw new ParsedTypeError("CreateDomainStmt.domainname is undefined!")
   }
 
   if (nameList.length === 1) {
@@ -245,7 +236,6 @@ export function parseDomainCreateStatements(
 export function parseFunctionCreateStatements(
   fileText: string,
   statement: Statement,
-  logger: Logger,
 ): CreateStatementInfo[] {
   const createFunctionStmt = statement?.stmt?.CreateFunctionStmt
   if (createFunctionStmt === undefined) {
@@ -259,9 +249,7 @@ export function parseFunctionCreateStatements(
     .map((name) => name.String.str)
 
   if (nameList === undefined) {
-    logger.warn("CreateFunctionStmt.funcname is undefined!")
-
-    return []
+    throw new ParsedTypeError("CreateFunctionStmt.funcname is undefined!")
   }
 
   if (nameList.length === 1) {
@@ -304,7 +292,6 @@ export function parseFunctionCreateStatements(
 export function parseIndexCreateStatements(
   fileText: string,
   statement: Statement,
-  logger: Logger,
 ): CreateStatementInfo[] {
   const IndexStmt = statement?.stmt?.IndexStmt
   if (IndexStmt === undefined) {
@@ -314,9 +301,7 @@ export function parseIndexCreateStatements(
   const idxname = IndexStmt?.idxname
 
   if (idxname === undefined) {
-    logger.warn("IndexStmt.idxname is undefined!")
-
-    return []
+    throw new ParsedTypeError("IndexStmt.idxname is undefined!")
   }
 
   const indexNameLocation = findIndexFromBuffer(
@@ -346,7 +331,6 @@ export function parseIndexCreateStatements(
 export function parseTriggerCreateStatements(
   fileText: string,
   statement: Statement,
-  logger: Logger,
 ): CreateStatementInfo[] {
   const createTrigStmt = statement?.stmt?.CreateTrigStmt
   if (createTrigStmt === undefined) {
@@ -355,9 +339,7 @@ export function parseTriggerCreateStatements(
 
   const trigname = createTrigStmt.trigname
   if (trigname === undefined) {
-    logger.warn("CreateTrigStmt.trigname is undefined!")
-
-    return []
+    throw new ParsedTypeError("CreateTrigStmt.trigname is undefined!")
   }
 
   const triggerNameLocation = findIndexFromBuffer(
@@ -387,7 +369,6 @@ export function parseTriggerCreateStatements(
 export function parseMaterializedViewCreateStatements(
   fileText: string,
   statement: Statement,
-  logger: Logger,
 ): CreateStatementInfo[] {
   const createTableAsStmt = statement?.stmt?.CreateTableAsStmt
   if (createTableAsStmt === undefined) {
@@ -397,9 +378,7 @@ export function parseMaterializedViewCreateStatements(
   const schemaname = createTableAsStmt.into.rel.schemaname
   const relname = createTableAsStmt.into.rel.relname
   if (relname === undefined) {
-    logger.warn("CreateTableAsStmt.into.rel.relname is undefined!")
-
-    return []
+    throw new ParsedTypeError("CreateTableAsStmt.into.rel.relname is undefined!")
   }
 
   const viewNameLocation = findIndexFromBuffer(

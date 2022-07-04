@@ -2,7 +2,7 @@ import dedent from "ts-dedent"
 import { DefinitionLink, Logger, Position, URI } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { getSampleFileResource } from "@/__tests__/helpers/file"
+import { getSampleFileUri } from "@/__tests__/helpers/file"
 import { RecordLogger } from "@/__tests__/helpers/logger"
 import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
@@ -148,7 +148,7 @@ describe("Definition Tests", () => {
       ],
     ])(
       "can go to definition (%s)", async (source, target) => {
-        const documentUri = getSampleFileResource(source)
+        const documentUri = getSampleFileUri(source)
         const definition = await onDefinition(documentUri, target)
 
         expect(definition).toDefinitionUriEqual(documentUri)
@@ -156,7 +156,7 @@ describe("Definition Tests", () => {
     )
 
     it("Definition with language server disable comment", async () => {
-      const documentUri = getSampleFileResource("definitions/table/companies.pgsql")
+      const documentUri = getSampleFileUri("definitions/table/companies.pgsql")
       const definition = await onDefinition(
         documentUri,
         dedent`
@@ -171,7 +171,7 @@ describe("Definition Tests", () => {
     })
 
     it("Definition with language server disable block comment", async () => {
-      const documentUri = getSampleFileResource("definitions/table/companies.pgsql")
+      const documentUri = getSampleFileUri("definitions/table/companies.pgsql")
       const definition = await onDefinition(
         documentUri,
         dedent`

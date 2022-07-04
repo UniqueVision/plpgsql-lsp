@@ -11,7 +11,9 @@ export const FILE_QUERY_COMMAND = {
 } as const
 
 async function executeFileQuery(
-  pgPool: PostgresPool, document: TextDocument, logger: Logger,
+  pgPool: PostgresPool,
+  document: TextDocument,
+  logger: Logger,
 ): Promise<void> {
   const pgClient = await pgPool.connect()
   try {

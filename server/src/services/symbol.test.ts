@@ -1,6 +1,6 @@
 import { Logger, SymbolInformation, URI } from "vscode-languageserver"
 
-import { getSampleFileResource } from "@/__tests__/helpers/file"
+import { getSampleFileUri } from "@/__tests__/helpers/file"
 import { RecordLogger } from "@/__tests__/helpers/logger"
 import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
@@ -99,7 +99,7 @@ describe("Definition Tests", () => {
       "definitions/index/users_id_name_index.pgsql",
     ])(
       "can go to symbol (%s)", async (source) => {
-        const documentUri = getSampleFileResource(source)
+        const documentUri = getSampleFileUri(source)
         const definition = await onDocumentSymbol(source)
 
         expect(definition).toSymbolUriEqual(documentUri)

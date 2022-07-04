@@ -1,6 +1,6 @@
 import { promises as fs } from "fs"
 import path from "path"
-import { URI } from "vscode-languageserver"
+import { URI, WorkspaceFolder } from "vscode-languageserver"
 
 
 export type LoadFileOptions = {
@@ -11,8 +11,15 @@ export const DEFAULT_LOAD_FILE_OPTIONS = {
   skipDisableComment: false,
 }
 
-export function getSampleFileResource(file: string): URI {
+export function getSampleFileUri(file: string): URI {
   return `file://${path.join(sampleDirPath(), file)}`
+}
+
+export function getSampleWorkspace(): WorkspaceFolder {
+  return {
+    uri: `file://${sampleDirPath()}`,
+    name: "sample",
+  }
 }
 
 export async function loadSampleFile(
