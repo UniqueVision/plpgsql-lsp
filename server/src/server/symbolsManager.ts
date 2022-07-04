@@ -45,7 +45,7 @@ export class SymbolsManager {
     settings: Settings,
     logger: Logger,
   ): Promise<void> {
-    logger.log(`The "${workspaceFolder.name}" workspace symbols are loading...`)
+    logger.log(`The "${workspaceFolder.name}" workspace symbols are loading... 🚀`)
 
     for (const file of await loadDefinitionFiles(workspaceFolder, settings)) {
       const document = await readTextDocumentFromUri(`${workspaceFolder.uri}/${file}`)

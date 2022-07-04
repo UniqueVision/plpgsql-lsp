@@ -326,7 +326,7 @@ export class Handlers {
       return
     }
 
-    this.logger.log(`The "${workspaceFolder.name}" workspace is validationg...`)
+    this.logger.log(`The "${workspaceFolder.name}" workspace is validationg... 🚀`)
 
     await validateWorkspace(
       this.connection,
