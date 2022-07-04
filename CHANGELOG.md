@@ -1,7 +1,10 @@
 # Change Log
 
 ## Unreleased - TBD
-## [v2.8.0](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.7.3) - 2022/07/04
+## [v2.8.1](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.8.1) - 2022/07/05
+- Add workspaceValidationTargetFiles option to settings. [#49](https://github.com/UniqueVision/plpgsql-lsp/pull/49)
+
+## [v2.8.0](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.8.0) - 2022/07/04
 - Add workspace validation. [#48](https://github.com/UniqueVision/plpgsql-lsp/pull/48)
 - Add pg parser type check. [#47](https://github.com/UniqueVision/plpgsql-lsp/pull/47)
 
