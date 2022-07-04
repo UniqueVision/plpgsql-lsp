@@ -9,7 +9,7 @@ import { parseStmtements } from "@/postgres/parsers/statement"
 import { Settings } from "@/settings"
 import { disableLanguageServer } from "@/utilities/disableLanguageServer"
 import { neverReach } from "@/utilities/neverReach"
-import { loadWorkspaceFiles, readTextDocumentFromUri } from "@/utilities/text"
+import { loadDefinitionFiles, readTextDocumentFromUri } from "@/utilities/text"
 
 export class SymbolsManager {
   private fileSymbols: Map<URI, SymbolInformation[]> = new Map()
@@ -45,9 +45,9 @@ export class SymbolsManager {
     settings: Settings,
     logger: Logger,
   ): Promise<void> {
-    logger.log(`The "${workspaceFolder.name}" workspace symbols are loading...`)
+    logger.log(`The "${workspaceFolder.name}" workspace symbols are loading... 🚀`)
 
-    for (const file of await loadWorkspaceFiles(workspaceFolder, settings)) {
+    for (const file of await loadDefinitionFiles(workspaceFolder, settings)) {
       const document = await readTextDocumentFromUri(`${workspaceFolder.uri}/${file}`)
 
       if (disableLanguageServer(document)) {

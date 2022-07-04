@@ -210,13 +210,26 @@ export async function readTextDocumentFromUri(uri: URI): Promise<TextDocument> {
   )
 }
 
-export async function loadWorkspaceFiles(
+export async function loadDefinitionFiles(
   _workspaceFolder: WorkspaceFolder, settings: Settings,
 ) {
   return [
     ...new Set(
       await asyncFlatMap(
         settings.definitionFiles,
+        (filePattern) => glob.promise(filePattern),
+      ),
+    ),
+  ]
+}
+
+export async function loadWorkspaceValidationTargetFiles(
+  _workspaceFolder: WorkspaceFolder, settings: Settings,
+) {
+  return [
+    ...new Set(
+      await asyncFlatMap(
+        settings.workspaceValidationTargetFiles,
         (filePattern) => glob.promise(filePattern),
       ),
     ),

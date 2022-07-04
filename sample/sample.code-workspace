@@ -28,6 +28,9 @@
     "plpgsqlLanguageServer.database": "postgres",
     "plpgsqlLanguageServer.definitionFiles": [
       "definitions/**/*.pgsql"
+    ],
+    "plpgsqlLanguageServer.workspaceValidationTargetFiles": [
+      "definitions/**/*.pgsql"
     ]
   },
   "extensions": {

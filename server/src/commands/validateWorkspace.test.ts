@@ -8,7 +8,10 @@ import {
   loadSampleTextDocument,
   TestTextDocuments,
 } from "@/__tests__/helpers/textDocuments"
-import { PostgresPoolNotFoundError } from "@/errors"
+import {
+  PostgresPoolNotFoundError,
+  WorkspaceValidationTargetFilesEmptyError,
+} from "@/errors"
 import { Server } from "@/server"
 
 import { WORKSPACE_VALIDATION_COMMAND } from "./validateWorkspace"
@@ -51,7 +54,14 @@ describe("CommandExecuter.validateWorkspace Tests", () => {
 
   describe("Enable Settings", function () {
     beforeEach(() => {
-      const settings = new SettingsBuilder().build()
+      const settings = new SettingsBuilder()
+        .with({
+          workspaceValidationTargetFiles: [
+            "**/*.psql",
+            "**/*.pgsql",
+          ],
+        })
+        .build()
       server = setupTestServer(settings, new RecordLogger())
       server.start()
     })
@@ -61,12 +71,32 @@ describe("CommandExecuter.validateWorkspace Tests", () => {
     })
   })
 
+  describe("Disable Settings", function () {
+    beforeEach(() => {
+      const settings = new SettingsBuilder()
+        .build()
+      server = setupTestServer(settings, new RecordLogger())
+    })
+
+    it(
+      "throw WorkspaceValidationTargetFilesEmptyError on the correct query",
+      async () => {
+        await expect(executeCommand("queries/correct_query.pgsql"))
+          .rejects
+          .toThrowError(WorkspaceValidationTargetFilesEmptyError)
+      },
+    )
+  })
+
   describe("Wrong Postgres Settings", function () {
     beforeEach(() => {
       const settings = new SettingsBuilder()
         .with({
           database: "NonExistentDatabase",
-          enableExecuteFileQueryCommand: true,
+          workspaceValidationTargetFiles: [
+            "**/*.psql",
+            "**/*.pgsql",
+          ],
         })
         .build()
 

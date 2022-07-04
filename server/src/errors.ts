@@ -55,6 +55,13 @@ export class CannotExecuteCommandWithQueryParametersError
 
 export class ExecuteFileQueryCommandDisabledError extends PlpgsqlLanguageServerError {
   constructor() {
-    super("\"enableExecuteFileQueryCommand\" is false.")
+    super("\"settings.enableExecuteFileQueryCommand\" is false.")
+  }
+}
+
+export class WorkspaceValidationTargetFilesEmptyError
+  extends PlpgsqlLanguageServerError {
+  constructor() {
+    super("\"settings.workspaceValidationTargetFiles\" is empty.")
   }
 }
