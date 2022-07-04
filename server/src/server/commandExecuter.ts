@@ -16,6 +16,7 @@ import {
   NotCoveredFileError,
   PostgresPoolNotFoundError,
   WorkspaceNotFound,
+  WorkspaceValidationTargetFilesEmptyError,
   WrongCommandArgumentsError,
 } from "@/errors"
 import { getPool, PostgresPoolMap } from "@/postgres"
@@ -129,6 +130,10 @@ export class CommandExecuter {
     }
 
     const settings = await this.settingsManager.get(documentUri)
+
+    if (settings.workspaceValidationTargetFiles.length === 0) {
+      throw new WorkspaceValidationTargetFilesEmptyError()
+    }
 
     const pgPool = await getPool(this.pgPools, settings, this.logger)
     if (pgPool === undefined) {

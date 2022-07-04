@@ -94,41 +94,40 @@
           "scope": "resource",
           "type": "string",
           "default": "localhost",
-          "description": "your database host."
+          "description": "Your database host."
         },
         "plpgsqlLanguageServer.port": {
           "scope": "resource",
           "type": "number",
           "default": 5432,
-          "description": "your database port."
+          "description": "Your database port."
         },
         "plpgsqlLanguageServer.database": {
           "scope": "resource",
           "type": "string",
           "nullable": true,
-          "description": "your database name."
+          "description": "Your database name."
         },
         "plpgsqlLanguageServer.user": {
           "scope": "resource",
           "type": "string",
           "nullable": true,
-          "description": "your database user."
+          "description": "Your database user."
         },
         "plpgsqlLanguageServer.password": {
           "scope": "resource",
           "type": "string",
           "nullable": true,
-          "description": "your database password."
+          "description": "Your database password."
         },
         "plpgsqlLanguageServer.definitionFiles": {
           "scope": "resource",
           "type": "array",
-          "nullable": true,
           "default": [
             "**/*.psql",
             "**/*.pgsql"
           ],
-          "description": "definition file list (table/type/function).",
+          "description": "The pattern list of the definition files.",
           "items": {
             "type": "string"
           }
@@ -137,24 +136,33 @@
           "scope": "resource",
           "type": "string",
           "default": "public",
-          "description": "default schema name."
+          "description": "Default schema name."
         },
         "plpgsqlLanguageServer.queryParameterPattern": {
           "scope": "resource",
           "type": "string",
           "default": "\\$[1-9][0-9]*",
-          "description": "query paramter pattern. the pattern is described by regular expression."
+          "description": "Query paramter pattern. the pattern is described by regular expression."
         },
         "plpgsqlLanguageServer.keywordQueryParameterPattern": {
           "scope": "resource",
           "type": "string",
-          "description": "keyword query paramter pattern. the pattern must include \"{keyword}\", as in \"@{keyword}\"."
+          "description": "Keyword query paramter pattern. the pattern must include \"{keyword}\", as in \"@{keyword}\"."
         },
         "plpgsqlLanguageServer.enableExecuteFileQueryCommand": {
           "scope": "resource",
           "type": "boolean",
           "default": true,
           "description": "Enable/Disable \"Execute the Current File Query\" command."
+        },
+        "plpgsqlLanguageServer.workspaceValidationTargetFiles": {
+          "scope": "resource",
+          "type": "array",
+          "default": [],
+          "description": "The pattern list of the workspace validation target files.",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [

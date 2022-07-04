@@ -7,7 +7,7 @@ import { getQueryParameterInfo } from "@/postgres/parameters"
 import { validateTextDocument } from "@/services/validation"
 import { Settings } from "@/settings"
 import { disableValidation } from "@/utilities/disableLanguageServer"
-import { loadWorkspaceFiles, readTextDocumentFromUri } from "@/utilities/text"
+import { loadDefinitionFiles, readTextDocumentFromUri } from "@/utilities/text"
 
 
 export const WORKSPACE_VALIDATION_COMMAND = {
@@ -29,7 +29,7 @@ export async function validateWorkspace(
   options: ValidationOptions,
   logger: Logger,
 ): Promise<void> {
-  for (const file of await loadWorkspaceFiles(workspaceFolder, settings)) {
+  for (const file of await loadDefinitionFiles(workspaceFolder, settings)) {
     const document = await readTextDocumentFromUri(`${workspaceFolder.uri}/${file}`)
     await validateFile(connection, pgPool, document, settings, options, logger)
   }

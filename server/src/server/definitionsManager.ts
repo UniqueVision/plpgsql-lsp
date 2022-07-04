@@ -8,7 +8,7 @@ import { parseStmtements } from "@/postgres/parsers/statement"
 import { Settings } from "@/settings"
 import { disableLanguageServer } from "@/utilities/disableLanguageServer"
 import {
-  loadWorkspaceFiles, makeDefinitionLinkMarkdown, readTextDocumentFromUri,
+  loadDefinitionFiles, makeDefinitionLinkMarkdown, readTextDocumentFromUri,
 } from "@/utilities/text"
 
 export type DefinitionName = string;
@@ -52,7 +52,7 @@ export class DefinitionsManager {
   ): Promise<void> {
     logger.log(`The "${workspaceFolder.name}" workspace definitions are loading...`)
 
-    for (const file of await loadWorkspaceFiles(workspaceFolder, settings)) {
+    for (const file of await loadDefinitionFiles(workspaceFolder, settings)) {
       const document = await readTextDocumentFromUri(`${workspaceFolder.uri}/${file}`)
 
       if (disableLanguageServer(document)) {
