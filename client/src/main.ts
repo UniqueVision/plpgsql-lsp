@@ -9,6 +9,6 @@ export function activate(context: ExtensionContext): void {
   return extension.activate(context)
 }
 
-export function deactivate(): Thenable<void> | undefined {
+export function deactivate(): Thenable<void> {
   return extension.deactivate()
 }
