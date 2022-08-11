@@ -46,20 +46,22 @@ export async function queryFileSyntaxAnalysis(
       logger.error(`SyntaxError ${code}: ${message} (${document.uri})`)
     }
 
-    let range: Range | undefined = undefined
-    if (error instanceof DatabaseError && error.position !== undefined) {
-      const errorPosition = Number(error.position)
-      const errorLines = fileText.slice(0, errorPosition).split("\n")
-      range = Range.create(
-        errorLines.length - 1,
-        getNonSpaceCharacter(errorLines[errorLines.length - 1]),
-        errorLines.length - 1,
-        errorLines[errorLines.length - 1].length,
-      )
-    }
-    else {
-      range = getTextAllRange(document)
-    }
+    const range = (() => {
+      if (error instanceof DatabaseError && error.position !== undefined) {
+        const errorPosition = Number(error.position)
+        const errorLines = fileText.slice(0, errorPosition).split("\n")
+
+        return Range.create(
+          errorLines.length - 1,
+          getNonSpaceCharacter(errorLines[errorLines.length - 1]),
+          errorLines.length - 1,
+          errorLines[errorLines.length - 1].length,
+        )
+      }
+      else {
+        return getTextAllRange(document)
+      }
+    })()
 
     errors.push({ range, message })
   }

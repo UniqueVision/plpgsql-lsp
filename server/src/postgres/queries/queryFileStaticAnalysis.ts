@@ -93,17 +93,15 @@ export async function queryFileStaticAnalysis(
 
       rows.forEach(
         (row) => {
-          let range: Range | undefined = undefined
-          if (location === undefined) {
-            range = getTextAllRange(document)
-          }
-          else {
-            range = getLineRangeFromBuffer(
-              fileText,
-              location,
-              row.lineno ? row.lineno - 1 : 0,
-            ) ?? getTextAllRange(document)
-          }
+          const range = (() => {
+            return (location === undefined)
+              ? getTextAllRange(document)
+              : getLineRangeFromBuffer(
+                fileText,
+                location,
+                row.lineno ? row.lineno - 1 : 0,
+              ) ?? getTextAllRange(document)
+          })()
 
           errors.push({
             level: row.level, range, message: row.message,

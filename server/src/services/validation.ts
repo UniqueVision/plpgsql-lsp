@@ -119,13 +119,11 @@ async function validateStaticAnalysis(
 
   return errors.flatMap(
     ({ level, range, message }) => {
-      let severity: DiagnosticSeverity | undefined = undefined
-      if (["warning", "warning extra"].includes(level)) {
-        severity = DiagnosticSeverity.Warning
-      }
-      else {
-        severity = DiagnosticSeverity.Error
-      }
+      const severity = (() => {
+        return (["warning", "warning extra"].includes(level))
+          ? DiagnosticSeverity.Warning
+          : DiagnosticSeverity.Error
+      })()
 
       const diagnostic: Diagnostic = {
         severity,
