@@ -49,6 +49,6 @@ npm run test
 
 1. Update the version number in `package.json`.
 1. Install with `npm install`.
-1. Execute `npm run package` to produce `vscode-plpgsql-lsp-#.#.#.vsix`. (For MacOS, `npm run package:mac`.)
+1. Execute `npm run package:linux` to produce `vscode-plpgsql-lsp-#.#.#.vsix`. (For MacOS, `npm run package:mac`.)
 1. Log into [VSCode Marketplace](https://marketplace.visualstudio.com/manage/publishers/uniquevision) (Unique Vision users only at this time).
 1. Under `PL/pgSQL Language Server`, select `More Actions`, then `Update` and upload the `.vsix` file.

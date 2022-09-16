@@ -49,6 +49,6 @@ npm run test
 
 1. `package.json`のバージョン番号を上げる。
 2. `npm install` でモジュールを更新する。
-3. `npm run package`で`vscode-plpgsql-lsp-#.#.#.vsix`を生成する（Mac の場合は `npm run package:mac` ）。
+3. `npm run package:linux`で`vscode-plpgsql-lsp-#.#.#.vsix`を生成する（Mac の場合は `npm run package:mac` ）。
 4. [VSCode Marketplace](https://marketplace.visualstudio.com/manage/publishers/uniquevision)にログインする。
 5. `PL/pgSQL Language Server`の`More Actions`の下、`Update`を選択して`.vsix`ファイルを入れる。
