@@ -1,6 +1,9 @@
 # Change Log
 
 ## Unreleased - TBD
+## [v2.8.3](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.8.3) - 2022/09/16
+- Support `elsif` keyword. [#52](https://github.com/UniqueVision/plpgsql-lsp/pull/52)
+
 ## [v2.8.2](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.8.2) - 2022/07/05
 - Fix workspace validation bug. [#50](https://github.com/UniqueVision/plpgsql-lsp/pull/50)
 
