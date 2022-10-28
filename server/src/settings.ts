@@ -7,6 +7,7 @@ export interface Settings {
   definitionFiles: string[];
   defaultSchema: string;
   queryParameterPattern: string
+  statementSeparatorPattern?: string,
   keywordQueryParameterPattern?: string,
   enableExecuteFileQueryCommand: boolean,
   workspaceValidationTargetFiles: string[],
@@ -24,6 +25,7 @@ export const DEFAULT_SETTINGS: Settings = {
   ],
   defaultSchema: "public",
   queryParameterPattern: /\$[1-9][0-9]*/.source,
+  statementSeparatorPattern: undefined,
   keywordQueryParameterPattern: undefined,
   enableExecuteFileQueryCommand: true,
   workspaceValidationTargetFiles: [],

@@ -15,6 +15,7 @@ export interface SyntaxError {
 export type SyntaxAnalysisOptions = {
   isComplete: boolean;
   queryParameterInfo: QueryParameterInfo | null;
+  statementSeparatorPattern?: string;
 };
 
 export async function queryFileSyntaxAnalysis(
@@ -25,9 +26,14 @@ export async function queryFileSyntaxAnalysis(
 ): Promise<SyntaxError[]> {
   const errors = []
   const doc = document.getText()
-  const re = /(--[\s]?name[\s]?:.*)/g
 
-  const preparedStmts = doc.split(re)
+  let preparedStmts = [doc]
+  if (options.statementSeparatorPattern) {
+    // const re = /(--[\s]?name[\s]?:.*)/g
+    const re =new RegExp(options.statementSeparatorPattern, "g")
+    preparedStmts = doc.split(re)
+  }
+
 
   for (let i = 0; i < preparedStmts.length; i++) {
     const stmt = preparedStmts[i]

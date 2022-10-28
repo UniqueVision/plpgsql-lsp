@@ -11,6 +11,7 @@ type ValidateTextDocumentOptions = {
   isComplete: boolean,
   hasDiagnosticRelatedInformationCapability: boolean,
   queryParameterInfo: QueryParameterInfo | null,
+  statementSeparatorPattern?: string,
 }
 
 export async function validateTextDocument(
@@ -73,6 +74,7 @@ async function validateSyntaxAnalysis(
     {
       isComplete: options.isComplete,
       queryParameterInfo: options.queryParameterInfo,
+      statementSeparatorPattern:options.statementSeparatorPattern,
     },
     logger,
   )
