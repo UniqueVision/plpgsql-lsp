@@ -32,6 +32,9 @@ export async function queryFileSyntaxAnalysis(
   for (let i = 0; i < preparedStmts.length; i++) {
     const stmt = preparedStmts[i]
     const currentPosition = preparedStmts.slice(0, i).join("").length
+    // TODO replace all matches with $*, we don't care if its a wrong parameter match
+    // inside a string, etc. Ultimately nothing gets executed.
+    // (@\b\w+\b)
     const [fileText, parameterNumber] = sanitizeFileWithQueryParameters(
       stmt,
       options.queryParameterInfo,
