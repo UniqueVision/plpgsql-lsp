@@ -461,6 +461,30 @@
           <string>variable.other.pgsql</string>
         </dict>
         <dict>
+          <key>comment</key>
+          <string>Prepared statement variables.</string>
+          <key>match</key>
+          <string>((?&lt;!@)@)\b(\w+)\b</string>
+          <key>name</key>
+          <string>variable.text</string>
+        </dict>
+        <dict>
+          <key>comment</key>
+          <string>Prepared statement variables.</string>
+          <key>match</key>
+          <string>((?&lt;!:):)\b(\w+)\b</string>
+          <key>name</key>
+          <string>variable.text</string>
+        </dict>
+        <dict>
+          <key>comment</key>
+          <string>Variables for https://github.com/kyleconroy/sqlc.</string>
+          <key>match</key>
+          <string>(sqlc\.[n]?arg)</string>
+          <key>name</key>
+          <string>variable.sqlc</string>
+        </dict>
+        <dict>
           <key>begin</key>
           <string>(\$[\w_0-9]*\$)</string>
           <key>comment</key>
