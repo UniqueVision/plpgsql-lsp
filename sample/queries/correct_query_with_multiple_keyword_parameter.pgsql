@@ -6,4 +6,4 @@ SELECT
 FROM
   users
 WHERE
-  id = @id AND name = ANY(@names);
+  id = sqlc.arg('id') AND name = ANY(@names);

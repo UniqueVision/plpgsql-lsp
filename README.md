@@ -236,14 +236,14 @@ so must be indicated in the settings file.
 
 ```jsonc
 {
-  "plpgsqlLanguageServer.keywordQueryParameterPattern": "@{keyword}"
+  "plpgsqlLanguageServer.keywordQueryParameterPatterns": "@{keyword}"
 }
 ```
 
 You have finished setting, you can validate it like this.
 
 ```sql
--- plpgsql-language-server:use-keyword-query-parameter
+-- plpgsql-language-server:use-keyword-query-parameters
 
 SELECT
   id,
@@ -257,7 +257,7 @@ WHERE
 The complex queries file require the keywords to be specified explicitly in the comment.
 
 ```sql
--- plpgsql-language-server:use-keyword-query-parameter keywords=[id, names]
+-- plpgsql-language-server:use-keyword-query-parameters keywords=[id, names]
 
 SELECT
   id,
