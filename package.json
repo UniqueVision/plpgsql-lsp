@@ -147,7 +147,7 @@
 				"plpgsqlLanguageServer.statementSeparatorPattern": {
 					"scope": "resource",
 					"type": "string",
-					"description": "Prepared statement separator regex pattern. If set, multiple statements in a file can be analyzed."
+					"description": "Prepared statement separator regex pattern. If set, multiple statements in a file can be analyzed. Example: '-- name:[\\s]+.*'"
 				},
 				"plpgsqlLanguageServer.keywordQueryParameterPatterns": {
 					"scope": "resource",

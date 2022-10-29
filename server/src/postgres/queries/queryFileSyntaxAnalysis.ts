@@ -32,7 +32,7 @@ export async function queryFileSyntaxAnalysis(
   let preparedStmts = [doc]
   let stmtSepRE: RegExp | undefined
   if (options.statementSeparatorPattern) {
-    stmtSepRE =new RegExp(options.statementSeparatorPattern, "g")
+    stmtSepRE =new RegExp(`(${options.statementSeparatorPattern})`, "g")
     preparedStmts = doc.split(stmtSepRE)
   }
 
@@ -81,7 +81,7 @@ export async function queryFileSyntaxAnalysis(
       const range = (() => {
         if (error instanceof DatabaseError && error.position !== undefined) {
           const errorPosition = Number(error.position) + currentPosition
-          
+
           return getRange(doc, errorPosition)
         } else {
           return getTextAllRange(document)
