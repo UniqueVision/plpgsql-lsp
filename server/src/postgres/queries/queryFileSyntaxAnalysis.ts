@@ -40,10 +40,21 @@ export async function queryFileSyntaxAnalysis(
   for (let i = 0; i < preparedStmts.length; i++) {
     const sqlCommentRE = /\/\*[\s\S]*?\*\/|([^:]|^)--.*$/gm
     const singleQuotedRE = /'(.*?)'/g
-    // avoid recognizing string contents as parameters
-    const stmt = preparedStmts[i].replace(singleQuotedRE, "'string'")
+    const beginRE = /^([\s]*begin[\s]*;)/gm
+    const commitRE = /^([\s]*commit[\s]*;)/gm
+
+    const stmt = preparedStmts[i]
+      // do not execute the current file (e.g. migrations)
+      .replace(beginRE, (m) => "-".repeat(m.length))
+      .replace(commitRE, (m) => "-".repeat(m.length))
+      // avoid recognizing string contents as parameters (_ so they can be valid {keyword})
+      .replace(singleQuotedRE, (m) => `'${"_".repeat(m.length-2)}'`)
+
     const queryParameterInfo = getQueryParameterInfo(
-      document, stmt.replace(sqlCommentRE, ""), settings, logger,
+      document,
+      stmt.replace(sqlCommentRE, ""), // ignore possible matches with comments
+      settings,
+      logger,
     )
     if (queryParameterInfo !== null && !("type" in queryParameterInfo)) {
       continue

@@ -6,5 +6,7 @@
   "plpgsqlLanguageServer.definitionFiles": [
     "definitions/**/*.pgsql"
   ],
-  "plpgsqlLanguageServer.keywordQueryParameterPatterns": "@{keyword}"
+  "plpgsqlLanguageServer.keywordQueryParameterPatterns": [
+    "@{keyword}"
+  ]
 }
