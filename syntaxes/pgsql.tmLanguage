@@ -453,6 +453,12 @@
           </array>
         </dict>
         <dict>
+          <key>match</key>
+          <string>(?i:\b((?:primary|foreign)\s+key|references|on\sdelete(\s+cascade)?|nocheck|check|constraint|collate|default|unique)\b)</string>
+          <key>name</key>
+          <string>storage.modifier.sql</string>
+        </dict>
+        <dict>
           <key>comment</key>
           <string>Double quoting treated like strings, but they are really identifiers.</string>
           <key>match</key>

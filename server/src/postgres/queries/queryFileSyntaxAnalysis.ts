@@ -39,16 +39,14 @@ export async function queryFileSyntaxAnalysis(
   const statementNames: string[] = []
   for (let i = 0; i < preparedStmts.length; i++) {
     const sqlCommentRE = /\/\*[\s\S]*?\*\/|([^:]|^)--.*$/gm
-    const singleQuotedRE = /'(.*?)'/g
+    // const singleQuotedRE = /'(.*?)'/g
     const beginRE = /^([\s]*begin[\s]*;)/gm
     const commitRE = /^([\s]*commit[\s]*;)/gm
 
-    const stmt = preparedStmts[i]
+    let stmt = preparedStmts[i]
       // do not execute the current file (e.g. migrations)
       .replace(beginRE, (m) => "-".repeat(m.length))
       .replace(commitRE, (m) => "-".repeat(m.length))
-      // avoid recognizing string contents as parameters (_ so they can be valid {keyword})
-      .replace(singleQuotedRE, (m) => `'${"_".repeat(m.length-2)}'`)
 
     const queryParameterInfo = getQueryParameterInfo(
       document,
@@ -59,7 +57,56 @@ export async function queryFileSyntaxAnalysis(
     if (queryParameterInfo !== null && !("type" in queryParameterInfo)) {
       continue
     }
+
+    // replace inside single quotes only if any given pattern matches,
+    // else we are overriding uuids, booleans in string form, etc.
+    let re : RegExp
+    switch (queryParameterInfo?.type) {
+      case "default":
+        re = new RegExp(
+          "'.*?"+queryParameterInfo.queryParameterPattern.
+            replace("{keyword}", "[A-Za-z_][A-Za-z0-9_]*?")+".*?'", "g",
+        )
+        stmt = stmt.replace(
+          re,
+          (m) => `'${"_".repeat(m.length-2)}'`,
+        )
+
+        // remove parameters that were matched ignoring single quotes (can't replace
+        // beforehand since given pattern may contain single quoted text)
+        // to get all plausible params but don't exist after replacing
+        queryParameterInfo.queryParameters =
+          queryParameterInfo.queryParameters.filter((param) => stmt.includes(param))
+
+        break
+      case "keyword":
+        queryParameterInfo.keywordQueryParameterPatterns.map(p => {
+          re = new RegExp(
+            "'.*?"+p.replace("{keyword}", "[A-Za-z_][A-Za-z0-9_]*?")+".*?'", "g",
+          )
+          stmt = stmt.replace(
+            re,
+            (m) => `'${"_".repeat(m.length-2)}'`,
+          )
+        })
+
+        // remove parameters that were matched ignoring single quotes (can't replace
+        // beforehand since given pattern may contain single quoted text)
+        // to get all plausible params but don't exist after replacing
+        queryParameterInfo.keywordParameters =
+          queryParameterInfo.keywordParameters.filter((param) => stmt.includes(param))
+
+        break
+      default:
+        break
+    }
+
+
+    logger.info(JSON.stringify(queryParameterInfo))
+    logger.info(stmt)
+
     const currentPosition = preparedStmts.slice(0, i).join("").length
+
     if (options.statementSeparatorPattern && stmtSepRE?.test(stmt) ) {
       if (statementNames.includes(stmt)) {
         errors.push({
