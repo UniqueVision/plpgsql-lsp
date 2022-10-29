@@ -28,16 +28,28 @@ export async function queryFileSyntaxAnalysis(
   const doc = document.getText()
 
   let preparedStmts = [doc]
+  let stmtRE: RegExp | undefined
   if (options.statementSeparatorPattern) {
-    // const re = /(--[\s]?name[\s]?:.*)/g
-    const re =new RegExp(options.statementSeparatorPattern, "g")
-    preparedStmts = doc.split(re)
+    // const stmtRE = /(--[\s]?name[\s]?:.*)/g
+    stmtRE =new RegExp(options.statementSeparatorPattern, "g")
+    preparedStmts = doc.split(stmtRE)
   }
 
+  const statementNames: string[] = []
 
   for (let i = 0; i < preparedStmts.length; i++) {
     const stmt = preparedStmts[i]
     const currentPosition = preparedStmts.slice(0, i).join("").length
+    if (options.statementSeparatorPattern && stmtRE?.test(stmt) ) {
+      if (statementNames.includes(stmt)) {
+        errors.push({
+          range: getRange(doc, currentPosition),
+          message: "Duplicated statement",
+        })
+        continue
+      }
+      statementNames.push(stmt)
+    }
     // TODO replace all matches with $*, we don't care if its a wrong parameter match
     // inside a string, etc. Ultimately nothing gets executed.
     // (@\b\w+\b)
@@ -47,9 +59,7 @@ export async function queryFileSyntaxAnalysis(
       logger,
     )
     //  TODOs:
-    // add flag to enable multiple statements per file analysis
-    // separate into different statements by conf defined regex: /--[\s]?name[\s]?:.*/gi
-    // loop through and replace all parameter regexes with $1,$2...: sqlc.arg\(.*\), @(.*)...
+    // loop through and replace all found parameter regexes with $1,$2...: sqlc.arg\(.*\), @(.*)... see server/src/postgres/parameters/keywordParameters.ts
 
     const pgClient = await pgPool.connect()
     try {
@@ -67,14 +77,9 @@ export async function queryFileSyntaxAnalysis(
       const range = (() => {
         if (error instanceof DatabaseError && error.position !== undefined) {
           const errorPosition = Number(error.position) + currentPosition
-          const errorLines = doc.slice(0, errorPosition).split("\n")
+          const rg = getRange(doc, errorPosition)
 
-          return Range.create(
-            errorLines.length - 1,
-            getNonSpaceCharacter(errorLines[errorLines.length - 1]),
-            errorLines.length - 1,
-            errorLines[errorLines.length - 1].length,
-          )
+          return rg
         } else {
           return getTextAllRange(document)
         }
@@ -88,4 +93,15 @@ export async function queryFileSyntaxAnalysis(
   }
 
   return errors
+}
+
+function getRange(doc: string, errorPosition: number) {
+  const errorLines = doc.slice(0, errorPosition).split("\n")
+
+  return Range.create(
+    errorLines.length - 1,
+    getNonSpaceCharacter(errorLines[errorLines.length - 1]),
+    errorLines.length - 1,
+    errorLines[errorLines.length - 1].length,
+  )
 }
