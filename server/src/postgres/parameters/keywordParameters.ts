@@ -1,9 +1,7 @@
 import { Logger, uinteger } from "vscode-languageserver-protocol/node"
-import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { Settings } from "@/settings"
 import { escapeRegex } from "@/utilities/regex"
-import { getFirstLine, getTextAfterFirstLine } from "@/utilities/text"
 
 import { makePositionalParamter } from "./helpers"
 
@@ -24,11 +22,11 @@ export class KeywordQueryParameterPatternsNotDefinedError extends Error {
 }
 
 export function getKeywordQueryParameterInfo(
-  document: TextDocument,
+  statement: string,
+  firstLine: string,
   keywordQueryParameterPatterns: Settings["keywordQueryParameterPatterns"],
   _logger: Logger,
 ): KeywordQueryParametersInfo | null {
-  const firstLine = getFirstLine(document)
   for (const pattern of [
     /^ *-- +plpgsql-language-server:use-keyword-query-parameters( +keywords=\[ *([A-Za-z_][A-Za-z0-9_]*)?((, *([A-Za-z_][A-Za-z0-9_]*))*),? *\])? *$/, // eslint-disable-line max-len
     /^ *\/\* +plpgsql-language-server:use-keyword-query-parameters( +keywords=\[ *([A-Za-z_][A-Za-z0-9_]*)?((, *([A-Za-z_][A-Za-z0-9_]*))*),? *\])? +\*\/$/, // eslint-disable-line max-len
@@ -72,7 +70,7 @@ export function getKeywordQueryParameterInfo(
           )
           keywordParameters.push(...Array.from(
             new Set(
-              [...getTextAfterFirstLine(document).matchAll(keywordRegExp)]
+              [...statement.matchAll(keywordRegExp)]
                 .map((found) => {
 
                   return found[0]

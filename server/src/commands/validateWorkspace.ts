@@ -50,7 +50,9 @@ export async function validateFile(
   let diagnostics: Diagnostic[] | undefined = undefined
 
   if (!disableValidation(document)) {
-    const queryParameterInfo = getQueryParameterInfo(document, settings, logger)
+    const queryParameterInfo = getQueryParameterInfo(
+      document, document.getText(), settings, logger,
+    )
     if (queryParameterInfo === null || "type" in queryParameterInfo) {
       diagnostics = await validateTextDocument(
         pgPool,
@@ -62,6 +64,7 @@ export async function validateFile(
           queryParameterInfo,
           statementSeparatorPattern: settings.statementSeparatorPattern,
         },
+        settings,
         logger,
       )
     }

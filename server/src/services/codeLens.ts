@@ -18,8 +18,8 @@ export async function getCodeLenses(
   const codeLenses: CodeLens[] = []
   if (
     settings.enableExecuteFileQueryCommand
-    && getQueryParameterInfo(document, settings, logger) === null
-    && await isCorrectFileValidation(pgPool, document, logger)
+    && getQueryParameterInfo(document, document.getText(), settings, logger) === null
+    && await isCorrectFileValidation(pgPool, document, settings, logger)
   ) {
     codeLenses.push(makeExecuteFileQueryCommandCodeLens(document))
   }

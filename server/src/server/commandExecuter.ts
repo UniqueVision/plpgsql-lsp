@@ -86,7 +86,10 @@ export class CommandExecuter {
       throw new ExecuteFileQueryCommandDisabledError()
     }
 
-    if (getQueryParameterInfo(document, settings, this.logger) !== null) {
+    const queryParameterInfo = getQueryParameterInfo(
+      document, document.getText(), settings, this.logger,
+    )
+    if (queryParameterInfo !== null) {
       throw new CannotExecuteCommandWithQueryParametersError()
     }
 
