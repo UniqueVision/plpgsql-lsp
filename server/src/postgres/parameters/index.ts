@@ -27,7 +27,7 @@ export type QueryParameterInfo = (
   | PositionalQueryParametersInfo
   | KeywordQueryParametersInfo
 )
-// TODO need to get per statement when using statement separator
+
 export function getQueryParameterInfo(
   document: TextDocument,
   statement: string,

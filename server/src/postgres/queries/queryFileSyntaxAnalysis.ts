@@ -30,71 +30,69 @@ export async function queryFileSyntaxAnalysis(
   const doc = document.getText()
 
   let preparedStmts = [doc]
-  let stmtRE: RegExp | undefined
+  let stmtSepRE: RegExp | undefined
   if (options.statementSeparatorPattern) {
-    // const stmtRE = /(--[\s]?name[\s]?:.*)/g
-    stmtRE =new RegExp(options.statementSeparatorPattern, "g")
-    preparedStmts = doc.split(stmtRE)
+    stmtSepRE =new RegExp(options.statementSeparatorPattern, "g")
+    preparedStmts = doc.split(stmtSepRE)
   }
 
   const statementNames: string[] = []
-
   for (let i = 0; i < preparedStmts.length; i++) {
     const sqlCommentRE = /\/\*[\s\S]*?\*\/|([^:]|^)--.*$/gm
-    const stmt = preparedStmts[i]
+    const singleQuotedRE = /'(.*?)'/g
+    // avoid recognizing string contents as parameters
+    const stmt = preparedStmts[i].replace(singleQuotedRE, "'string'")
     const queryParameterInfo = getQueryParameterInfo(
       document, stmt.replace(sqlCommentRE, ""), settings, logger,
     )
-    if (queryParameterInfo === null || "type" in queryParameterInfo) {
-      const currentPosition = preparedStmts.slice(0, i).join("").length
-      if (options.statementSeparatorPattern && stmtRE?.test(stmt) ) {
-        if (statementNames.includes(stmt)) {
-          errors.push({
-            range: getRange(doc, currentPosition),
-            message: "Duplicated statement",
-          })
-          continue
-        }
-        statementNames.push(stmt)
+    if (queryParameterInfo !== null && !("type" in queryParameterInfo)) {
+      continue
+    }
+    const currentPosition = preparedStmts.slice(0, i).join("").length
+    if (options.statementSeparatorPattern && stmtSepRE?.test(stmt) ) {
+      if (statementNames.includes(stmt)) {
+        errors.push({
+          range: getRange(doc, currentPosition),
+          message: "Duplicated statement",
+        })
+        continue
       }
-      const [fileText, parameterNumber] = sanitizeFileWithQueryParameters(
-        stmt,
-        queryParameterInfo,
-        logger,
-      )
+      statementNames.push(stmt)
+    }
+    const [fileText, parameterNumber] = sanitizeFileWithQueryParameters(
+      stmt,
+      queryParameterInfo,
+      logger,
+    )
 
-      logger.warn(JSON.stringify({ fileText, parameters: queryParameterInfo }))
+    const pgClient = await pgPool.connect()
+    try {
+      await pgClient.query("BEGIN")
+      await pgClient.query(fileText, Array(parameterNumber).fill(null))
+    } catch (error: unknown) {
+      const databaseError = error as DatabaseError
+      const code = databaseError.code ?? "unknown"
+      const message = databaseError.message
 
-      const pgClient = await pgPool.connect()
-      try {
-        await pgClient.query("BEGIN")
-        await pgClient.query(fileText, Array(parameterNumber).fill(null))
-      } catch (error: unknown) {
-        const databaseError = error as DatabaseError
-        const code = databaseError.code ?? "unknown"
-        const message = databaseError.message
-
-        if (options.isComplete) {
-          logger.error(`SyntaxError ${code}: ${message} (${document.uri})`)
-        }
-
-        const range = (() => {
-          if (error instanceof DatabaseError && error.position !== undefined) {
-            const errorPosition = Number(error.position) + currentPosition
-            const rg = getRange(doc, errorPosition)
-
-            return rg
-          } else {
-            return getTextAllRange(document)
-          }
-        })()
-
-        errors.push({ range, message })
-
-      } finally {
-        await pgClient.query("ROLLBACK")
-        pgClient.release()
+      if (options.isComplete) {
+        logger.error(`SyntaxError ${code}: ${message} (${document.uri})`)
       }
+
+      const range = (() => {
+        if (error instanceof DatabaseError && error.position !== undefined) {
+          const errorPosition = Number(error.position) + currentPosition
+          
+          return getRange(doc, errorPosition)
+        } else {
+          return getTextAllRange(document)
+        }
+      })()
+
+      errors.push({ range, message })
+
+    } finally {
+      await pgClient.query("ROLLBACK")
+      pgClient.release()
     }
   }
 

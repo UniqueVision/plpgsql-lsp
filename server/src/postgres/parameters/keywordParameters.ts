@@ -100,7 +100,6 @@ export function sanitizeFileWithKeywordQueryParameters(
   for (
     const [index, keywordParameter] of Array.from(keywordParameters.values()).entries()
   ) {
-    // TODO "|(sqlc\\.[n]?arg\\(.*?[\\)])" + "|(@\\b\\w+\\b)"
     fileText = fileText.replace(
       new RegExp(escapeRegex(keywordParameter), "g"),
       makePositionalParamter(index, keywordParameter),
