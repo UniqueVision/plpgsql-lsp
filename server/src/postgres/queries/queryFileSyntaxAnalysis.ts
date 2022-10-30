@@ -58,49 +58,7 @@ export async function queryFileSyntaxAnalysis(
       continue
     }
 
-    // replace inside single quotes only if any given pattern matches,
-    // else we are overriding uuids, booleans in string form, etc.
-    let re : RegExp
-    switch (queryParameterInfo?.type) {
-      case "default":
-        re = new RegExp(
-          "'.*?"+queryParameterInfo.queryParameterPattern.
-            replace("{keyword}", "[A-Za-z_][A-Za-z0-9_]*?")+".*?'", "g",
-        )
-        stmt = stmt.replace(
-          re,
-          (m) => `'${"_".repeat(m.length-2)}'`,
-        )
-
-        // remove parameters that were matched ignoring single quotes (can't replace
-        // beforehand since given pattern may contain single quoted text)
-        // to get all plausible params but don't exist after replacing
-        queryParameterInfo.queryParameters =
-          queryParameterInfo.queryParameters.filter((param) => stmt.includes(param))
-
-        break
-      case "keyword":
-        queryParameterInfo.keywordQueryParameterPatterns.map(p => {
-          re = new RegExp(
-            "'.*?"+p.replace("{keyword}", "[A-Za-z_][A-Za-z0-9_]*?")+".*?'", "g",
-          )
-          stmt = stmt.replace(
-            re,
-            (m) => `'${"_".repeat(m.length-2)}'`,
-          )
-        })
-
-        // remove parameters that were matched ignoring single quotes (can't replace
-        // beforehand since given pattern may contain single quoted text)
-        // to get all plausible params but don't exist after replacing
-        queryParameterInfo.keywordParameters =
-          queryParameterInfo.keywordParameters.filter((param) => stmt.includes(param))
-
-        break
-      default:
-        break
-    }
-
+    stmt = sanitizeStatement(queryParameterInfo, stmt)
 
     logger.info(JSON.stringify(queryParameterInfo))
     logger.info(stmt)
@@ -111,7 +69,7 @@ export async function queryFileSyntaxAnalysis(
       if (statementNames.includes(stmt)) {
         errors.push({
           range: getRange(doc, currentPosition),
-          message: "Duplicated statement",
+          message: `Duplicated statement '${stmt}'`,
         })
         continue
       }
@@ -155,6 +113,63 @@ export async function queryFileSyntaxAnalysis(
   }
 
   return errors
+}
+
+function sanitizeStatement(
+  queryParameterInfo: QueryParameterInfo | null,
+  stmt: string,
+) {
+
+  // replace inside single quotes only if any given pattern matches,
+  // else we are overriding uuids, booleans in string form, etc.
+  let re: RegExp
+  switch (queryParameterInfo?.type) {
+    case "default":
+      re = makeParamPatternInStringPattern(queryParameterInfo.queryParameterPattern)
+      stmt = stmt.replace(
+        re,
+        (m) => `'${"_".repeat(m.length - 2)}'`,
+      )
+
+      // remove parameters that were matched ignoring single quotes (can't replace
+      // beforehand since given pattern may contain single quoted text)
+      // to get all plausible params but don't exist after replacing
+      queryParameterInfo.queryParameters =
+        queryParameterInfo.queryParameters.filter((param) => stmt.includes(param))
+
+      break
+    case "keyword":
+      queryParameterInfo.keywordQueryParameterPatterns.map(p => {
+        re = makeParamPatternInStringPattern(p)
+        stmt = stmt.replace(
+          re,
+          (m) => `'${"_".repeat(m.length - 2)}'`,
+        )
+      })
+
+      // remove parameters that were matched ignoring single quotes (can't replace
+      // beforehand since given pattern may contain single quoted text)
+      // to get all plausible params but don't exist after replacing
+      queryParameterInfo.keywordParameters =
+        queryParameterInfo.keywordParameters.filter((param) => stmt.includes(param))
+
+      break
+    default:
+      break
+  }
+
+  return stmt
+}
+
+function makeParamPatternInStringPattern(
+  paramPattern: string,
+): RegExp {
+  return new RegExp(
+    "'.*?"
+     + paramPattern.replace("{keyword}", "[A-Za-z_][A-Za-z0-9_]*?")
+     + ".*?'",
+    "g",
+  )
 }
 
 function getRange(doc: string, errorPosition: number) {
