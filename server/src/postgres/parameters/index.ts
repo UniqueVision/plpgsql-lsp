@@ -55,7 +55,7 @@ export function getQueryParameterInfo(
   // keyword query parameter.
   try{
     queryParameterInfo = getKeywordQueryParameterInfo(
-      statement, getFirstLine(document), settings.keywordQueryParameterPatterns, logger,
+      statement, getFirstLine(document), settings.keywordQueryParameterPattern, logger,
     )
   }
   catch (error: unknown) {

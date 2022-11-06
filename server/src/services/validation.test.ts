@@ -224,7 +224,7 @@ describe("Validate Tests", () => {
   describe("Keyword Query Parameter File Validation", function () {
     beforeEach(() => {
       const settings = new SettingsBuilder()
-        .with({ keywordQueryParameterPatterns: ["@{keyword}"] })
+        .with({ keywordQueryParameterPattern: ["@{keyword}"] })
         .build()
       server = setupTestServer(settings, new RecordLogger())
     })

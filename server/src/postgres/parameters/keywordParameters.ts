@@ -8,13 +8,13 @@ import { makePositionalParamter } from "./helpers"
 export type KeywordQueryParametersInfo = {
   type: "keyword",
   keywordParameters: string[],
-  keywordQueryParameterPatterns: string[]
+  keywordQueryParameterPattern: string[]
 }
 
 export class KeywordQueryParameterPatternsNotDefinedError extends Error {
   constructor() {
     super(
-      "'plpgsqlLanguageServer.keywordQueryParameterPatterns'"
+      "'plpgsqlLanguageServer.keywordQueryParameterPattern'"
       + " does not set in the settings.",
     )
     this.name = "KeywordQueryParameterPatternsNotDefinedError"
@@ -24,7 +24,7 @@ export class KeywordQueryParameterPatternsNotDefinedError extends Error {
 export function getKeywordQueryParameterInfo(
   statement: string,
   firstLine: string,
-  keywordQueryParameterPatterns: Settings["keywordQueryParameterPatterns"],
+  keywordQueryParameterPattern: Settings["keywordQueryParameterPattern"],
   _logger: Logger,
 ): KeywordQueryParametersInfo | null {
   for (const pattern of [
@@ -35,8 +35,15 @@ export function getKeywordQueryParameterInfo(
 
     if (found !== null) {
 
-      if (keywordQueryParameterPatterns === undefined) {
+      if (keywordQueryParameterPattern === undefined) {
         throw new KeywordQueryParameterPatternsNotDefinedError()
+      }
+      let keywordQueryParameterPatterns: string[]
+      if (typeof keywordQueryParameterPattern === "string") {
+        keywordQueryParameterPatterns = [keywordQueryParameterPattern]
+      }
+      else {
+        keywordQueryParameterPatterns = keywordQueryParameterPattern
       }
 
       const keywordParameters: string[] = []
@@ -83,7 +90,7 @@ export function getKeywordQueryParameterInfo(
       return {
         type: "keyword",
         keywordParameters,
-        keywordQueryParameterPatterns,
+        keywordQueryParameterPattern: keywordQueryParameterPatterns,
       }
     }
   }

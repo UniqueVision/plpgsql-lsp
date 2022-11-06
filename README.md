@@ -236,7 +236,7 @@ so must be indicated in the settings file.
 
 ```jsonc
 {
-  "plpgsqlLanguageServer.keywordQueryParameterPatterns": ["@{keyword}"]
+  "plpgsqlLanguageServer.keywordQueryParameterPattern": ["@{keyword}"]
 }
 ```
 

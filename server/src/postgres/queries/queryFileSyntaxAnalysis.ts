@@ -139,7 +139,7 @@ function sanitizeStatement(
 
       break
     case "keyword":
-      queryParameterInfo.keywordQueryParameterPatterns.map(p => {
+      queryParameterInfo.keywordQueryParameterPattern.map(p => {
         re = makeParamPatternInStringPattern(p)
         stmt = stmt.replace(
           re,
