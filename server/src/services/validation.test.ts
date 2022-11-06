@@ -249,7 +249,7 @@ describe("Validate Tests", () => {
   describe("Multiple Statements File Validation With Keyword Parameters", function () {
     beforeEach(() => {
       const settings = new SettingsBuilder()
-        .with({ keywordQueryParameterPatterns: [
+        .with({ keywordQueryParameterPattern: [
           "@{keyword}",
           "sqlc\\.arg\\('{keyword}'\\)",
           "sqlc\\.narg\\('{keyword}'\\)",
