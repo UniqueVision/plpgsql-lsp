@@ -30,15 +30,15 @@ export type QueryParameterInfo = (
 
 export function getQueryParameterInfo(
   document: TextDocument,
-  statement: string,
   settings: Settings,
   logger: Logger,
 ): QueryParameterInfo | Diagnostic | null {
   let queryParameterInfo
+  const statement = document.getText()
 
   // default query parameter
   queryParameterInfo = getDefaultQueryParameterInfo(
-    statement, getFirstLine(document), settings.queryParameterPattern, logger,
+    document, settings.queryParameterPattern, logger,
   )
   if (queryParameterInfo !== null) {
     return queryParameterInfo

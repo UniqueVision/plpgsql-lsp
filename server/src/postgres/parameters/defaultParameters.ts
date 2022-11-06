@@ -1,6 +1,8 @@
 import { Logger, uinteger } from "vscode-languageserver-protocol/node"
+import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { escapeRegex } from "@/utilities/regex"
+import { getFirstLine, getTextAfterFirstLine } from "@/utilities/text"
 
 import { makePositionalParamter } from "./helpers"
 
@@ -12,11 +14,13 @@ export type DefaultQueryParametersInfo = {
 
 
 export function getDefaultQueryParameterInfo(
-  statement: string,
-  firstLine: string,
+  document: TextDocument,
   queryParameterPattern: string,
   _logger: Logger,
 ): DefaultQueryParametersInfo | null {
+  const statement = getTextAfterFirstLine(document)
+  const firstLine = getFirstLine(document)
+
   for (const pattern of [
     /^ *-- +plpgsql-language-server:use-query-parameter *$/,
     /^ *\/\* +plpgsql-language-server:use-query-parameter +\*\/$/,
