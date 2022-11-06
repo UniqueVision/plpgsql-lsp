@@ -1,42 +1,53 @@
 import { Logger, uinteger } from "vscode-languageserver-protocol/node"
+import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { Settings } from "@/settings"
 import { escapeRegex } from "@/utilities/regex"
+import { getFirstLine } from "@/utilities/text"
 
 import { makePositionalParamter } from "./helpers"
 
 export type KeywordQueryParametersInfo = {
   type: "keyword",
   keywordParameters: string[],
-  keywordQueryParameterPatterns: string[]
+  keywordQueryParameterPattern: string[]
 }
 
-export class KeywordQueryParameterPatternsNotDefinedError extends Error {
+export class KeywordQueryParameterPatternNotDefinedError extends Error {
   constructor() {
     super(
-      "'plpgsqlLanguageServer.keywordQueryParameterPatterns'"
+      "'plpgsqlLanguageServer.keywordQueryParameterPattern'"
       + " does not set in the settings.",
     )
-    this.name = "KeywordQueryParameterPatternsNotDefinedError"
+    this.name = "KeywordQueryParameterPatternNotDefinedError"
   }
 }
 
 export function getKeywordQueryParameterInfo(
+  document: TextDocument,
   statement: string,
-  firstLine: string,
-  keywordQueryParameterPatterns: Settings["keywordQueryParameterPatterns"],
+  keywordQueryParameterPattern: Settings["keywordQueryParameterPattern"],
   _logger: Logger,
 ): KeywordQueryParametersInfo | null {
+  const firstLine = getFirstLine(document)
+
   for (const pattern of [
-    /^ *-- +plpgsql-language-server:use-keyword-query-parameters( +keywords=\[ *([A-Za-z_][A-Za-z0-9_]*)?((, *([A-Za-z_][A-Za-z0-9_]*))*),? *\])? *$/, // eslint-disable-line max-len
-    /^ *\/\* +plpgsql-language-server:use-keyword-query-parameters( +keywords=\[ *([A-Za-z_][A-Za-z0-9_]*)?((, *([A-Za-z_][A-Za-z0-9_]*))*),? *\])? +\*\/$/, // eslint-disable-line max-len
+    /^ *-- +plpgsql-language-server:use-keyword-query-parameter( +keywords=\[ *([A-Za-z_][A-Za-z0-9_]*)?((, *([A-Za-z_][A-Za-z0-9_]*))*),? *\])? *$/, // eslint-disable-line max-len
+    /^ *\/\* +plpgsql-language-server:use-keyword-query-parameter( +keywords=\[ *([A-Za-z_][A-Za-z0-9_]*)?((, *([A-Za-z_][A-Za-z0-9_]*))*),? *\])? +\*\/$/, // eslint-disable-line max-len
   ]) {
     const found = firstLine.match(pattern)
 
     if (found !== null) {
 
-      if (keywordQueryParameterPatterns === undefined) {
-        throw new KeywordQueryParameterPatternsNotDefinedError()
+      if (keywordQueryParameterPattern === undefined) {
+        throw new KeywordQueryParameterPatternNotDefinedError()
+      }
+      let keywordQueryParameterPatterns: string[]
+      if (typeof keywordQueryParameterPattern === "string") {
+        keywordQueryParameterPatterns = [keywordQueryParameterPattern]
+      }
+      else {
+        keywordQueryParameterPatterns = keywordQueryParameterPattern
       }
 
       const keywordParameters: string[] = []
@@ -45,7 +56,7 @@ export function getKeywordQueryParameterInfo(
 
       if (headWord !== undefined) {
         keywordQueryParameterPatterns.forEach(
-          p => keywordParameters.push(p.replace("{keyword}", headWord)),
+          pattern => keywordParameters.push(pattern.replace("{keyword}", headWord)),
         )
 
         if (tailWords !== "") {
@@ -55,26 +66,23 @@ export function getKeywordQueryParameterInfo(
             .filter(word => word !== "")
             .forEach(word => {
               keywordQueryParameterPatterns.forEach(
-                p => keywordParameters.push(p.replace("{keyword}", word)),
+                pattern => keywordParameters.push(pattern.replace("{keyword}", word)),
               )
             })
         }
       }
       else {
         // auto calculation.
-        keywordQueryParameterPatterns.forEach(p => {
+        keywordQueryParameterPatterns.forEach(pattern => {
 
           const keywordRegExp = new RegExp(
-            p.replace("{keyword}", "[A-Za-z_][A-Za-z0-9_]*"),
+            pattern.replace("{keyword}", "[A-Za-z_][A-Za-z0-9_]*"),
             "g",
           )
           keywordParameters.push(...Array.from(
             new Set(
               [...statement.matchAll(keywordRegExp)]
-                .map((found) => {
-
-                  return found[0]
-                }),
+                .map((found) => found[0]),
             ),
           ))
         })
@@ -83,7 +91,7 @@ export function getKeywordQueryParameterInfo(
       return {
         type: "keyword",
         keywordParameters,
-        keywordQueryParameterPatterns,
+        keywordQueryParameterPattern: keywordQueryParameterPatterns,
       }
     }
   }

@@ -149,7 +149,7 @@
 					"type": "string",
 					"description": "Prepared statement separator regex pattern. If set, multiple statements in a file can be analyzed. Example: '-- name:[\\s]+.*'"
 				},
-				"plpgsqlLanguageServer.keywordQueryParameterPatterns": {
+				"plpgsqlLanguageServer.keywordQueryParameterPattern": {
 					"scope": "resource",
 					"type": "array",
 					"default": [],
