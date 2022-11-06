@@ -1,201 +1,210 @@
 {
-  "name": "vscode-plpgsql-lsp",
-  "displayName": "PL/pgSQL Language Server",
-  "description": "VSCode PL/pgSQL Language Server.",
-  "license": "MIT",
-  "version": "2.8.3",
-  "icon": "images/postgres.png",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/UniqueVision/plpgsql-lsp"
-  },
-  "publisher": "uniquevision",
-  "categories": [],
-  "keywords": [
-    "Postgres",
-    "PostgreSQL",
-    "plpgsql",
-    "Language Server"
-  ],
-  "engines": {
-    "vscode": "^1.68.0"
-  },
-  "activationEvents": [
-    "onLanguage:postgres",
-    "onCommand:plpgsql-lsp.executeFileQuery",
-    "onCommand:plpgsql-lsp.validateWorkspace"
-  ],
-  "main": "./client/out/extension",
-  "scripts": {
-    "vscode:prepublish": "npm run build",
-    "build": "npm run clean && webpack --mode production --config ./client/webpack.config.js && webpack --mode production --config ./server/webpack.config.js",
-    "build:dev": "npm run clean && webpack --mode none --config ./client/webpack.config.js && webpack --mode none --config ./server/webpack.config.js",
-    "compile": "tsc -b",
-    "compile:client": "tsc -b ./client/tsconfig.json",
-    "compile:server": "tsc -b ./server/tsconfig.json",
-    "watch": "webpack --watch",
-    "package:linux": "vsce package --target linux-x64",
-    "package:mac": "vsce package --target darwin-x64",
-    "package:windows": "vsce package --target win32-x64",
-    "lint": "eslint ./client/src ./server/src --ext .ts,.tsx --fix",
-    "postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
-    "test": "cd server && npm run test && cd ..",
-    "test:ci": "cd server && npm run test:ci && cd ..",
-    "clean": "rimraf client/out && rimraf server/out"
-  },
-  "contributes": {
-    "commands": [
-      {
-        "command": "plpgsql-lsp.executeFileQuery",
-        "title": "PL/pgSQL: Execute the Current File Query"
-      },
-      {
-        "command": "plpgsql-lsp.validateWorkspace",
-        "title": "PL/pgSQL: Validate the Workspace Files"
-      }
-    ],
-    "menus": {
-      "commandPalette": [
-        {
-          "command": "plpgsql-lsp.executeFileQuery",
-          "when": "editorLangId == postgres"
-        },
-        {
-          "command": "plpgsql-lsp.validateWorkspace",
-          "when": "editorLangId == postgres"
-        }
-      ]
-    },
-    "languages": [
-      {
-        "id": "postgres",
-        "extensions": [
-          ".pgsql",
-          ".psql"
-        ],
-        "aliases": [
-          "Postgres"
-        ],
-        "configuration": "./language-configuration.json"
-      }
-    ],
-    "grammars": [
-      {
-        "language": "postgres",
-        "scopeName": "source.pgsql",
-        "path": "./syntaxes/pgsql.tmLanguage"
-      }
-    ],
-    "configuration": {
-      "type": "object",
-      "title": "PostgreSQL connection configuration",
-      "properties": {
-        "plpgsqlLanguageServer.host": {
-          "scope": "resource",
-          "type": "string",
-          "default": "localhost",
-          "description": "Your database host."
-        },
-        "plpgsqlLanguageServer.port": {
-          "scope": "resource",
-          "type": "number",
-          "default": 5432,
-          "description": "Your database port."
-        },
-        "plpgsqlLanguageServer.database": {
-          "scope": "resource",
-          "type": "string",
-          "nullable": true,
-          "description": "Your database name."
-        },
-        "plpgsqlLanguageServer.user": {
-          "scope": "resource",
-          "type": "string",
-          "nullable": true,
-          "description": "Your database user."
-        },
-        "plpgsqlLanguageServer.password": {
-          "scope": "resource",
-          "type": "string",
-          "nullable": true,
-          "description": "Your database password."
-        },
-        "plpgsqlLanguageServer.definitionFiles": {
-          "scope": "resource",
-          "type": "array",
-          "default": [
-            "**/*.psql",
-            "**/*.pgsql"
-          ],
-          "description": "The pattern list of the definition files.",
-          "items": {
-            "type": "string"
-          }
-        },
-        "plpgsqlLanguageServer.defaultSchema": {
-          "scope": "resource",
-          "type": "string",
-          "default": "public",
-          "description": "Default schema name."
-        },
-        "plpgsqlLanguageServer.queryParameterPattern": {
-          "scope": "resource",
-          "type": "string",
-          "default": "\\$[1-9][0-9]*",
-          "description": "Query paramter pattern. the pattern is described by regular expression."
-        },
-        "plpgsqlLanguageServer.keywordQueryParameterPattern": {
-          "scope": "resource",
-          "type": "string",
-          "description": "Keyword query paramter pattern. the pattern must include \"{keyword}\", as in \"@{keyword}\"."
-        },
-        "plpgsqlLanguageServer.enableExecuteFileQueryCommand": {
-          "scope": "resource",
-          "type": "boolean",
-          "default": true,
-          "description": "Enable/Disable \"Execute the Current File Query\" command."
-        },
-        "plpgsqlLanguageServer.workspaceValidationTargetFiles": {
-          "scope": "resource",
-          "type": "array",
-          "default": [],
-          "description": "The pattern list of the workspace validation target files.",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "required": [
-        "plpgsqlLanguageServer.host",
-        "plpgsqlLanguageServer.port",
-        "plpgsqlLanguageServer.defaultSchema"
-      ]
-    }
-  },
-  "devDependencies": {
-    "@types/node": "^18.0.0",
-    "@typescript-eslint/eslint-plugin": "^5.30.0",
-    "@typescript-eslint/parser": "^5.30.0",
-    "eslint": "^8.18.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-config-standard": "^17.0.0",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-promise": "^6.0.0",
-    "eslint-plugin-simple-import-sort": "^7.0.0",
-    "jest": "^28.1.2",
-    "merge-options": "^3.0.4",
-    "node-loader": "^2.0.0",
-    "rimraf": "^3.0.2",
-    "ts-jest": "^28.0.5",
-    "ts-loader": "^9.3.1",
-    "ts-node": "^10.8.1",
-    "tsconfig-paths-webpack-plugin": "^3.5.2",
-    "typescript": "^4.7.4",
-    "vsce": "^2.9.2",
-    "webpack": "^5.73.0",
-    "webpack-cli": "^4.10.0",
-    "webpack-node-externals": "^3.0.0"
-  }
+	"name": "vscode-plpgsql-lsp",
+	"displayName": "PL/pgSQL Language Server",
+	"description": "VSCode PL/pgSQL Language Server.",
+	"license": "MIT",
+	"version": "2.8.3",
+	"icon": "images/postgres.png",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/UniqueVision/plpgsql-lsp"
+	},
+	"publisher": "uniquevision",
+	"categories": [],
+	"keywords": [
+		"Postgres",
+		"PostgreSQL",
+		"plpgsql",
+		"Language Server"
+	],
+	"engines": {
+		"vscode": "^1.68.0"
+	},
+	"activationEvents": [
+		"onLanguage:postgres",
+		"onCommand:plpgsql-lsp.executeFileQuery",
+		"onCommand:plpgsql-lsp.validateWorkspace"
+	],
+	"main": "./client/out/extension",
+	"scripts": {
+		"vscode:prepublish": "npm run build",
+		"build": "npm run clean && webpack --mode production --config ./client/webpack.config.js && webpack --mode production --config ./server/webpack.config.js",
+		"build:dev": "npm run clean && webpack --mode none --config ./client/webpack.config.js && webpack --mode none --config ./server/webpack.config.js",
+		"compile": "tsc -b",
+		"compile:client": "tsc -b ./client/tsconfig.json",
+		"compile:server": "tsc -b ./server/tsconfig.json",
+		"watch": "webpack --watch",
+		"package:linux": "vsce package --target linux-x64",
+		"package:mac": "vsce package --target darwin-x64",
+		"package:windows": "vsce package --target win32-x64",
+		"lint": "eslint ./client/src ./server/src --ext .ts,.tsx --fix",
+		"postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
+		"test": "cd server && npm run test && cd ..",
+		"test:ci": "cd server && npm run test:ci && cd ..",
+		"clean": "rimraf client/out && rimraf server/out"
+	},
+	"contributes": {
+		"commands": [
+			{
+				"command": "plpgsql-lsp.executeFileQuery",
+				"title": "PL/pgSQL: Execute the Current File Query"
+			},
+			{
+				"command": "plpgsql-lsp.validateWorkspace",
+				"title": "PL/pgSQL: Validate the Workspace Files"
+			}
+		],
+		"menus": {
+			"commandPalette": [
+				{
+					"command": "plpgsql-lsp.executeFileQuery",
+					"when": "editorLangId == postgres"
+				},
+				{
+					"command": "plpgsql-lsp.validateWorkspace",
+					"when": "editorLangId == postgres"
+				}
+			]
+		},
+		"languages": [
+			{
+				"id": "postgres",
+				"extensions": [
+					".pgsql",
+					".psql"
+				],
+				"aliases": [
+					"Postgres"
+				],
+				"configuration": "./language-configuration.json"
+			}
+		],
+		"grammars": [
+			{
+				"language": "postgres",
+				"scopeName": "source.pgsql",
+				"path": "./syntaxes/pgsql.tmLanguage"
+			}
+		],
+		"configuration": {
+			"type": "object",
+			"title": "PostgreSQL connection configuration",
+			"properties": {
+				"plpgsqlLanguageServer.host": {
+					"scope": "resource",
+					"type": "string",
+					"default": "localhost",
+					"description": "Your database host."
+				},
+				"plpgsqlLanguageServer.port": {
+					"scope": "resource",
+					"type": "number",
+					"default": 5432,
+					"description": "Your database port."
+				},
+				"plpgsqlLanguageServer.database": {
+					"scope": "resource",
+					"type": "string",
+					"nullable": true,
+					"description": "Your database name."
+				},
+				"plpgsqlLanguageServer.user": {
+					"scope": "resource",
+					"type": "string",
+					"nullable": true,
+					"description": "Your database user."
+				},
+				"plpgsqlLanguageServer.password": {
+					"scope": "resource",
+					"type": "string",
+					"nullable": true,
+					"description": "Your database password."
+				},
+				"plpgsqlLanguageServer.definitionFiles": {
+					"scope": "resource",
+					"type": "array",
+					"default": [
+						"**/*.psql",
+						"**/*.pgsql"
+					],
+					"description": "The pattern list of the definition files.",
+					"items": {
+						"type": "string"
+					}
+				},
+				"plpgsqlLanguageServer.defaultSchema": {
+					"scope": "resource",
+					"type": "string",
+					"default": "public",
+					"description": "Default schema name."
+				},
+				"plpgsqlLanguageServer.queryParameterPattern": {
+					"scope": "resource",
+					"type": "string",
+					"default": "\\$[1-9][0-9]*",
+					"description": "Query parameter pattern. the pattern is described by regular expression."
+				},
+				"plpgsqlLanguageServer.statementSeparatorPattern": {
+					"scope": "resource",
+					"type": "string",
+					"description": "Prepared statement separator regex pattern. If set, multiple statements in a file can be analyzed. Example: '-- name:[\\s]+.*'"
+				},
+				"plpgsqlLanguageServer.keywordQueryParameterPatterns": {
+					"scope": "resource",
+					"type": "array",
+					"default": [],
+					"description": "Keyword query parameter patterns. Patterns must include \"{keyword}\", as in \"@{keyword}\".",
+					"items": {
+						"type": "string"
+					}
+				},
+				"plpgsqlLanguageServer.enableExecuteFileQueryCommand": {
+					"scope": "resource",
+					"type": "boolean",
+					"default": true,
+					"description": "Enable/Disable \"Execute the Current File Query\" command."
+				},
+				"plpgsqlLanguageServer.workspaceValidationTargetFiles": {
+					"scope": "resource",
+					"type": "array",
+					"default": [],
+					"description": "The pattern list of the workspace validation target files.",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"plpgsqlLanguageServer.host",
+				"plpgsqlLanguageServer.port",
+				"plpgsqlLanguageServer.defaultSchema"
+			]
+		}
+	},
+	"devDependencies": {
+		"@types/node": "^18.0.0",
+		"@typescript-eslint/eslint-plugin": "^5.30.0",
+		"@typescript-eslint/parser": "^5.30.0",
+		"eslint": "^8.18.0",
+		"eslint-config-prettier": "^8.5.0",
+		"eslint-config-standard": "^17.0.0",
+		"eslint-plugin-import": "^2.26.0",
+		"eslint-plugin-node": "^11.1.0",
+		"eslint-plugin-prettier": "^4.2.1",
+		"eslint-plugin-promise": "^6.0.0",
+		"eslint-plugin-simple-import-sort": "^7.0.0",
+		"jest": "^28.1.2",
+		"merge-options": "^3.0.4",
+		"node-loader": "^2.0.0",
+		"rimraf": "^3.0.2",
+		"ts-jest": "^28.0.5",
+		"ts-loader": "^9.3.1",
+		"ts-node": "^10.8.1",
+		"tsconfig-paths-webpack-plugin": "^3.5.2",
+		"typescript": "^4.7.4",
+		"vsce": "^2.9.2",
+		"webpack": "^5.73.0",
+		"webpack-cli": "^4.10.0",
+		"webpack-node-externals": "^3.0.0"
+	}
 }

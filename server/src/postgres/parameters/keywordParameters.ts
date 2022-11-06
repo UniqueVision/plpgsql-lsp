@@ -1,52 +1,51 @@
 import { Logger, uinteger } from "vscode-languageserver-protocol/node"
-import { TextDocument } from "vscode-languageserver-textdocument"
 
+import { Settings } from "@/settings"
 import { escapeRegex } from "@/utilities/regex"
-import { getFirstLine, getTextAfterFirstLine } from "@/utilities/text"
 
 import { makePositionalParamter } from "./helpers"
 
 export type KeywordQueryParametersInfo = {
   type: "keyword",
   keywordParameters: string[],
-  keywordQueryParameterPattern: string
+  keywordQueryParameterPatterns: string[]
 }
 
-export class KeywordQueryParameterPatternNotDefinedError extends Error {
+export class KeywordQueryParameterPatternsNotDefinedError extends Error {
   constructor() {
     super(
-      "'plpgsqlLanguageServer.keywordQueryParameterPattern'"
+      "'plpgsqlLanguageServer.keywordQueryParameterPatterns'"
       + " does not set in the settings.",
     )
-    this.name = "KeywordQueryParameterPatternNotDefinedError"
+    this.name = "KeywordQueryParameterPatternsNotDefinedError"
   }
 }
 
 export function getKeywordQueryParameterInfo(
-  document: TextDocument,
-  keywordQueryParameterPattern: string | undefined,
+  statement: string,
+  firstLine: string,
+  keywordQueryParameterPatterns: Settings["keywordQueryParameterPatterns"],
   _logger: Logger,
 ): KeywordQueryParametersInfo | null {
-  const firstLine = getFirstLine(document)
   for (const pattern of [
-    /^ *-- +plpgsql-language-server:use-keyword-query-parameter( +keywords=\[ *([A-Za-z_][A-Za-z0-9_]*)?((, *([A-Za-z_][A-Za-z0-9_]*))*),? *\])? *$/, // eslint-disable-line max-len
-    /^ *\/\* +plpgsql-language-server:use-keyword-query-parameter( +keywords=\[ *([A-Za-z_][A-Za-z0-9_]*)?((, *([A-Za-z_][A-Za-z0-9_]*))*),? *\])? +\*\/$/, // eslint-disable-line max-len
+    /^ *-- +plpgsql-language-server:use-keyword-query-parameters( +keywords=\[ *([A-Za-z_][A-Za-z0-9_]*)?((, *([A-Za-z_][A-Za-z0-9_]*))*),? *\])? *$/, // eslint-disable-line max-len
+    /^ *\/\* +plpgsql-language-server:use-keyword-query-parameters( +keywords=\[ *([A-Za-z_][A-Za-z0-9_]*)?((, *([A-Za-z_][A-Za-z0-9_]*))*),? *\])? +\*\/$/, // eslint-disable-line max-len
   ]) {
     const found = firstLine.match(pattern)
 
     if (found !== null) {
 
-      if (keywordQueryParameterPattern === undefined) {
-        throw new KeywordQueryParameterPatternNotDefinedError()
+      if (keywordQueryParameterPatterns === undefined) {
+        throw new KeywordQueryParameterPatternsNotDefinedError()
       }
 
-      let keywordParameters = []
+      const keywordParameters: string[] = []
       const headWord = found[2]
       const tailWords = found[3]
 
       if (headWord !== undefined) {
-        keywordParameters.push(
-          keywordQueryParameterPattern.replace("{keyword}", headWord),
+        keywordQueryParameterPatterns.forEach(
+          p => keywordParameters.push(p.replace("{keyword}", headWord)),
         )
 
         if (tailWords !== "") {
@@ -55,31 +54,36 @@ export function getKeywordQueryParameterInfo(
             .map(word => word.trim())
             .filter(word => word !== "")
             .forEach(word => {
-              keywordParameters.push(
-                keywordQueryParameterPattern.replace("{keyword}", word),
+              keywordQueryParameterPatterns.forEach(
+                p => keywordParameters.push(p.replace("{keyword}", word)),
               )
             })
         }
       }
       else {
         // auto calculation.
-        const keywordRegExp = new RegExp(
-          keywordQueryParameterPattern
-            .replace("{keyword}", "[A-Za-z_][A-Za-z0-9_]*"),
-          "g",
-        )
-        keywordParameters = Array.from(
-          new Set(
-            [...getTextAfterFirstLine(document).matchAll(keywordRegExp)]
-              .map((found) => found[0]),
-          ),
-        )
+        keywordQueryParameterPatterns.forEach(p => {
+
+          const keywordRegExp = new RegExp(
+            p.replace("{keyword}", "[A-Za-z_][A-Za-z0-9_]*"),
+            "g",
+          )
+          keywordParameters.push(...Array.from(
+            new Set(
+              [...statement.matchAll(keywordRegExp)]
+                .map((found) => {
+
+                  return found[0]
+                }),
+            ),
+          ))
+        })
       }
 
       return {
         type: "keyword",
         keywordParameters,
-        keywordQueryParameterPattern,
+        keywordQueryParameterPatterns,
       }
     }
   }

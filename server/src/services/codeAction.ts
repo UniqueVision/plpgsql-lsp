@@ -21,8 +21,8 @@ export async function getCodeActions(
   const actions: CodeAction[] = []
   if (
     settings.enableExecuteFileQueryCommand
-    && getQueryParameterInfo(document, settings, logger) === null
-    && await isCorrectFileValidation(pgPool, document, logger)
+    && getQueryParameterInfo(document, document.getText(), settings, logger) === null
+    && await isCorrectFileValidation(pgPool, document, settings, logger)
   ) {
     actions.push(makeExecuteFileQueryCommandCodeAction(document))
   }

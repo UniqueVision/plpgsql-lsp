@@ -3,7 +3,7 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { Settings } from "@/settings"
 import { neverReach } from "@/utilities/neverReach"
-import { getTextAllRange } from "@/utilities/text"
+import { getFirstLine, getTextAllRange } from "@/utilities/text"
 
 import {
   DefaultQueryParametersInfo,
@@ -12,7 +12,7 @@ import {
 } from "./defaultParameters"
 import {
   getKeywordQueryParameterInfo,
-  KeywordQueryParameterPatternNotDefinedError,
+  KeywordQueryParameterPatternsNotDefinedError,
   KeywordQueryParametersInfo,
   sanitizeFileWithKeywordQueryParameters,
 } from "./keywordParameters"
@@ -30,6 +30,7 @@ export type QueryParameterInfo = (
 
 export function getQueryParameterInfo(
   document: TextDocument,
+  statement: string,
   settings: Settings,
   logger: Logger,
 ): QueryParameterInfo | Diagnostic | null {
@@ -37,14 +38,16 @@ export function getQueryParameterInfo(
 
   // default query parameter
   queryParameterInfo = getDefaultQueryParameterInfo(
-    document, settings.queryParameterPattern, logger,
+    statement, getFirstLine(document), settings.queryParameterPattern, logger,
   )
   if (queryParameterInfo !== null) {
     return queryParameterInfo
   }
 
   // positional query parameter.
-  queryParameterInfo = getPositionalQueryParameterInfo(document, logger)
+  queryParameterInfo = getPositionalQueryParameterInfo(
+    statement, getFirstLine(document), logger,
+  )
   if (queryParameterInfo !== null) {
     return queryParameterInfo
   }
@@ -52,11 +55,11 @@ export function getQueryParameterInfo(
   // keyword query parameter.
   try{
     queryParameterInfo = getKeywordQueryParameterInfo(
-      document, settings.keywordQueryParameterPattern, logger,
+      statement, getFirstLine(document), settings.keywordQueryParameterPatterns, logger,
     )
   }
   catch (error: unknown) {
-    if (error instanceof KeywordQueryParameterPatternNotDefinedError) {
+    if (error instanceof KeywordQueryParameterPatternsNotDefinedError) {
       return {
         severity: DiagnosticSeverity.Error,
         range: getTextAllRange(document),

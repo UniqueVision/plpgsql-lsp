@@ -6,17 +6,20 @@ import { QueryParameterInfo } from "@/postgres/parameters"
 import { parseFunctions } from "@/postgres/parsers/parseFunctions"
 import { queryFileStaticAnalysis } from "@/postgres/queries/queryFileStaticAnalysis"
 import { queryFileSyntaxAnalysis } from "@/postgres/queries/queryFileSyntaxAnalysis"
+import { Settings } from "@/settings"
 
 type ValidateTextDocumentOptions = {
   isComplete: boolean,
   hasDiagnosticRelatedInformationCapability: boolean,
   queryParameterInfo: QueryParameterInfo | null,
+  statementSeparatorPattern?: string,
 }
 
 export async function validateTextDocument(
   pgPool: PostgresPool,
   document: TextDocument,
   options: ValidateTextDocumentOptions,
+  settings: Settings,
   logger: Logger,
 ): Promise<Diagnostic[]> {
   let diagnostics: Diagnostic[] = []
@@ -24,6 +27,7 @@ export async function validateTextDocument(
     pgPool,
     document,
     options,
+    settings,
     logger,
   )
 
@@ -42,6 +46,7 @@ export async function validateTextDocument(
 export async function isCorrectFileValidation(
   pgPool: PostgresPool,
   document: TextDocument,
+  settings: Settings,
   logger: Logger,
 ): Promise<boolean> {
   const diagnostics = await validateTextDocument(
@@ -52,6 +57,7 @@ export async function isCorrectFileValidation(
       queryParameterInfo: null,
       hasDiagnosticRelatedInformationCapability: false,
     },
+    settings,
     logger,
   )
 
@@ -65,6 +71,7 @@ async function validateSyntaxAnalysis(
   pgPool: PostgresPool,
   document: TextDocument,
   options: ValidateTextDocumentOptions,
+  settings: Settings,
   logger: Logger,
 ): Promise<Diagnostic[]> {
   const errors = await queryFileSyntaxAnalysis(
@@ -73,7 +80,9 @@ async function validateSyntaxAnalysis(
     {
       isComplete: options.isComplete,
       queryParameterInfo: options.queryParameterInfo,
+      statementSeparatorPattern:options.statementSeparatorPattern,
     },
+    settings,
     logger,
   )
 
