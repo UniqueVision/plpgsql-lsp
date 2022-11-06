@@ -6,6 +6,7 @@ import { PostgresPool } from "@/postgres"
 import { getQueryParameterInfo, QueryParameterInfo,
   sanitizeFileWithQueryParameters } from "@/postgres/parameters"
 import { Settings } from "@/settings"
+import { neverReach } from "@/utilities/neverReach"
 import { getNonSpaceCharacter, getTextAllRange } from "@/utilities/text"
 
 export interface SyntaxError {
@@ -123,41 +124,52 @@ function sanitizeStatement(
   // replace inside single quotes only if any given pattern matches,
   // else we are overriding uuids, booleans in string form, etc.
   let re: RegExp
-  switch (queryParameterInfo?.type) {
-    case "default":
-      re = makeParamPatternInStringPattern(queryParameterInfo.queryParameterPattern)
-      statement = statement.replace(
-        re,
-        (m) => `'${"_".repeat(m.length - 2)}'`,
-      )
+  if (queryParameterInfo) {
+    const parameterInfoType = queryParameterInfo.type
+    switch (parameterInfoType) {
+      case undefined:
+        break
 
-      // remove parameters that were matched ignoring single quotes (can't replace
-      // beforehand since given pattern may contain single quoted text)
-      // to get all plausible params but don't exist after replacing
-      queryParameterInfo.queryParameters =
+      case "default":
+        re = makeParamPatternInStringPattern(queryParameterInfo.queryParameterPattern)
+        statement = statement.replace(
+          re, (match) => `'${"_".repeat(match.length - 2)}'`,
+        )
+
+        // remove parameters that were matched ignoring single quotes (can't replace
+        // beforehand since given pattern may contain single quoted text)
+        // to get all plausible params but don't exist after replacing
+        queryParameterInfo.queryParameters =
         queryParameterInfo.queryParameters.filter((param) => statement.includes(param))
 
-      break
-    case "keyword":
-      queryParameterInfo.keywordQueryParameterPattern.map(p => {
-        re = makeParamPatternInStringPattern(p)
-        statement = statement.replace(
-          re,
-          (m) => `'${"_".repeat(m.length - 2)}'`,
-        )
-      })
+        break
 
-      // remove parameters that were matched ignoring single quotes (can't replace
-      // beforehand since given pattern may contain single quoted text)
-      // to get all plausible params but don't exist after replacing
-      queryParameterInfo.keywordParameters =
+      case "keyword":
+        queryParameterInfo.keywordQueryParameterPattern.map(p => {
+          re = makeParamPatternInStringPattern(p)
+          statement = statement.replace(
+            re, (match) => `'${"_".repeat(match.length - 2)}'`,
+          )
+        })
+
+        // remove parameters that were matched ignoring single quotes (can't replace
+        // beforehand since given pattern may contain single quoted text)
+        // to get all plausible params but don't exist after replacing
+        queryParameterInfo.keywordParameters =
         queryParameterInfo.keywordParameters.filter(
           (param) => statement.includes(param),
         )
 
-      break
-    default:
-      break
+        break
+
+      case "position":
+        break
+
+      default: {
+        const unknwonType: never = parameterInfoType
+        neverReach(`"${unknwonType}" is unknown "queryParameterInfo.type".`)
+      }
+    }
   }
 
   return statement
