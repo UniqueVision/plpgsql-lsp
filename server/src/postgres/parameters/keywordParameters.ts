@@ -56,7 +56,7 @@ export function getKeywordQueryParameterInfo(
 
       if (headWord !== undefined) {
         keywordQueryParameterPatterns.forEach(
-          p => keywordParameters.push(p.replace("{keyword}", headWord)),
+          pattern => keywordParameters.push(pattern.replace("{keyword}", headWord)),
         )
 
         if (tailWords !== "") {
@@ -66,17 +66,17 @@ export function getKeywordQueryParameterInfo(
             .filter(word => word !== "")
             .forEach(word => {
               keywordQueryParameterPatterns.forEach(
-                p => keywordParameters.push(p.replace("{keyword}", word)),
+                pattern => keywordParameters.push(pattern.replace("{keyword}", word)),
               )
             })
         }
       }
       else {
         // auto calculation.
-        keywordQueryParameterPatterns.forEach(p => {
+        keywordQueryParameterPatterns.forEach(pattern => {
 
           const keywordRegExp = new RegExp(
-            p.replace("{keyword}", "[A-Za-z_][A-Za-z0-9_]*"),
+            pattern.replace("{keyword}", "[A-Za-z_][A-Za-z0-9_]*"),
             "g",
           )
           keywordParameters.push(...Array.from(
