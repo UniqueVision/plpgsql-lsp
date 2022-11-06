@@ -1,5 +1,4 @@
--- plpgsql-language-server:use-keyword-query-parameters
-
+-- plpgsql-language-server:use-keyword-query-parameter
 SELECT
   id,
   name
