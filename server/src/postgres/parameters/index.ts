@@ -30,6 +30,7 @@ export type QueryParameterInfo = (
 
 export function getQueryParameterInfo(
   document: TextDocument,
+  statement: string,
   settings: Settings,
   logger: Logger,
 ): QueryParameterInfo | Diagnostic | null {
@@ -37,7 +38,7 @@ export function getQueryParameterInfo(
 
   // default query parameter
   queryParameterInfo = getDefaultQueryParameterInfo(
-    document, settings.queryParameterPattern, logger,
+    document, statement, settings.queryParameterPattern, logger,
   )
   if (queryParameterInfo !== null) {
     return queryParameterInfo
@@ -45,7 +46,7 @@ export function getQueryParameterInfo(
 
   // positional query parameter.
   queryParameterInfo = getPositionalQueryParameterInfo(
-    document, logger,
+    document, statement, logger,
   )
   if (queryParameterInfo !== null) {
     return queryParameterInfo
@@ -54,7 +55,7 @@ export function getQueryParameterInfo(
   // keyword query parameter.
   try{
     queryParameterInfo = getKeywordQueryParameterInfo(
-      document, settings.keywordQueryParameterPattern, logger,
+      document, statement, settings.keywordQueryParameterPattern, logger,
     )
   }
   catch (error: unknown) {

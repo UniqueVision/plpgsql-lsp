@@ -3,7 +3,7 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { Settings } from "@/settings"
 import { escapeRegex } from "@/utilities/regex"
-import { getFirstLine, getTextAfterFirstLine } from "@/utilities/text"
+import { getFirstLine } from "@/utilities/text"
 
 import { makePositionalParamter } from "./helpers"
 
@@ -25,11 +25,11 @@ export class KeywordQueryParameterPatternNotDefinedError extends Error {
 
 export function getKeywordQueryParameterInfo(
   document: TextDocument,
+  statement: string,
   keywordQueryParameterPattern: Settings["keywordQueryParameterPattern"],
   _logger: Logger,
 ): KeywordQueryParametersInfo | null {
   const firstLine = getFirstLine(document)
-  const statement = getTextAfterFirstLine(document)
 
   for (const pattern of [
     /^ *-- +plpgsql-language-server:use-keyword-query-parameter( +keywords=\[ *([A-Za-z_][A-Za-z0-9_]*)?((, *([A-Za-z_][A-Za-z0-9_]*))*),? *\])? *$/, // eslint-disable-line max-len

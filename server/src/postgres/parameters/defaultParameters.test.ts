@@ -21,7 +21,7 @@ describe("Default Query Parameter Tests", () => {
         { skipDisableComment: true },
       )
       const queryParametersInfo = getDefaultQueryParameterInfo(
-        document, /:[A-Za-z_][A-Za-z0-9_]*/.source, NullLogger,
+        document, document.getText(), /:[A-Za-z_][A-Za-z0-9_]*/.source, NullLogger,
       )
 
       expect(queryParametersInfo).toBeTruthy()
