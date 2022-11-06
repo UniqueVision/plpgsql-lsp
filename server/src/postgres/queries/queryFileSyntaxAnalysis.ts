@@ -40,8 +40,8 @@ export async function queryFileSyntaxAnalysis(
   for (let i = 0; i < preparedStatements.length; i++) {
     const sqlCommentRE = /\/\*[\s\S]*?\*\/|([^:]|^)--.*$/gm
     // const singleQuotedRE = /'(.*?)'/g
-    const beginRE = /^([\s]*begin[\s]*;)/gm
-    const commitRE = /^([\s]*commit[\s]*;)/gm
+    const beginRE = /^([\s]*begin[\s]*;)/igm
+    const commitRE = /^([\s]*commit[\s]*;)/igm
 
     let statement = preparedStatements[i]
       // do not execute the current file (e.g. migrations)
