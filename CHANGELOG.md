@@ -1,6 +1,10 @@
 # Change Log
 
 ## Unreleased - TBD
+
+## [v2.9.0](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.9.0) - 2022/11/07
+- Support `elsif` keyword. [#56](https://github.com/UniqueVision/plpgsql-lsp/pull/56), [#57](https://github.com/UniqueVision/plpgsql-lsp/pull/57), [#59](https://github.com/UniqueVision/plpgsql-lsp/pull/59)
+
 ## [v2.8.3](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.8.3) - 2022/09/16
 - Support `elsif` keyword. [#52](https://github.com/UniqueVision/plpgsql-lsp/pull/52)
 
