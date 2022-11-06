@@ -61,9 +61,6 @@ export async function queryFileSyntaxAnalysis(
 
     statement = sanitizeStatement(queryParameterInfo, statement)
 
-    logger.info(JSON.stringify(queryParameterInfo))
-    logger.info(statement)
-
     const currentPosition = preparedStatements.slice(0, i).join("").length
 
     if (options.statementSeparatorPattern && statementSepRE?.test(statement) ) {
