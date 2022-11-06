@@ -245,4 +245,24 @@ describe("Validate Tests", () => {
       expect(diagnostics).toStrictEqual([])
     })
   })
+
+
+  describe("Migrations executed before analyzing query", function () {
+    beforeEach(() => {
+      const settings = new SettingsBuilder()
+        .with({
+          migrationsFolder: "src/__tests__/__fixtures__/migrations/migrations_test/",
+        })
+        .build()
+      server = setupTestServer(settings, new RecordLogger())
+    })
+
+    it("Correct query", async () => {
+      const diagnostics = await validateSampleFile(
+        "queries/correct_query_with_migrations_run.pgsql",
+      )
+
+      expect(diagnostics).toStrictEqual([])
+    })
+  })
 })
