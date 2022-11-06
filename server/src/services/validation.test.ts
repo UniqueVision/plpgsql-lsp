@@ -245,4 +245,25 @@ describe("Validate Tests", () => {
       expect(diagnostics).toStrictEqual([])
     })
   })
+
+  describe("Multiple Statements File Validation With Keyword Parameters", function () {
+    beforeEach(() => {
+      const settings = new SettingsBuilder()
+        .with({ keywordQueryParameterPatterns: [
+          "@{keyword}",
+          "sqlc\\.arg\\('{keyword}'\\)",
+          "sqlc\\.narg\\('{keyword}'\\)",
+        ], statementSeparatorPattern: "-- name:[\\s]+.*" })
+        .build()
+      server = setupTestServer(settings, new RecordLogger())
+    })
+
+    it("Correct query with multiple statements", async () => {
+      const diagnostics = await validateSampleFile(
+        "queries/correct_query_with_multiple_statements.pgsql",
+      )
+
+      expect(diagnostics).toStrictEqual([])
+    })
+  })
 })
