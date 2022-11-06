@@ -131,10 +131,12 @@ function sanitizeStatement(
         break
 
       case "default":
-        re = makeParamPatternInStringPattern(queryParameterInfo.queryParameterPattern)
-        statement = statement.replace(
-          re, (match) => `'${"_".repeat(match.length - 2)}'`,
-        )
+        queryParameterInfo.queryParameterPattern.map(pattern => {
+          re = makeParamPatternInStringPattern(pattern)
+          statement = statement.replace(
+            re, (match) => `'${"_".repeat(match.length - 2)}'`,
+          )
+        } )
 
         // remove parameters that were matched ignoring single quotes (can't replace
         // beforehand since given pattern may contain single quoted text)
@@ -145,8 +147,8 @@ function sanitizeStatement(
         break
 
       case "keyword":
-        queryParameterInfo.keywordQueryParameterPattern.map(p => {
-          re = makeParamPatternInStringPattern(p)
+        queryParameterInfo.keywordQueryParameterPattern.map(pattern => {
+          re = makeParamPatternInStringPattern(pattern)
           statement = statement.replace(
             re, (match) => `'${"_".repeat(match.length - 2)}'`,
           )

@@ -82,10 +82,7 @@ export function getKeywordQueryParameterInfo(
           keywordParameters.push(...Array.from(
             new Set(
               [...statement.matchAll(keywordRegExp)]
-                .map((found) => {
-
-                  return found[0]
-                }),
+                .map((found) => found[0]),
             ),
           ))
         })
