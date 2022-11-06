@@ -29,28 +29,28 @@ export async function queryFileSyntaxAnalysis(
   const errors = []
   const doc = document.getText()
 
-  let preparedStmts = [doc]
-  let stmtSepRE: RegExp | undefined
+  let preparedStatements = [doc]
+  let statementSepRE: RegExp | undefined
   if (options.statementSeparatorPattern) {
-    stmtSepRE =new RegExp(`(${options.statementSeparatorPattern})`, "g")
-    preparedStmts = doc.split(stmtSepRE)
+    statementSepRE =new RegExp(`(${options.statementSeparatorPattern})`, "g")
+    preparedStatements = doc.split(statementSepRE)
   }
 
   const statementNames: string[] = []
-  for (let i = 0; i < preparedStmts.length; i++) {
+  for (let i = 0; i < preparedStatements.length; i++) {
     const sqlCommentRE = /\/\*[\s\S]*?\*\/|([^:]|^)--.*$/gm
     // const singleQuotedRE = /'(.*?)'/g
     const beginRE = /^([\s]*begin[\s]*;)/gm
     const commitRE = /^([\s]*commit[\s]*;)/gm
 
-    let stmt = preparedStmts[i]
+    let statement = preparedStatements[i]
       // do not execute the current file (e.g. migrations)
       .replace(beginRE, (m) => "-".repeat(m.length))
       .replace(commitRE, (m) => "-".repeat(m.length))
 
     const queryParameterInfo = getQueryParameterInfo(
       document,
-      stmt.replace(sqlCommentRE, ""), // ignore possible matches with comments
+      statement.replace(sqlCommentRE, ""), // ignore possible matches with comments
       settings,
       logger,
     )
@@ -58,25 +58,25 @@ export async function queryFileSyntaxAnalysis(
       continue
     }
 
-    stmt = sanitizeStatement(queryParameterInfo, stmt)
+    statement = sanitizeStatement(queryParameterInfo, statement)
 
     logger.info(JSON.stringify(queryParameterInfo))
-    logger.info(stmt)
+    logger.info(statement)
 
-    const currentPosition = preparedStmts.slice(0, i).join("").length
+    const currentPosition = preparedStatements.slice(0, i).join("").length
 
-    if (options.statementSeparatorPattern && stmtSepRE?.test(stmt) ) {
-      if (statementNames.includes(stmt)) {
+    if (options.statementSeparatorPattern && statementSepRE?.test(statement) ) {
+      if (statementNames.includes(statement)) {
         errors.push({
           range: getRange(doc, currentPosition),
-          message: `Duplicated statement '${stmt}'`,
+          message: `Duplicated statement '${statement}'`,
         })
         continue
       }
-      statementNames.push(stmt)
+      statementNames.push(statement)
     }
     const [fileText, parameterNumber] = sanitizeFileWithQueryParameters(
-      stmt,
+      statement,
       queryParameterInfo,
       logger,
     )
@@ -117,7 +117,7 @@ export async function queryFileSyntaxAnalysis(
 
 function sanitizeStatement(
   queryParameterInfo: QueryParameterInfo | null,
-  stmt: string,
+  statement: string,
 ) {
 
   // replace inside single quotes only if any given pattern matches,
@@ -126,7 +126,7 @@ function sanitizeStatement(
   switch (queryParameterInfo?.type) {
     case "default":
       re = makeParamPatternInStringPattern(queryParameterInfo.queryParameterPattern)
-      stmt = stmt.replace(
+      statement = statement.replace(
         re,
         (m) => `'${"_".repeat(m.length - 2)}'`,
       )
@@ -135,13 +135,13 @@ function sanitizeStatement(
       // beforehand since given pattern may contain single quoted text)
       // to get all plausible params but don't exist after replacing
       queryParameterInfo.queryParameters =
-        queryParameterInfo.queryParameters.filter((param) => stmt.includes(param))
+        queryParameterInfo.queryParameters.filter((param) => statement.includes(param))
 
       break
     case "keyword":
       queryParameterInfo.keywordQueryParameterPattern.map(p => {
         re = makeParamPatternInStringPattern(p)
-        stmt = stmt.replace(
+        statement = statement.replace(
           re,
           (m) => `'${"_".repeat(m.length - 2)}'`,
         )
@@ -151,14 +151,16 @@ function sanitizeStatement(
       // beforehand since given pattern may contain single quoted text)
       // to get all plausible params but don't exist after replacing
       queryParameterInfo.keywordParameters =
-        queryParameterInfo.keywordParameters.filter((param) => stmt.includes(param))
+        queryParameterInfo.keywordParameters.filter(
+          (param) => statement.includes(param),
+        )
 
       break
     default:
       break
   }
 
-  return stmt
+  return statement
 }
 
 function makeParamPatternInStringPattern(
