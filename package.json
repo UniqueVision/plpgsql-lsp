@@ -158,6 +158,11 @@
 						"type": "string"
 					}
 				},
+				"plpgsqlLanguageServer.migrationsFolder": {
+					"scope": "resource",
+					"type": "string",
+					"description": "Relative path to migrations with pattern '*.up.sql'. If set, migrations will be applied for all analyses. If the current file is a migration file, execution will run until the previous migration."
+				},
 				"plpgsqlLanguageServer.enableExecuteFileQueryCommand": {
 					"scope": "resource",
 					"type": "boolean",

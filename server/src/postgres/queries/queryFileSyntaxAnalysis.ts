@@ -1,3 +1,5 @@
+import fs from "fs/promises"
+import path from "path"
 import { DatabaseError } from "pg"
 import { Logger, Range } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
@@ -7,7 +9,6 @@ import { getQueryParameterInfo, QueryParameterInfo,
   sanitizeFileWithQueryParameters } from "@/postgres/parameters"
 import { Settings } from "@/settings"
 import { getNonSpaceCharacter, getTextAllRange } from "@/utilities/text"
-
 export interface SyntaxError {
   range: Range;
   message: string;
@@ -84,6 +85,39 @@ export async function queryFileSyntaxAnalysis(
     const pgClient = await pgPool.connect()
     try {
       await pgClient.query("BEGIN")
+
+      const migrationsFolder = settings.migrationsFolder
+      if (migrationsFolder) {
+        const migrationFiles = (await fs.readdir(migrationsFolder))
+          .filter(fn => fn.endsWith(".up.sql"))
+          .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+          .map(f => path.join(migrationsFolder, f))
+
+        logger.info(`Executing migration files: ${JSON.stringify(migrationFiles)}`)
+        for await (const file of migrationFiles) {
+          try {
+            if (document.uri.endsWith(file)) {
+              // allow us to revisit and work on any migration file
+              logger.info("Stopping migration execution")
+
+              break
+            }
+            const migration = await fs.readFile(file,
+              { encoding: "utf8" })
+            await pgClient.query(migration)
+          } catch (error: unknown) {
+            logger.error(`Stopping migration execution at ${
+              path.basename(file)
+            }: ${error}`)
+
+            await pgClient.query("ROLLBACK")
+            await pgClient.query("BEGIN")
+
+            break
+          }
+        }
+      }
+
       await pgClient.query(fileText, Array(parameterNumber).fill(null))
     } catch (error: unknown) {
       const databaseError = error as DatabaseError

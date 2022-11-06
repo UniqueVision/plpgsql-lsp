@@ -9,6 +9,7 @@ export interface Settings {
   queryParameterPattern: string
   statementSeparatorPattern?: string,
   keywordQueryParameterPatterns?: string[],
+  migrationsFolder?: string,
   enableExecuteFileQueryCommand: boolean,
   workspaceValidationTargetFiles: string[],
 }
@@ -27,6 +28,7 @@ export const DEFAULT_SETTINGS: Settings = {
   queryParameterPattern: /\$[1-9][0-9]*/.source,
   statementSeparatorPattern: undefined,
   keywordQueryParameterPatterns: undefined,
+  migrationsFolder: undefined,
   enableExecuteFileQueryCommand: true,
   workspaceValidationTargetFiles: [],
 }
