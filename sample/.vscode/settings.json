@@ -6,5 +6,10 @@
     "plpgsqlLanguageServer.definitionFiles": [
         "definitions/**/*.pgsql"
     ],
-    "plpgsqlLanguageServer.keywordQueryParameterPattern": ["@{keyword}"]
+    "plpgsqlLanguageServer.keywordQueryParameterPattern": [
+        "@{keyword}",
+        "sqlc\\.arg\\s*\\('{keyword}'\\)",
+        "sqlc\\.narg\\s*\\('{keyword}'\\)",
+    ],
+    "plpgsqlLanguageServer.statementSeparatorPattern": "-- name:[\\s]+.*",
 }

@@ -2,6 +2,7 @@ import { NullLogger } from "vscode-languageserver"
 
 import { loadSampleTextDocument } from "@/__tests__/helpers/textDocuments"
 import { neverReach } from "@/utilities/neverReach"
+import { getTextAfterFirstLine } from "@/utilities/text"
 
 import {
   getDefaultQueryParameterInfo, sanitizeFileWithDefaultQueryParameters,
@@ -21,7 +22,10 @@ describe("Default Query Parameter Tests", () => {
         { skipDisableComment: true },
       )
       const queryParametersInfo = getDefaultQueryParameterInfo(
-        document, document.getText(), /:[A-Za-z_][A-Za-z0-9_]*/.source, NullLogger,
+        document,
+        getTextAfterFirstLine(document),
+        /:[A-Za-z_][A-Za-z0-9_]*/.source,
+        NullLogger,
       )
 
       expect(queryParametersInfo).toBeTruthy()

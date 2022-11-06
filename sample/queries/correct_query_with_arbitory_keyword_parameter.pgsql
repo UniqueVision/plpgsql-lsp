@@ -1,4 +1,5 @@
 -- plpgsql-language-server:use-keyword-query-parameter keywords=[id, names]
+
 SELECT
   id,
   name,

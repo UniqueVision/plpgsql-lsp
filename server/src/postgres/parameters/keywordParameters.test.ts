@@ -2,6 +2,7 @@ import { NullLogger } from "vscode-languageserver"
 
 import { loadSampleTextDocument } from "@/__tests__/helpers/textDocuments"
 import { neverReach } from "@/utilities/neverReach"
+import { getTextAfterFirstLine } from "@/utilities/text"
 
 import {
   getKeywordQueryParameterInfo, sanitizeFileWithKeywordQueryParameters,
@@ -20,7 +21,7 @@ describe("Keyword Query Parameter Tests", () => {
         "queries/correct_query_with_keyword_parameter.pgsql",
       )
       const queryParametersInfo = getKeywordQueryParameterInfo(
-        document, "@{keyword}", NullLogger,
+        document, getTextAfterFirstLine(document), "@{keyword}", NullLogger,
       )
 
       expect(queryParametersInfo).toBeTruthy()
@@ -45,6 +46,7 @@ describe("Keyword Query Parameter Tests", () => {
       )
       const queryParametersInfo = getKeywordQueryParameterInfo(
         document,
+        getTextAfterFirstLine(document),
         [
           "@{keyword}",
           "sqlc\\.arg\\('{keyword}'\\)",
