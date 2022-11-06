@@ -9,7 +9,7 @@ import {
   TestTextDocuments,
 } from "@/__tests__/helpers/textDocuments"
 import {
-  KeywordQueryParameterPatternsNotDefinedError,
+  KeywordQueryParameterPatternNotDefinedError,
 } from "@/postgres/parameters/keywordParameters"
 import { Server } from "@/server"
 
@@ -147,7 +147,7 @@ describe("Validate Tests", () => {
     )
 
     it(
-      "Raise KeywordQueryParameterPatternsNotDefinedError.",
+      "Raise KeywordQueryParameterPatternNotDefinedError.",
       async () => {
         const diagnostics = await validateSampleFile(
           "queries/correct_query_with_keyword_parameter.pgsql",
@@ -156,7 +156,7 @@ describe("Validate Tests", () => {
         expect(diagnostics).toStrictEqual([
           {
             severity: DiagnosticSeverity.Error,
-            message: new KeywordQueryParameterPatternsNotDefinedError().message,
+            message: new KeywordQueryParameterPatternNotDefinedError().message,
             range: Range.create(0, 0, 8, 34),
           },
         ])

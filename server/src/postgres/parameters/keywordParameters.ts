@@ -13,13 +13,13 @@ export type KeywordQueryParametersInfo = {
   keywordQueryParameterPattern: string[]
 }
 
-export class KeywordQueryParameterPatternsNotDefinedError extends Error {
+export class KeywordQueryParameterPatternNotDefinedError extends Error {
   constructor() {
     super(
       "'plpgsqlLanguageServer.keywordQueryParameterPattern'"
       + " does not set in the settings.",
     )
-    this.name = "KeywordQueryParameterPatternsNotDefinedError"
+    this.name = "KeywordQueryParameterPatternNotDefinedError"
   }
 }
 
@@ -40,7 +40,7 @@ export function getKeywordQueryParameterInfo(
     if (found !== null) {
 
       if (keywordQueryParameterPattern === undefined) {
-        throw new KeywordQueryParameterPatternsNotDefinedError()
+        throw new KeywordQueryParameterPatternNotDefinedError()
       }
       let keywordQueryParameterPatterns: string[]
       if (typeof keywordQueryParameterPattern === "string") {

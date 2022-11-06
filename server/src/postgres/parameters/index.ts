@@ -12,7 +12,7 @@ import {
 } from "./defaultParameters"
 import {
   getKeywordQueryParameterInfo,
-  KeywordQueryParameterPatternsNotDefinedError,
+  KeywordQueryParameterPatternNotDefinedError,
   KeywordQueryParametersInfo,
   sanitizeFileWithKeywordQueryParameters,
 } from "./keywordParameters"
@@ -58,7 +58,7 @@ export function getQueryParameterInfo(
     )
   }
   catch (error: unknown) {
-    if (error instanceof KeywordQueryParameterPatternsNotDefinedError) {
+    if (error instanceof KeywordQueryParameterPatternNotDefinedError) {
       return {
         severity: DiagnosticSeverity.Error,
         range: getTextAllRange(document),
