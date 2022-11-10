@@ -131,7 +131,7 @@ function sanitizeStatement(
         queryParameterInfo.queryParameterPattern.map(pattern => {
           re = makeParamPatternInStringPattern(pattern)
           statement = statement.replace(
-            re, (match) => `'${"_".repeat(match.length - 2)}'`,
+            re, (match) => `${"_".repeat(match.length)}`,
           )
         } )
 
@@ -147,7 +147,7 @@ function sanitizeStatement(
         queryParameterInfo.keywordQueryParameterPattern.map(pattern => {
           re = makeParamPatternInStringPattern(pattern)
           statement = statement.replace(
-            re, (match) => `'${"_".repeat(match.length - 2)}'`,
+            re, (match) => `${"_".repeat(match.length)}`,
           )
         })
 
@@ -178,9 +178,9 @@ function makeParamPatternInStringPattern(
   paramPattern: string,
 ): RegExp {
   return new RegExp(
-    "'.*?"
-     + paramPattern.replace("{keyword}", "[A-Za-z_][A-Za-z0-9_]*?")
-     + ".*?'",
+    "(?<=')[^']*.?"
+		+ paramPattern.replace("{keyword}", "[^']*?")
+		+ "(?='(?:[^']*'[^']*')*[^']*$)",
     "g",
   )
 }
