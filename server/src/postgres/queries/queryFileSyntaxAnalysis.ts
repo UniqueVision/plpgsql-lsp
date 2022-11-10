@@ -26,8 +26,9 @@ export async function queryFileSyntaxAnalysis(
   options: SyntaxAnalysisOptions,
   settings: Settings,
   logger: Logger,
-): Promise<SyntaxError[]> {
+): Promise<[SyntaxError[], SyntaxError[]]> {
   const errors = []
+  const warnings = []
   const doc = document.getText()
 
   let preparedStmts = [doc]
@@ -41,13 +42,16 @@ export async function queryFileSyntaxAnalysis(
   for (let i = 0; i < preparedStmts.length; i++) {
     const sqlCommentRE = /\/\*[\s\S]*?\*\/|([^:]|^)--.*$/gm
     // const singleQuotedRE = /'(.*?)'/g
-    const beginRE = /^([\s]*begin[\s]*;)/gm
-    const commitRE = /^([\s]*commit[\s]*;)/gm
+    const insertRE = /^([\s]*insert[\s]*)/gmi
+    const beginRE = /^([\s]*begin[\s]*;)/gmi
+    const commitRE = /^([\s]*commit[\s]*;)/gmi
+    const rollbackRE = /^([\s]*rollback[\s]*;)/gmi
 
     let stmt = preparedStmts[i]
       // do not execute the current file (e.g. migrations)
       .replace(beginRE, (m) => "-".repeat(m.length))
       .replace(commitRE, (m) => "-".repeat(m.length))
+      .replace(rollbackRE, (m) => "-".repeat(m.length))
 
     const queryParameterInfo = getQueryParameterInfo(
       document,
@@ -81,6 +85,15 @@ export async function queryFileSyntaxAnalysis(
       queryParameterInfo,
       logger,
     )
+
+    // would need to extract types and default values. Filling with null will violate constraints
+    if (insertRE.test(fileText.trimStart())) {
+      warnings.push({
+        range: getRange(doc, currentPosition),
+        message: "INSERT statements currently not analyzed",
+		  })
+      continue
+	  }
 
     const pgClient = await pgPool.connect()
     try {
@@ -146,7 +159,7 @@ export async function queryFileSyntaxAnalysis(
     }
   }
 
-  return errors
+  return [errors, warnings]
 }
 
 function sanitizeStatement(
