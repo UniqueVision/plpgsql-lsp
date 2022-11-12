@@ -224,7 +224,11 @@ describe("Validate Tests", () => {
   describe("Keyword Query Parameter File Validation", function () {
     beforeEach(() => {
       const settings = new SettingsBuilder()
-        .with({ keywordQueryParameterPattern: ["@{keyword}"] })
+        .with({ keywordQueryParameterPattern: [
+          "@{keyword}",
+          "sqlc\\.arg\\s*\\('{keyword}'\\)",
+          "sqlc\\.narg\\s*\\('{keyword}'\\)",
+        ] })
         .build()
       server = setupTestServer(settings, new RecordLogger())
     })
@@ -244,6 +248,15 @@ describe("Validate Tests", () => {
 
       expect(diagnostics).toStrictEqual([])
     })
+
+
+    it("Correct query with multiple single quotes and keyword parameters", async () => {
+      const diagnostics = await validateSampleFile(
+		  "queries/correct_query_with_ts_query_keyword_parameter.pgsql",
+      )
+
+      expect(diagnostics).toStrictEqual([])
+	  })
   })
 
   describe("Multiple Statements File Validation With Keyword Parameters", function () {
