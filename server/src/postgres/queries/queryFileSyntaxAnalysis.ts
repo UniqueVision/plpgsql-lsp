@@ -37,6 +37,35 @@ export async function queryFileSyntaxAnalysis(
     statementSepRE =new RegExp(`(${options.statementSeparatorPattern})`, "g")
     preparedStatements = doc.split(statementSepRE)
   }
+  const migrationsFolder = settings.migrationsFolder
+
+  const pgClient = await pgPool.connect()
+  try {
+	  await pgClient.query("BEGIN")
+
+	  if (migrationsFolder) {
+	    const upMigrationFiles = (await fs.readdir(migrationsFolder))
+	      .filter(fn => fn.endsWith(".up.sql"))
+	      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+	      .map(f => path.join(migrationsFolder, f))
+
+	    const downMigrationFiles = (await fs.readdir(migrationsFolder))
+	      .filter(fn => fn.endsWith(".down.sql"))
+	      .sort((a, b) => b.localeCompare(a, undefined, { numeric: true }))
+	      .map(f => path.join(migrationsFolder, f))
+
+
+	    const shouldContinue = await runMigrations(downMigrationFiles, migrationsFolder)
+
+	    shouldContinue && await runMigrations(upMigrationFiles, migrationsFolder)
+	  }
+
+  } catch (error: unknown) {
+    analyzeError(error, 0, "migration")
+	  await pgClient.query("BEGIN")
+  } finally {
+	  await pgClient.query("SAVEPOINT migrations")
+  }
 
   const statementNames: string[] = []
   for (let i = 0; i < preparedStatements.length; i++) {
@@ -80,71 +109,84 @@ export async function queryFileSyntaxAnalysis(
       logger,
     )
 
-    const pgClient = await pgPool.connect()
     try {
-      await pgClient.query("BEGIN")
-
-      const migrationsFolder = settings.migrationsFolder
-      if (migrationsFolder) {
-        const migrationFiles = (await fs.readdir(migrationsFolder))
-          .filter(fn => fn.endsWith(".up.sql"))
-          .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
-          .map(f => path.join(migrationsFolder, f))
-
-        logger.info(`Executing migration files: ${JSON.stringify(migrationFiles)}`)
-        for await (const file of migrationFiles) {
-          try {
-            if (document.uri.endsWith(file)) {
-              // allow us to revisit and work on any migration file
-              logger.info("Stopping migration execution")
-
-              break
-            }
-            const migration = await fs.readFile(file,
-              { encoding: "utf8" })
-            await pgClient.query(migration)
-          } catch (error: unknown) {
-            logger.error(`Stopping migration execution at ${
-              path.basename(file)
-            }: ${error}`)
-
-            await pgClient.query("ROLLBACK")
-            await pgClient.query("BEGIN")
-
-            break
-          }
-        }
-      }
-
       await pgClient.query(fileText, Array(parameterNumber).fill(null))
     } catch (error: unknown) {
-      const databaseError = error as DatabaseError
-      const code = databaseError.code ?? "unknown"
-      const message = databaseError.message
-
-      if (options.isComplete) {
-        logger.error(`SyntaxError ${code}: ${message} (${document.uri})`)
-      }
-
-      const range = (() => {
-        if (error instanceof DatabaseError && error.position !== undefined) {
-          const errorPosition = Number(error.position) + currentPosition
-
-          return getRange(doc, errorPosition)
-        } else {
-          return getTextAllRange(document)
-        }
-      })()
-
-      errors.push({ range, message })
-
+      analyzeError(error, currentPosition, "statement")
     } finally {
-      await pgClient.query("ROLLBACK")
-      pgClient.release()
+      await pgClient.query("ROLLBACK TO migrations")
     }
   }
+  await pgClient.query("ROLLBACK")
+  pgClient.release()
 
   return errors
+
+
+  function analyzeError(
+    error: unknown,
+    currentPosition: number,
+    type: "statement" | "migration",
+    file?: string,
+  ) {
+    const databaseError = error as DatabaseError
+    const code = databaseError.code ?? "unknown"
+    let message = databaseError.message
+    if (type === "migration") {
+      message = `Migrations (${file}): ${message}` // explicit error about what migration failed
+    }
+
+    if (options.isComplete) {
+      logger.error(`SyntaxError ${code}: ${message} (${document.uri})`)
+    }
+
+    const range = (() => {
+      if (
+        error instanceof DatabaseError
+        && error.position !== undefined
+        && type !== "migration"
+      ) {
+        const errorPosition = Number(error.position) + currentPosition
+
+        return getRange(doc, errorPosition)
+      } else {
+        return getTextAllRange(document)
+      }
+    })()
+
+    errors.push({ range, message })
+  }
+
+  async function runMigrations(
+    migrationFiles: string[],
+    migrationsFolder: string,
+  ) : Promise<boolean> {
+    for await (const file of migrationFiles) {
+      try {
+        if (document.uri.endsWith(path.relative(migrationsFolder, file))) {
+        // allow us to revisit and work on any migration file
+          logger.info("Stopping migration execution")
+
+          return false
+        }
+        const migration = await fs.readFile(file,
+          { encoding: "utf8" })
+        await pgClient.query(migration)
+      } catch (error: unknown) {
+        analyzeError(error, 0, "migration", file)
+        logger.error(`Stopping migration execution at ${
+          path.basename(file)
+        }: ${error}`)
+
+        await pgClient.query("ROLLBACK")
+        await pgClient.query("BEGIN")
+
+        return false
+      }
+    }
+
+    return true
+  }
 }
 
 function sanitizeStatement(
