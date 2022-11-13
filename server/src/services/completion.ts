@@ -163,13 +163,13 @@ export function getLanguageServerCommentCompletionItems(): CompletionItem[] {
       detail: "Use positional query parameter with number.",
     },
     {
-      label: "plpgsql-language-server:use-keyword-query-parameters",
+      label: "plpgsql-language-server:use-keyword-query-parameter",
       kind: CompletionItemKind.Text,
       data: 0,
       detail: "Use keyword query parameter.",
     },
     {
-      label: "plpgsql-language-server:use-keyword-query-parameters keywords=[id, name]",
+      label: "plpgsql-language-server:use-keyword-query-parameter keywords=[id, name]",
       kind: CompletionItemKind.Text,
       data: 0,
       detail: "Use keyword query parameter with keywords.",

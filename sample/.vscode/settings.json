@@ -1,12 +1,15 @@
 {
-  "plpgsqlLanguageServer.host": "localhost",
-  "plpgsqlLanguageServer.user": "postgres",
-  "plpgsqlLanguageServer.password": "password",
-  "plpgsqlLanguageServer.database": "postgres",
-  "plpgsqlLanguageServer.definitionFiles": [
-    "definitions/**/*.pgsql"
-  ],
-  "plpgsqlLanguageServer.keywordQueryParameterPatterns": [
-    "@{keyword}"
-  ]
+    "plpgsqlLanguageServer.host": "localhost",
+    "plpgsqlLanguageServer.user": "postgres",
+    "plpgsqlLanguageServer.password": "password",
+    "plpgsqlLanguageServer.database": "postgres",
+    "plpgsqlLanguageServer.definitionFiles": [
+        "definitions/**/*.pgsql"
+    ],
+    "plpgsqlLanguageServer.keywordQueryParameterPattern": [
+        "@{keyword}",
+        "sqlc\\.arg\\s*\\('{keyword}'\\)",
+        "sqlc\\.narg\\s*\\('{keyword}'\\)",
+    ],
+    "plpgsqlLanguageServer.statementSeparatorPattern": "-- name:[\\s]+.*",
 }

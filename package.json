@@ -3,7 +3,7 @@
 	"displayName": "PL/pgSQL Language Server",
 	"description": "VSCode PL/pgSQL Language Server.",
 	"license": "MIT",
-	"version": "2.8.3",
+	"version": "2.9.0",
 	"icon": "images/postgres.png",
 	"repository": {
 		"type": "git",
@@ -149,7 +149,7 @@
 					"type": "string",
 					"description": "Prepared statement separator regex pattern. If set, multiple statements in a file can be analyzed. Example: '-- name:[\\s]+.*'"
 				},
-				"plpgsqlLanguageServer.keywordQueryParameterPatterns": {
+				"plpgsqlLanguageServer.keywordQueryParameterPattern": {
 					"scope": "resource",
 					"type": "array",
 					"default": [],

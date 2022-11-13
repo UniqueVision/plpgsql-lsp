@@ -9,7 +9,7 @@ import {
   TestTextDocuments,
 } from "@/__tests__/helpers/textDocuments"
 import {
-  KeywordQueryParameterPatternsNotDefinedError,
+  KeywordQueryParameterPatternNotDefinedError,
 } from "@/postgres/parameters/keywordParameters"
 import { Server } from "@/server"
 
@@ -147,7 +147,7 @@ describe("Validate Tests", () => {
     )
 
     it(
-      "Raise KeywordQueryParameterPatternsNotDefinedError.",
+      "Raise KeywordQueryParameterPatternNotDefinedError.",
       async () => {
         const diagnostics = await validateSampleFile(
           "queries/correct_query_with_keyword_parameter.pgsql",
@@ -156,7 +156,7 @@ describe("Validate Tests", () => {
         expect(diagnostics).toStrictEqual([
           {
             severity: DiagnosticSeverity.Error,
-            message: new KeywordQueryParameterPatternsNotDefinedError().message,
+            message: new KeywordQueryParameterPatternNotDefinedError().message,
             range: Range.create(0, 0, 8, 34),
           },
         ])
@@ -224,7 +224,11 @@ describe("Validate Tests", () => {
   describe("Keyword Query Parameter File Validation", function () {
     beforeEach(() => {
       const settings = new SettingsBuilder()
-        .with({ keywordQueryParameterPatterns: ["@{keyword}"] })
+        .with({ keywordQueryParameterPattern: [
+          "@{keyword}",
+          "sqlc\\.arg\\s*\\('{keyword}'\\)",
+          "sqlc\\.narg\\s*\\('{keyword}'\\)",
+        ] })
         .build()
       server = setupTestServer(settings, new RecordLogger())
     })
@@ -240,6 +244,36 @@ describe("Validate Tests", () => {
     it("Correct query with arbitory keyword parameters", async () => {
       const diagnostics = await validateSampleFile(
         "queries/correct_query_with_arbitory_keyword_parameter.pgsql",
+      )
+
+      expect(diagnostics).toStrictEqual([])
+    })
+
+
+    it("Correct query with multiple single quotes and keyword parameters", async () => {
+      const diagnostics = await validateSampleFile(
+		  "queries/correct_query_with_ts_query_keyword_parameter.pgsql",
+      )
+
+      expect(diagnostics).toStrictEqual([])
+	  })
+  })
+
+  describe("Multiple Statements File Validation With Keyword Parameters", function () {
+    beforeEach(() => {
+      const settings = new SettingsBuilder()
+        .with({ keywordQueryParameterPattern: [
+          "@{keyword}",
+          "sqlc\\.arg\\('{keyword}'\\)",
+          "sqlc\\.narg\\('{keyword}'\\)",
+        ], statementSeparatorPattern: "-- name:[\\s]+.*" })
+        .build()
+      server = setupTestServer(settings, new RecordLogger())
+    })
+
+    it("Correct query with multiple statements", async () => {
+      const diagnostics = await validateSampleFile(
+        "queries/correct_query_with_multiple_statements.pgsql",
       )
 
       expect(diagnostics).toStrictEqual([])

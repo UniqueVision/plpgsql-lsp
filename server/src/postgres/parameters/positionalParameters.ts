@@ -1,4 +1,7 @@
 import { Logger, uinteger } from "vscode-languageserver-protocol/node"
+import { TextDocument } from "vscode-languageserver-textdocument"
+
+import { getFirstLine } from "@/utilities/text"
 
 export type PositionalQueryParametersInfo = {
   type: "position",
@@ -6,10 +9,12 @@ export type PositionalQueryParametersInfo = {
 }
 
 export function getPositionalQueryParameterInfo(
+  document: TextDocument,
   statement: string,
-  firstLine: string,
   _logger: Logger,
 ): PositionalQueryParametersInfo | null {
+  const firstLine = getFirstLine(document)
+
   for (const pattern of [
     /^ *-- +plpgsql-language-server:use-positional-query-parameter( +number=[1-9][0-9]*)? *$/, // eslint-disable-line max-len
     /^ *\/\* +plpgsql-language-server:use-positional-query-parameter( +number=[1-9][0-9]*)? +\*\/$/, // eslint-disable-line max-len

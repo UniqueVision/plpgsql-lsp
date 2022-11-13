@@ -53,6 +53,7 @@ export async function validateFile(
     const queryParameterInfo = getQueryParameterInfo(
       document, document.getText(), settings, logger,
     )
+
     if (queryParameterInfo === null || "type" in queryParameterInfo) {
       diagnostics = await validateTextDocument(
         pgPool,

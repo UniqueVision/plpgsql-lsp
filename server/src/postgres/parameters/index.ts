@@ -3,7 +3,7 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { Settings } from "@/settings"
 import { neverReach } from "@/utilities/neverReach"
-import { getFirstLine, getTextAllRange } from "@/utilities/text"
+import { getTextAllRange } from "@/utilities/text"
 
 import {
   DefaultQueryParametersInfo,
@@ -12,7 +12,7 @@ import {
 } from "./defaultParameters"
 import {
   getKeywordQueryParameterInfo,
-  KeywordQueryParameterPatternsNotDefinedError,
+  KeywordQueryParameterPatternNotDefinedError,
   KeywordQueryParametersInfo,
   sanitizeFileWithKeywordQueryParameters,
 } from "./keywordParameters"
@@ -38,7 +38,7 @@ export function getQueryParameterInfo(
 
   // default query parameter
   queryParameterInfo = getDefaultQueryParameterInfo(
-    statement, getFirstLine(document), settings.queryParameterPattern, logger,
+    document, statement, settings.queryParameterPattern, logger,
   )
   if (queryParameterInfo !== null) {
     return queryParameterInfo
@@ -46,7 +46,7 @@ export function getQueryParameterInfo(
 
   // positional query parameter.
   queryParameterInfo = getPositionalQueryParameterInfo(
-    statement, getFirstLine(document), logger,
+    document, statement, logger,
   )
   if (queryParameterInfo !== null) {
     return queryParameterInfo
@@ -55,11 +55,11 @@ export function getQueryParameterInfo(
   // keyword query parameter.
   try{
     queryParameterInfo = getKeywordQueryParameterInfo(
-      statement, getFirstLine(document), settings.keywordQueryParameterPatterns, logger,
+      document, statement, settings.keywordQueryParameterPattern, logger,
     )
   }
   catch (error: unknown) {
-    if (error instanceof KeywordQueryParameterPatternsNotDefinedError) {
+    if (error instanceof KeywordQueryParameterPatternNotDefinedError) {
       return {
         severity: DiagnosticSeverity.Error,
         range: getTextAllRange(document),

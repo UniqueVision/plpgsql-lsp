@@ -158,7 +158,7 @@ Validation is executed under the following conditions.
 - "Execute the Current File Query" command was successfull.
 - Execute "Validate the Workspace Files" command.
 
-## [Experimental Feature] Query Parameters
+## Query Parameters
 In the case of a file that defines a query with parameters,
 You can validate it by adding the query parameter comment at the file top.
 
@@ -236,14 +236,14 @@ so must be indicated in the settings file.
 
 ```jsonc
 {
-  "plpgsqlLanguageServer.keywordQueryParameterPatterns": ["@{keyword}"]
+  "plpgsqlLanguageServer.keywordQueryParameterPattern": ["@{keyword}"]
 }
 ```
 
 You have finished setting, you can validate it like this.
 
 ```sql
--- plpgsql-language-server:use-keyword-query-parameters
+-- plpgsql-language-server:use-keyword-query-parameter
 
 SELECT
   id,
@@ -257,7 +257,7 @@ WHERE
 The complex queries file require the keywords to be specified explicitly in the comment.
 
 ```sql
--- plpgsql-language-server:use-keyword-query-parameters keywords=[id, names]
+-- plpgsql-language-server:use-keyword-query-parameter keywords=[id, names]
 
 SELECT
   id,
@@ -267,4 +267,42 @@ FROM
   users
 WHERE
   id = @id AND name = ANY(@names);
+```
+
+## Multiple Statements
+If you want to validate multiple statements individually, you can do so by giving the following settings.
+
+```jsonc
+{
+  "plpgsqlLanguageServer.keywordQueryParameterPattern": [
+    "@{keyword}",
+    "sqlc\\.arg\\s*\\('{keyword}'\\)",
+    "sqlc\\.narg\\s*\\('{keyword}'\\)",
+  ],
+  "plpgsqlLanguageServer.statementSeparatorPattern": "-- name:[\\s]+.*",
+}
+```
+
+This setting allows the following files to be handled.
+
+```sql
+-- plpgsql-language-server:use-keyword-query-parameter
+
+-- name: ListUser :many
+SELECT
+  id,
+  name
+FROM
+  users
+WHERE
+  id = sqlc.arg('id');
+
+-- name: ListUsers :many
+SELECT
+  id,
+  name
+FROM
+  users
+WHERE
+  name = ANY(@names);
 ```
