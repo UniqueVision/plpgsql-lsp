@@ -1,1 +1,1 @@
-drop table if exists bad_migrations_test.user_team;
+drop table if exists bad_migrations_test.user_team cascade;

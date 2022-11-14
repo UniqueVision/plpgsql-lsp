@@ -285,7 +285,16 @@ describe("Validate Tests", () => {
     beforeEach(() => {
       const settings = new SettingsBuilder()
         .with({
-          migrationsFolder: "src/__tests__/__fixtures__/migrations/migrations_test/",
+          migrations: {
+            folder:"src/__tests__/__fixtures__/migrations/migrations_test/",
+            upFilePattern: ".up.sql",
+            downFilePattern: ".down.sql",
+            postMigrations:{
+              // eslint-disable-next-line max-len
+              folder: "src/__tests__/__fixtures__/migrations/migrations_test/post-migrations",
+              filePattern: ".sql",
+            },
+          },
         })
         .build()
       server = setupTestServer(settings, new RecordLogger())
@@ -299,6 +308,13 @@ describe("Validate Tests", () => {
       expect(diagnostics).toStrictEqual([])
     })
 
+    it("Post migrations were run", async () => {
+      const diagnostics = await validateSampleFile(
+        "queries/correct_query_with_post_migrations_run.pgsql",
+      )
+
+      expect(diagnostics).toStrictEqual([])
+    })
 
     it("Analyzing latest migration file", async () => {
       const diagnostics = await validateSampleFile(
@@ -322,8 +338,11 @@ describe("Validate Tests", () => {
     beforeEach(() => {
       const settings = new SettingsBuilder()
         .with({
-          // eslint-disable-next-line max-len
-          migrationsFolder: "src/__tests__/__fixtures__/migrations/bad_migrations_test/",
+          migrations: {
+            folder:"src/__tests__/__fixtures__/migrations/bad_migrations_test/",
+            upFilePattern: ".up.sql",
+            downFilePattern: ".down.sql",
+          },
         })
         .build()
       server = setupTestServer(settings, new RecordLogger())
