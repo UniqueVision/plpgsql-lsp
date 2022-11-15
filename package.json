@@ -158,6 +158,55 @@
 						"type": "string"
 					}
 				},
+				"plpgsqlLanguageServer.migrations": {
+					"properties": {
+						"folder": {
+							"scope": "resource",
+							"type": "string",
+							"required": true,
+							"example": "db/migrations",
+							"description": "Relative path to migration files."
+						},
+						"upFilePattern": {
+							"scope": "resource",
+							"type": "string",
+							"required": true,
+							"example": ".up.sql",
+							"description": "Up migrations file pattern. Executed by sorted filename order."
+						},
+						"downFilePattern": {
+							"scope": "resource",
+							"type": "string",
+							"required": true,
+							"example": ".down.sql",
+							"description": "Down migrations file pattern. Executed by sorted filename order."
+						},
+						"postMigrations": {
+							"scope": "resource",
+							"type": "object",
+							"description": "If set, post migration scripts will be run after migrations.",
+							"properties": {
+								"folder": {
+									"scope": "resource",
+									"type": "string",
+									"required": true,
+									"example": "db/post-migrations",
+									"description": "Relative path to post-migration files."
+								},
+								"filePattern": {
+									"scope": "resource",
+									"type": "string",
+									"required": true,
+									"example": ".sql",
+									"description": "Post-migration file pattern. Executed by sorted filename order."
+								}
+							}
+						}
+					},
+					"scope": "resource",
+					"type": "object",
+					"description": "If set, migrations will be applied for all analyses. If the current file is a migration file, execution will run until the previous migration."
+				},
 				"plpgsqlLanguageServer.enableExecuteFileQueryCommand": {
 					"scope": "resource",
 					"type": "boolean",

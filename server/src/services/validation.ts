@@ -100,7 +100,7 @@ async function validateSyntaxAnalysis(
             uri: document.uri,
             range: Object.assign({}, diagnostic.range),
           },
-          message: `Syntax ${message}`,
+          message: `Syntax: ${message}`,
         },
       ]
     }
