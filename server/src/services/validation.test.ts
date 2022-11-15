@@ -224,11 +224,13 @@ describe("Validate Tests", () => {
   describe("Keyword Query Parameter File Validation", function () {
     beforeEach(() => {
       const settings = new SettingsBuilder()
-        .with({ keywordQueryParameterPattern: [
-          "@{keyword}",
-          "sqlc\\.arg\\s*\\('{keyword}'\\)",
-          "sqlc\\.narg\\s*\\('{keyword}'\\)",
-        ] })
+        .with({
+          keywordQueryParameterPattern: [
+            "@{keyword}",
+            "sqlc\\.arg\\s*\\('{keyword}'\\)",
+            "sqlc\\.narg\\s*\\('{keyword}'\\)",
+          ],
+        })
         .build()
       server = setupTestServer(settings, new RecordLogger())
     })
@@ -252,21 +254,24 @@ describe("Validate Tests", () => {
 
     it("Correct query with multiple single quotes and keyword parameters", async () => {
       const diagnostics = await validateSampleFile(
-		  "queries/correct_query_with_ts_query_keyword_parameter.pgsql",
+        "queries/correct_query_with_ts_query_keyword_parameter.pgsql",
       )
 
       expect(diagnostics).toStrictEqual([])
-	  })
+    })
   })
 
   describe("Multiple Statements File Validation With Keyword Parameters", function () {
     beforeEach(() => {
       const settings = new SettingsBuilder()
-        .with({ keywordQueryParameterPattern: [
-          "@{keyword}",
-          "sqlc\\.arg\\('{keyword}'\\)",
-          "sqlc\\.narg\\('{keyword}'\\)",
-        ], statementSeparatorPattern: "-- name:[\\s]+.*" })
+        .with({
+          keywordQueryParameterPattern: [
+            "@{keyword}",
+            "sqlc\\.arg\\('{keyword}'\\)",
+            "sqlc\\.narg\\('{keyword}'\\)",
+          ],
+          statementSeparatorPattern: "-- name:[\\s]+.*",
+        })
         .build()
       server = setupTestServer(settings, new RecordLogger())
     })
@@ -286,10 +291,10 @@ describe("Validate Tests", () => {
       const settings = new SettingsBuilder()
         .with({
           migrations: {
-            folder:"src/__tests__/__fixtures__/migrations/migrations_test/",
+            folder: "src/__tests__/__fixtures__/migrations/migrations_test/",
             upFilePattern: ".up.sql",
             downFilePattern: ".down.sql",
-            postMigrations:{
+            postMigrations: {
               // eslint-disable-next-line max-len
               folder: "src/__tests__/__fixtures__/migrations/migrations_test/post-migrations",
               filePattern: ".sql",
@@ -339,7 +344,7 @@ describe("Validate Tests", () => {
       const settings = new SettingsBuilder()
         .with({
           migrations: {
-            folder:"src/__tests__/__fixtures__/migrations/bad_migrations_test/",
+            folder: "src/__tests__/__fixtures__/migrations/bad_migrations_test/",
             upFilePattern: ".up.sql",
             downFilePattern: ".down.sql",
           },

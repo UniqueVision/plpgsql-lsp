@@ -113,7 +113,7 @@ CREATE TABLE employees (
     notes text,
     reports_to smallint,
     photo_path character varying(255),
-	FOREIGN KEY (reports_to) REFERENCES employees
+    FOREIGN KEY (reports_to) REFERENCES employees
 );
 
 
@@ -152,8 +152,8 @@ CREATE TABLE products (
     units_on_order smallint,
     reorder_level smallint,
     discontinued integer NOT NULL,
-	FOREIGN KEY (category_id) REFERENCES categories,
-	FOREIGN KEY (supplier_id) REFERENCES suppliers
+    FOREIGN KEY (category_id) REFERENCES categories,
+    FOREIGN KEY (supplier_id) REFERENCES suppliers
 );
 
 
@@ -211,7 +211,7 @@ CREATE TABLE territories (
     territory_id character varying(20) NOT NULL PRIMARY KEY,
     territory_description bpchar NOT NULL,
     region_id smallint NOT NULL,
-	FOREIGN KEY (region_id) REFERENCES region
+    FOREIGN KEY (region_id) REFERENCES region
 );
 
 

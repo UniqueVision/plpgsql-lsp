@@ -5,8 +5,10 @@ import { Logger, Range } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { PostgresPool } from "@/postgres"
-import { getQueryParameterInfo, QueryParameterInfo,
-  sanitizeFileWithQueryParameters } from "@/postgres/parameters"
+import {
+  getQueryParameterInfo, QueryParameterInfo,
+  sanitizeFileWithQueryParameters,
+} from "@/postgres/parameters"
 import { Settings } from "@/settings"
 import { neverReach } from "@/utilities/neverReach"
 import { getNonSpaceCharacter, getTextAllRange } from "@/utilities/text"
@@ -34,31 +36,31 @@ export async function queryFileSyntaxAnalysis(
   let preparedStatements = [doc]
   let statementSepRE: RegExp | undefined
   if (options.statementSeparatorPattern) {
-    statementSepRE =new RegExp(`(${options.statementSeparatorPattern})`, "g")
+    statementSepRE = new RegExp(`(${options.statementSeparatorPattern})`, "g")
     preparedStatements = doc.split(statementSepRE)
   }
   const migrations = settings.migrations
 
   const pgClient = await pgPool.connect()
   try {
-	  await pgClient.query("BEGIN")
+    await pgClient.query("BEGIN")
 
-	  if (migrations) {
-	    const upMigrationFiles = (await fs.readdir(migrations.folder))
-	      .filter(file => file.endsWith(migrations.upFilePattern))
-	      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
-	      .map(file => path.join(migrations.folder, file))
+    if (migrations) {
+      const upMigrationFiles = (await fs.readdir(migrations.folder))
+        .filter(file => file.endsWith(migrations.upFilePattern))
+        .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+        .map(file => path.join(migrations.folder, file))
 
-	    const downMigrationFiles = (await fs.readdir(migrations.folder))
-	      .filter(file => file.endsWith(migrations.downFilePattern))
-	      .sort((a, b) => b.localeCompare(a, undefined, { numeric: true }))
-	      .map(file => path.join(migrations.folder, file))
+      const downMigrationFiles = (await fs.readdir(migrations.folder))
+        .filter(file => file.endsWith(migrations.downFilePattern))
+        .sort((a, b) => b.localeCompare(a, undefined, { numeric: true }))
+        .map(file => path.join(migrations.folder, file))
 
-	    let shouldContinue = await runMigrations(
+      let shouldContinue = await runMigrations(
         downMigrationFiles, migrations.folder,
       )
 
-	    if (shouldContinue) {
+      if (shouldContinue) {
         shouldContinue = await runMigrations(upMigrationFiles, migrations.folder)
       }
 
@@ -69,15 +71,15 @@ export async function queryFileSyntaxAnalysis(
           .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
           .map(file => path.join(postMigrations.folder, file))
 
-	      await runMigrations(postMigrationFiles, postMigrations.folder)
+        await runMigrations(postMigrationFiles, postMigrations.folder)
       }
-	  }
+    }
 
   } catch (error: unknown) {
     analyzeError(error, 0, "migration")
-	  await pgClient.query("BEGIN")
+    await pgClient.query("BEGIN")
   } finally {
-	  await pgClient.query("SAVEPOINT migrations")
+    await pgClient.query("SAVEPOINT migrations")
   }
 
   const statementNames: string[] = []
@@ -106,7 +108,7 @@ export async function queryFileSyntaxAnalysis(
 
     const currentPosition = preparedStatements.slice(0, i).join("").length
 
-    if (options.statementSeparatorPattern && statementSepRE?.test(statement) ) {
+    if (options.statementSeparatorPattern && statementSepRE?.test(statement)) {
       if (statementNames.includes(statement)) {
         errors.push({
           range: getRange(doc, currentPosition),
@@ -173,7 +175,7 @@ export async function queryFileSyntaxAnalysis(
   async function runMigrations(
     files: string[],
     folder: string,
-  ) : Promise<boolean> {
+  ): Promise<boolean> {
     for await (const file of files) {
       try {
         if (document.uri.endsWith(path.relative(folder, file))) {
@@ -187,9 +189,9 @@ export async function queryFileSyntaxAnalysis(
         await pgClient.query(migration)
       } catch (error: unknown) {
         analyzeError(error, 0, "migration", file)
-        logger.error(`Stopping migration execution at ${
-          path.basename(file)
-        }: ${error}`)
+        logger.error(
+          `Stopping migration execution at ${path.basename(file)}: ${error}`,
+        )
 
         await pgClient.query("ROLLBACK")
         await pgClient.query("BEGIN")
@@ -222,13 +224,13 @@ function sanitizeStatement(
           statement = statement.replace(
             re, (match) => `${"_".repeat(match.length)}`,
           )
-        } )
+        })
 
         // remove parameters that were matched ignoring single quotes (can't replace
         // beforehand since given pattern may contain single quoted text)
         // to get all plausible params but don't exist after replacing
         queryParameterInfo.queryParameters =
-        queryParameterInfo.queryParameters.filter((param) => statement.includes(param))
+          queryParameterInfo.queryParameters.filter((param) => statement.includes(param))
 
         break
 
@@ -244,9 +246,9 @@ function sanitizeStatement(
         // beforehand since given pattern may contain single quoted text)
         // to get all plausible params but don't exist after replacing
         queryParameterInfo.keywordParameters =
-        queryParameterInfo.keywordParameters.filter(
-          (param) => statement.includes(param),
-        )
+          queryParameterInfo.keywordParameters.filter(
+            (param) => statement.includes(param),
+          )
 
         break
 
@@ -268,8 +270,8 @@ function makeParamPatternInStringPattern(
 ): RegExp {
   return new RegExp(
     "(?<=')[^']*.?"
-		+ paramPattern.replace("{keyword}", "[^']*?")
-		+ "(?='(?:[^']*'[^']*')*[^']*$)",
+    + paramPattern.replace("{keyword}", "[^']*?")
+    + "(?='(?:[^']*'[^']*')*[^']*$)",
     "g",
   )
 }
