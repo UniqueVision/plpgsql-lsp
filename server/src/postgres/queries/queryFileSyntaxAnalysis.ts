@@ -230,7 +230,9 @@ function sanitizeStatement(
         // beforehand since given pattern may contain single quoted text)
         // to get all plausible params but don't exist after replacing
         queryParameterInfo.queryParameters =
-          queryParameterInfo.queryParameters.filter((param) => statement.includes(param))
+          queryParameterInfo.queryParameters.filter(
+            (param) => statement.includes(param),
+          )
 
         break
 
