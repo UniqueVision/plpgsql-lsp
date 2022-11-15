@@ -224,7 +224,11 @@ describe("Validate Tests", () => {
   describe("Keyword Query Parameter File Validation", function () {
     beforeEach(() => {
       const settings = new SettingsBuilder()
-        .with({ keywordQueryParameterPattern: ["@{keyword}"] })
+        .with({ keywordQueryParameterPattern: [
+          "@{keyword}",
+          "sqlc\\.arg\\s*\\('{keyword}'\\)",
+          "sqlc\\.narg\\s*\\('{keyword}'\\)",
+        ] })
         .build()
       server = setupTestServer(settings, new RecordLogger())
     })
@@ -244,6 +248,15 @@ describe("Validate Tests", () => {
 
       expect(diagnostics).toStrictEqual([])
     })
+
+
+    it("Correct query with multiple single quotes and keyword parameters", async () => {
+      const diagnostics = await validateSampleFile(
+		  "queries/correct_query_with_ts_query_keyword_parameter.pgsql",
+      )
+
+      expect(diagnostics).toStrictEqual([])
+	  })
   })
 
   describe("Multiple Statements File Validation With Keyword Parameters", function () {
@@ -264,6 +277,101 @@ describe("Validate Tests", () => {
       )
 
       expect(diagnostics).toStrictEqual([])
+    })
+  })
+
+
+  describe("Migrations executed before analyzing query", function () {
+    beforeEach(() => {
+      const settings = new SettingsBuilder()
+        .with({
+          migrations: {
+            folder:"src/__tests__/__fixtures__/migrations/migrations_test/",
+            upFilePattern: ".up.sql",
+            downFilePattern: ".down.sql",
+            postMigrations:{
+              // eslint-disable-next-line max-len
+              folder: "src/__tests__/__fixtures__/migrations/migrations_test/post-migrations",
+              filePattern: ".sql",
+            },
+          },
+        })
+        .build()
+      server = setupTestServer(settings, new RecordLogger())
+    })
+
+    it("Correct query", async () => {
+      const diagnostics = await validateSampleFile(
+        "queries/correct_query_with_migrations_run.pgsql",
+      )
+
+      expect(diagnostics).toStrictEqual([])
+    })
+
+    it("Post migrations were run", async () => {
+      const diagnostics = await validateSampleFile(
+        "queries/correct_query_with_post_migrations_run.pgsql",
+      )
+
+      expect(diagnostics).toStrictEqual([])
+    })
+
+    it("Analyzing latest migration file", async () => {
+      const diagnostics = await validateSampleFile(
+        "migrations/migrations_test/0002.up.sql",
+      )
+
+      expect(diagnostics).toStrictEqual([])
+    })
+
+    it("Analyzing old migration file", async () => {
+      const diagnostics = await validateSampleFile(
+        "migrations/migrations_test/0001.up.sql",
+      )
+
+      expect(diagnostics).toStrictEqual([])
+    })
+  })
+
+
+  describe("Bad migrations executed analyzing query", function () {
+    beforeEach(() => {
+      const settings = new SettingsBuilder()
+        .with({
+          migrations: {
+            folder:"src/__tests__/__fixtures__/migrations/bad_migrations_test/",
+            upFilePattern: ".up.sql",
+            downFilePattern: ".down.sql",
+          },
+        })
+        .build()
+      server = setupTestServer(settings, new RecordLogger())
+    })
+
+    it("Bad latest migration file", async () => {
+      const diagnostics = await validateSampleFile(
+        "migrations/bad_migrations_test/0002.up.sql",
+      )
+      if (!diagnostics) {
+        throw new Error("")
+      }
+      expect(diagnostics[0].message)
+        .toContain("column \"fff\" referenced in foreign key constraint does not exist")
+    })
+
+    it("(In)correct query due to bad migrations", async () => {
+      const diagnostics = await validateSampleFile(
+        "queries/correct_query_with_migrations_run.pgsql",
+      )
+      if (!diagnostics) {
+        throw new Error("")
+      }
+      // global failed migration message
+      expect(diagnostics[0].message)
+        .toContain("column \"fff\" referenced in foreign key constraint does not exist")
+      // since migrations failed, everything is rolled back and query fails
+      expect(diagnostics[1].message)
+        .toContain("relation \"migrations_test.users\" does not exist")
     })
   })
 })
