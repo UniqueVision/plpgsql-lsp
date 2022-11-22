@@ -16,6 +16,7 @@ const BEGIN_RE = /^([\s]*begin[\s]*;)/igm
 const COMMIT_RE = /^([\s]*commit[\s]*;)/igm
 const ROLLBACK_RE = /^([\s]*rollback[\s]*;)/igm
 
+const DISABLE_STATEMENT_VALIDATION_RE = /^ *-- +plpgsql-language-server:disable *$/m
 
 export interface SyntaxError {
   range: Range;
@@ -34,8 +35,9 @@ export async function queryFileSyntaxAnalysis(
   options: SyntaxAnalysisOptions,
   settings: Settings,
   logger: Logger,
-): Promise<SyntaxError[]> {
+): Promise<[SyntaxError[], SyntaxError[]]> {
   const errors = []
+  const warnings = []
   const doc = document.getText()
 
   let preparedStatements = [doc]
@@ -89,6 +91,7 @@ export async function queryFileSyntaxAnalysis(
 
   const statementNames: string[] = []
   for (let i = 0; i < preparedStatements.length; i++) {
+    const currentPosition = preparedStatements.slice(0, i).join("").length
 
     let statement = preparedStatements[i]
       // do not execute the current file (e.g. migrations)
@@ -96,8 +99,12 @@ export async function queryFileSyntaxAnalysis(
       .replace(COMMIT_RE, (m) => "-".repeat(m.length))
       .replace(ROLLBACK_RE, (m) => "-".repeat(m.length))
 
-    if (/^ *-- +plpgsql-language-server:disable *$/.test(statement)) {
-      // TODO
+    if (DISABLE_STATEMENT_VALIDATION_RE.test(statement)) {
+      warnings.push({
+        range: getRange(doc, currentPosition),
+        message: "Validation disabled",
+		  })
+      continue
     }
 
     const queryParameterInfo = getQueryParameterInfo(
@@ -111,8 +118,6 @@ export async function queryFileSyntaxAnalysis(
     }
 
     statement = sanitizeStatement(queryParameterInfo, statement)
-
-    const currentPosition = preparedStatements.slice(0, i).join("").length
 
     if (options.statementSeparatorPattern && statementSepRE?.test(statement) ) {
       if (statementNames.includes(statement)) {
@@ -141,7 +146,7 @@ export async function queryFileSyntaxAnalysis(
   await pgClient.query("ROLLBACK")
   pgClient.release()
 
-  return errors
+  return [errors, warnings]
 
 
   function analyzeError(

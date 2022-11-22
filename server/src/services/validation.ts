@@ -74,7 +74,8 @@ async function validateSyntaxAnalysis(
   settings: Settings,
   logger: Logger,
 ): Promise<Diagnostic[]> {
-  const errors = await queryFileSyntaxAnalysis(
+  const diagnostics: Diagnostic[]= []
+  const [errors, warnings] = await queryFileSyntaxAnalysis(
     pgPool,
     document,
     {
@@ -86,7 +87,7 @@ async function validateSyntaxAnalysis(
     logger,
   )
 
-  return errors.map(({ range, message }) => {
+  diagnostics.push(...errors.map(({ range, message }) => {
     const diagnostic: Diagnostic = {
       severity: DiagnosticSeverity.Error,
       range,
@@ -106,7 +107,31 @@ async function validateSyntaxAnalysis(
     }
 
     return diagnostic
-  })
+  }))
+
+  diagnostics.push(...warnings.map(({ range, message }) => {
+    const diagnostic: Diagnostic = {
+      severity: DiagnosticSeverity.Warning,
+      range,
+      message,
+    }
+
+    if (options.hasDiagnosticRelatedInformationCapability) {
+      diagnostic.relatedInformation = [
+        {
+          location: {
+            uri: document.uri,
+            range: Object.assign({}, diagnostic.range),
+          },
+          message,
+        },
+      ]
+    }
+
+    return diagnostic
+  }))
+
+  return diagnostics
 }
 
 async function validateStaticAnalysis(
