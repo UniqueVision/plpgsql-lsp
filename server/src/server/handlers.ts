@@ -90,7 +90,7 @@ export class Handlers {
     event: TextDocumentChangeEvent<TextDocument>,
   ): Promise<void> {
     const settings = await this.settingsManager.get(event.document.uri)
-    if (settings.analyzeOn === "change") {
+    if (settings.validateOn === "change") {
       await this.validate(event.document)
     }
   }
