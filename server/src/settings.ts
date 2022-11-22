@@ -12,6 +12,7 @@ export interface Settings {
   enableExecuteFileQueryCommand: boolean;
   workspaceValidationTargetFiles: string[];
   migrations?: MigrationsSettings;
+  analyzeOn?: "save" | "change"
 }
 
 export interface MigrationsSettings {
@@ -40,4 +41,5 @@ export const DEFAULT_SETTINGS: Settings = {
   enableExecuteFileQueryCommand: true,
   workspaceValidationTargetFiles: [],
   migrations: undefined,
+  analyzeOn:  "change",
 }

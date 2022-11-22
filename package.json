@@ -138,6 +138,16 @@
 					"default": "public",
 					"description": "Default schema name."
 				},
+				"plpgsqlLanguageServer.analyzeOn": {
+					"scope": "resource",
+					"type": "string",
+					"enum": [
+						"save",
+						"change"
+					],
+					"default": "change",
+					"description": "Specify when to analyze files. Default: 'change'"
+				},
 				"plpgsqlLanguageServer.queryParameterPattern": {
 					"scope": "resource",
 					"type": "string",
