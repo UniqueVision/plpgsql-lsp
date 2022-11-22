@@ -10,6 +10,13 @@ import { getQueryParameterInfo, QueryParameterInfo,
 import { Settings } from "@/settings"
 import { neverReach } from "@/utilities/neverReach"
 import { getNonSpaceCharacter, getTextAllRange } from "@/utilities/text"
+
+const SQL_COMMENT_RE = /\/\*[\s\S]*?\*\/|([^:]|^)--.*$/gm
+const BEGIN_RE = /^([\s]*begin[\s]*;)/igm
+const COMMIT_RE = /^([\s]*commit[\s]*;)/igm
+const ROLLBACK_RE = /^([\s]*rollback[\s]*;)/igm
+
+
 export interface SyntaxError {
   range: Range;
   message: string;
@@ -82,19 +89,20 @@ export async function queryFileSyntaxAnalysis(
 
   const statementNames: string[] = []
   for (let i = 0; i < preparedStatements.length; i++) {
-    const sqlCommentRE = /\/\*[\s\S]*?\*\/|([^:]|^)--.*$/gm
-    // const singleQuotedRE = /'(.*?)'/g
-    const beginRE = /^([\s]*begin[\s]*;)/igm
-    const commitRE = /^([\s]*commit[\s]*;)/igm
 
     let statement = preparedStatements[i]
       // do not execute the current file (e.g. migrations)
-      .replace(beginRE, (m) => "-".repeat(m.length))
-      .replace(commitRE, (m) => "-".repeat(m.length))
+      .replace(BEGIN_RE, (m) => "-".repeat(m.length))
+      .replace(COMMIT_RE, (m) => "-".repeat(m.length))
+      .replace(ROLLBACK_RE, (m) => "-".repeat(m.length))
+
+    if (/^ *-- +plpgsql-language-server:disable *$/.test(statement)) {
+      // TODO
+    }
 
     const queryParameterInfo = getQueryParameterInfo(
       document,
-      statement.replace(sqlCommentRE, ""), // ignore possible matches with comments
+      statement.replace(SQL_COMMENT_RE, ""), // ignore possible matches with comments
       settings,
       logger,
     )
@@ -182,8 +190,11 @@ export async function queryFileSyntaxAnalysis(
 
           return false
         }
-        const migration = await fs.readFile(file,
-          { encoding: "utf8" })
+        const migration = (await fs.readFile(file, { encoding: "utf8" }))
+          .replace(BEGIN_RE, (m) => "-".repeat(m.length))
+          .replace(COMMIT_RE, (m) => "-".repeat(m.length))
+          .replace(ROLLBACK_RE, (m) => "-".repeat(m.length))
+
         await pgClient.query(migration)
       } catch (error: unknown) {
         analyzeError(error, 0, "migration", file)
