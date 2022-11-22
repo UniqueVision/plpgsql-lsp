@@ -171,14 +171,14 @@
               "scope": "resource",
               "type": "string",
               "required": true,
-              "example": ".up.sql",
+              "example": ".up.pgsql",
               "description": "Up migrations file pattern. Executed by sorted filename order."
             },
             "downFilePattern": {
               "scope": "resource",
               "type": "string",
               "required": true,
-              "example": ".down.sql",
+              "example": ".down.pgsql",
               "description": "Down migrations file pattern. Executed by sorted filename order."
             },
             "postMigrations": {
@@ -197,7 +197,7 @@
                   "scope": "resource",
                   "type": "string",
                   "required": true,
-                  "example": ".sql",
+                  "example": ".pgsql",
                   "description": "Post-migration file pattern. Executed by sorted filename order."
                 }
               }
