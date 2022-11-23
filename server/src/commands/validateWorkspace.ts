@@ -63,7 +63,7 @@ export async function validateFile(
           hasDiagnosticRelatedInformationCapability:
             options.hasDiagnosticRelatedInformationCapability,
           queryParameterInfo,
-          statementSeparatorPattern: settings.statementSeparatorPattern,
+          statements: settings.statements,
         },
         settings,
         logger,

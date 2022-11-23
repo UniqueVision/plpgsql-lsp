@@ -6,13 +6,13 @@ import { QueryParameterInfo } from "@/postgres/parameters"
 import { parseFunctions } from "@/postgres/parsers/parseFunctions"
 import { queryFileStaticAnalysis } from "@/postgres/queries/queryFileStaticAnalysis"
 import { queryFileSyntaxAnalysis } from "@/postgres/queries/queryFileSyntaxAnalysis"
-import { Settings } from "@/settings"
+import { Settings, StatementsSettings } from "@/settings"
 
 type ValidateTextDocumentOptions = {
   isComplete: boolean,
   hasDiagnosticRelatedInformationCapability: boolean,
   queryParameterInfo: QueryParameterInfo | null,
-  statementSeparatorPattern?: string,
+  statements?: StatementsSettings,
 }
 
 export async function validateTextDocument(
@@ -31,6 +31,8 @@ export async function validateTextDocument(
     logger,
   )
 
+  // TODO static analysis for statements
+  // if (diagnostics.filter(d => d.severity === DiagnosticSeverity.Error).length === 0) {
   if (diagnostics.length === 0) {
     diagnostics = await validateStaticAnalysis(
       pgPool,
@@ -74,39 +76,58 @@ async function validateSyntaxAnalysis(
   settings: Settings,
   logger: Logger,
 ): Promise<Diagnostic[]> {
-  const errors = await queryFileSyntaxAnalysis(
+  const diagnostics: Diagnostic[]= []
+  const [errors, warnings] = await queryFileSyntaxAnalysis(
     pgPool,
     document,
     {
       isComplete: options.isComplete,
       queryParameterInfo: options.queryParameterInfo,
-      statementSeparatorPattern:options.statementSeparatorPattern,
+      statements:options.statements,
     },
     settings,
     logger,
   )
 
-  return errors.map(({ range, message }) => {
-    const diagnostic: Diagnostic = {
+  const _diagnostics = [
+    {
+      items: errors,
       severity: DiagnosticSeverity.Error,
-      range,
-      message,
-    }
+      messagePrefix: "Syntax: ",
+    },
+    {
+      items: warnings,
+      severity: DiagnosticSeverity.Warning,
+      messagePrefix: "",
+    },
+  ]
 
-    if (options.hasDiagnosticRelatedInformationCapability) {
-      diagnostic.relatedInformation = [
-        {
-          location: {
-            uri: document.uri,
-            range: Object.assign({}, diagnostic.range),
+  _diagnostics.forEach(_diagnostic => {
+    diagnostics.push(..._diagnostic.items.map(({ range, message }) => {
+      const diagnostic: Diagnostic = {
+        severity: _diagnostic.severity,
+        range,
+        message,
+      }
+
+      if (options.hasDiagnosticRelatedInformationCapability) {
+        diagnostic.relatedInformation = [
+          {
+            location: {
+              uri: document.uri,
+              range: Object.assign({}, diagnostic.range),
+            },
+            message: _diagnostic.messagePrefix + message,
           },
-          message: `Syntax: ${message}`,
-        },
-      ]
-    }
+        ]
+      }
 
-    return diagnostic
+      return diagnostic
+    }))
+
   })
+
+  return diagnostics
 }
 
 async function validateStaticAnalysis(
