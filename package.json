@@ -192,6 +192,7 @@
 							"description": "Down migrations file pattern. Executed by sorted filename order."
 						},
 						"postMigrations": {
+							"default": null,
 							"scope": "resource",
 							"type": "object",
 							"description": "If set, post migration scripts will be run after migrations.",
@@ -214,6 +215,7 @@
 						}
 					},
 					"scope": "resource",
+					"default": null,
 					"type": "object",
 					"description": "If set, migrations will be applied for all analyses. If the current file is a migration file, execution will run until the previous migration."
 				},
