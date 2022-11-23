@@ -30,6 +30,9 @@
 		"vscode:prepublish": "npm run build",
 		"build": "npm run clean && webpack --mode production --config ./client/webpack.config.js && webpack --mode production --config ./server/webpack.config.js",
 		"build:dev": "npm run clean && webpack --mode none --config ./client/webpack.config.js && webpack --mode none --config ./server/webpack.config.js",
+		"tsc": "tsc --noEmit --project ./tsconfig.json && npm run tsc:client && npm run tsc:server",
+		"tsc:client": "tsc --noEmit --project ./client/tsconfig.json",
+		"tsc:server": "tsc --noEmit --project ./server/tsconfig.json",
 		"compile": "tsc -b",
 		"compile:client": "tsc -b ./client/tsconfig.json",
 		"compile:server": "tsc -b ./server/tsconfig.json",
@@ -154,11 +157,6 @@
 					"default": "\\$[1-9][0-9]*",
 					"description": "Query parameter pattern. the pattern is described by regular expression."
 				},
-				"plpgsqlLanguageServer.statementSeparatorPattern": {
-					"scope": "resource",
-					"type": "string",
-					"description": "Prepared statement separator regex pattern. If set, multiple statements in a file can be analyzed. Example: '-- name:[\\s]+.*'"
-				},
 				"plpgsqlLanguageServer.keywordQueryParameterPattern": {
 					"scope": "resource",
 					"type": "array",
@@ -167,6 +165,34 @@
 					"items": {
 						"type": "string"
 					}
+				},
+				"plpgsqlLanguageServer.statements": {
+					"properties": {
+						"separatorPattern": {
+							"scope": "resource",
+							"type": "string",
+							"required": true,
+							"example": "-- name:[\\s]+.*",
+							"description": "Prepared statement separator regex pattern. If set, multiple statements in a file can be analyzed."
+						},
+						"diagnosticsLevels": {
+							"scope": "resource",
+							"type": "object",
+							"default": null,
+							"description": "Override diagnostic levels for statements.",
+							"properties": {
+								"disableFlag": {
+									"scope": "resource",
+									"type": "string",
+									"default": "ignore",
+									"description": "Set diagnostic level for the disabled validation flag."
+								}
+							}
+						}
+					},
+					"scope": "resource",
+					"type": "object",
+					"description": "If set, migrations will be applied for all analyses. If the current file is a migration file, execution will run until the previous migration."
 				},
 				"plpgsqlLanguageServer.migrations": {
 					"properties": {

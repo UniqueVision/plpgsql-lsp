@@ -8,11 +8,22 @@ export interface Settings {
   defaultSchema: string;
   queryParameterPattern: string | string[];
   keywordQueryParameterPattern?: string | string[];
-  statementSeparatorPattern?: string;
   enableExecuteFileQueryCommand: boolean;
   workspaceValidationTargetFiles: string[];
   migrations?: MigrationsSettings;
+  statements?: StatementsSettings;
   validateOn: "save" | "change"
+}
+
+export interface StatementsSettings {
+  diagnosticsLevels?: StatementsDiagnosticLevelSettings;
+  separatorPattern: string;
+}
+
+export type DiagnosticLevel = "ignore" | "warning";
+
+export interface StatementsDiagnosticLevelSettings {
+  disableFlag?: DiagnosticLevel;
 }
 
 export interface MigrationsSettings {
@@ -37,9 +48,9 @@ export const DEFAULT_SETTINGS: Settings = {
   defaultSchema: "public",
   queryParameterPattern: /\$[1-9][0-9]*/.source,
   keywordQueryParameterPattern: undefined,
-  statementSeparatorPattern: undefined,
   enableExecuteFileQueryCommand: true,
   workspaceValidationTargetFiles: [],
   migrations: undefined,
+  statements: undefined,
   validateOn: "change",
 }

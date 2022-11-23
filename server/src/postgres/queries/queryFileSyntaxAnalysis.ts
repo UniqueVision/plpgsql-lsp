@@ -7,7 +7,7 @@ import { TextDocument } from "vscode-languageserver-textdocument"
 import { PostgresPool } from "@/postgres"
 import { getQueryParameterInfo, QueryParameterInfo,
   sanitizeFileWithQueryParameters } from "@/postgres/parameters"
-import { Settings } from "@/settings"
+import { Settings, StatementsSettings } from "@/settings"
 import { neverReach } from "@/utilities/neverReach"
 import { getNonSpaceCharacter, getTextAllRange } from "@/utilities/text"
 
@@ -26,7 +26,7 @@ export interface SyntaxError {
 export type SyntaxAnalysisOptions = {
   isComplete: boolean;
   queryParameterInfo: QueryParameterInfo | null;
-  statementSeparatorPattern?: string;
+  statements?: StatementsSettings;
 };
 
 export async function queryFileSyntaxAnalysis(
@@ -42,8 +42,8 @@ export async function queryFileSyntaxAnalysis(
 
   let preparedStatements = [doc]
   let statementSepRE: RegExp | undefined
-  if (options.statementSeparatorPattern) {
-    statementSepRE =new RegExp(`(${options.statementSeparatorPattern})`, "g")
+  if (options.statements) {
+    statementSepRE =new RegExp(`(${options.statements.separatorPattern})`, "g")
     preparedStatements = doc.split(statementSepRE)
   }
   const migrations = settings.migrations
@@ -100,10 +100,13 @@ export async function queryFileSyntaxAnalysis(
       .replace(ROLLBACK_RE, (m) => "-".repeat(m.length))
 
     if (DISABLE_STATEMENT_VALIDATION_RE.test(statement)) {
-      warnings.push({
-        range: getRange(doc, currentPosition),
-        message: "Validation disabled",
+      if (options.statements?.diagnosticsLevels?.disableFlag === "warning") {
+        warnings.push({
+          range: getRange(doc, currentPosition),
+          message: "Validation disabled",
 		  })
+      }
+
       continue
     }
 
@@ -119,7 +122,7 @@ export async function queryFileSyntaxAnalysis(
 
     statement = sanitizeStatement(queryParameterInfo, statement)
 
-    if (options.statementSeparatorPattern && statementSepRE?.test(statement) ) {
+    if (options.statements && statementSepRE?.test(statement) ) {
       if (statementNames.includes(statement)) {
         errors.push({
           range: getRange(doc, currentPosition),

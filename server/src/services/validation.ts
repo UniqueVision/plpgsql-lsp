@@ -6,13 +6,13 @@ import { QueryParameterInfo } from "@/postgres/parameters"
 import { parseFunctions } from "@/postgres/parsers/parseFunctions"
 import { queryFileStaticAnalysis } from "@/postgres/queries/queryFileStaticAnalysis"
 import { queryFileSyntaxAnalysis } from "@/postgres/queries/queryFileSyntaxAnalysis"
-import { Settings } from "@/settings"
+import { Settings, StatementsSettings } from "@/settings"
 
 type ValidateTextDocumentOptions = {
   isComplete: boolean,
   hasDiagnosticRelatedInformationCapability: boolean,
   queryParameterInfo: QueryParameterInfo | null,
-  statementSeparatorPattern?: string,
+  statements?: StatementsSettings,
 }
 
 export async function validateTextDocument(
@@ -31,7 +31,7 @@ export async function validateTextDocument(
     logger,
   )
 
-  if (diagnostics.length === 0) {
+  if (diagnostics.filter(d => d.severity === DiagnosticSeverity.Error).length === 0) {
     diagnostics = await validateStaticAnalysis(
       pgPool,
       document,
@@ -81,55 +81,49 @@ async function validateSyntaxAnalysis(
     {
       isComplete: options.isComplete,
       queryParameterInfo: options.queryParameterInfo,
-      statementSeparatorPattern:options.statementSeparatorPattern,
+      statements:options.statements,
     },
     settings,
     logger,
   )
 
-  diagnostics.push(...errors.map(({ range, message }) => {
-    const diagnostic: Diagnostic = {
+  const _diagnostics = [
+    {
+      items: errors,
       severity: DiagnosticSeverity.Error,
-      range,
-      message,
-    }
-
-    if (options.hasDiagnosticRelatedInformationCapability) {
-      diagnostic.relatedInformation = [
-        {
-          location: {
-            uri: document.uri,
-            range: Object.assign({}, diagnostic.range),
-          },
-          message: `Syntax: ${message}`,
-        },
-      ]
-    }
-
-    return diagnostic
-  }))
-
-  diagnostics.push(...warnings.map(({ range, message }) => {
-    const diagnostic: Diagnostic = {
+      messagePrefix: "Syntax: ",
+    },
+    {
+      items: warnings,
       severity: DiagnosticSeverity.Warning,
-      range,
-      message,
-    }
+      messagePrefix: "",
+    },
+  ]
 
-    if (options.hasDiagnosticRelatedInformationCapability) {
-      diagnostic.relatedInformation = [
-        {
-          location: {
-            uri: document.uri,
-            range: Object.assign({}, diagnostic.range),
+  _diagnostics.forEach(_diagnostic => {
+    diagnostics.push(..._diagnostic.items.map(({ range, message }) => {
+      const diagnostic: Diagnostic = {
+        severity: _diagnostic.severity,
+        range,
+        message,
+      }
+
+      if (options.hasDiagnosticRelatedInformationCapability) {
+        diagnostic.relatedInformation = [
+          {
+            location: {
+              uri: document.uri,
+              range: Object.assign({}, diagnostic.range),
+            },
+            message: _diagnostic.messagePrefix + message,
           },
-          message,
-        },
-      ]
-    }
+        ]
+      }
 
-    return diagnostic
-  }))
+      return diagnostic
+    }))
+
+  })
 
   return diagnostics
 }
