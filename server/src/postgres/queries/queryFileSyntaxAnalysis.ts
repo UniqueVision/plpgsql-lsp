@@ -23,6 +23,11 @@ export interface SyntaxError {
   message: string;
 }
 
+export interface SyntaxWarning {
+  range: Range;
+  message: string;
+}
+
 export type SyntaxAnalysisOptions = {
   isComplete: boolean;
   queryParameterInfo: QueryParameterInfo | null;
@@ -35,7 +40,7 @@ export async function queryFileSyntaxAnalysis(
   options: SyntaxAnalysisOptions,
   settings: Settings,
   logger: Logger,
-): Promise<[SyntaxError[], SyntaxError[]]> {
+): Promise<[SyntaxError[], SyntaxWarning[]]> {
   const errors = []
   const warnings = []
   const doc = document.getText()
