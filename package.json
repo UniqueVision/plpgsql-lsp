@@ -173,7 +173,7 @@
 							"type": "string",
 							"required": true,
 							"example": "-- name:[\\s]+.*",
-							"description": "Prepared statement separator regex pattern. If set, multiple statements in a file can be analyzed."
+							"description": "Prepared statement separator regex pattern."
 						},
 						"diagnosticsLevels": {
 							"scope": "resource",
@@ -185,14 +185,19 @@
 									"scope": "resource",
 									"type": "string",
 									"default": "ignore",
+									"enum": [
+										"ignore",
+										"warning"
+									],
 									"description": "Set diagnostic level for the disabled validation flag."
 								}
 							}
 						}
 					},
+					"default": null,
 					"scope": "resource",
 					"type": "object",
-					"description": "If set, migrations will be applied for all analyses. If the current file is a migration file, execution will run until the previous migration."
+					"description": "If set, multiple statements in a file can be analyzed based on a separator."
 				},
 				"plpgsqlLanguageServer.migrations": {
 					"properties": {

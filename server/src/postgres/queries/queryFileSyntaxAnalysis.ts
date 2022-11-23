@@ -99,7 +99,7 @@ export async function queryFileSyntaxAnalysis(
       .replace(COMMIT_RE, (m) => "-".repeat(m.length))
       .replace(ROLLBACK_RE, (m) => "-".repeat(m.length))
 
-    if (DISABLE_STATEMENT_VALIDATION_RE.test(statement)) {
+    if (options.statements && DISABLE_STATEMENT_VALIDATION_RE.test(statement)) {
       if (options.statements?.diagnosticsLevels?.disableFlag === "warning") {
         warnings.push({
           range: getRange(doc, currentPosition),

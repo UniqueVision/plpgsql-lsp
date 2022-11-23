@@ -285,6 +285,9 @@ describe("Validate Tests", () => {
       if (!diagnostics) {
         throw new Error("")
       }
+      if (diagnostics?.length === 0) {
+        throw new Error("")
+      }
       // warning for disabled statement
       expect(diagnostics[0].severity).toBe(2)
       expect(diagnostics[0].message).toContain("Validation disabled")

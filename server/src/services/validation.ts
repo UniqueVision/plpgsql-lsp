@@ -31,7 +31,9 @@ export async function validateTextDocument(
     logger,
   )
 
-  if (diagnostics.filter(d => d.severity === DiagnosticSeverity.Error).length === 0) {
+  // TODO static analysis for statements
+  // if (diagnostics.filter(d => d.severity === DiagnosticSeverity.Error).length === 0) {
+  if (diagnostics.length === 0) {
     diagnostics = await validateStaticAnalysis(
       pgPool,
       document,
