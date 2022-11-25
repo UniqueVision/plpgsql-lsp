@@ -89,7 +89,10 @@ export class Handlers {
   async onDidChangeContent(
     event: TextDocumentChangeEvent<TextDocument>,
   ): Promise<void> {
-    await this.validate(event.document)
+    const settings = await this.settingsManager.get(event.document.uri)
+    if (settings.validateOn === "change") {
+      await this.validate(event.document)
+    }
   }
 
   async onDidClose(

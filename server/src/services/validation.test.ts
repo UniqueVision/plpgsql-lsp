@@ -261,8 +261,8 @@ describe("Validate Tests", () => {
     })
   })
 
-  describe("Multiple Statements File Validation With Keyword Parameters", function () {
-    beforeEach(() => {
+  describe("Statement diagnostic settings", function () {
+    it("Show warning on disabled statement if flag set", async () => {
       const settings = new SettingsBuilder()
         .with({
           keywordQueryParameterPattern: [
@@ -270,13 +270,46 @@ describe("Validate Tests", () => {
             "sqlc\\.arg\\('{keyword}'\\)",
             "sqlc\\.narg\\('{keyword}'\\)",
           ],
-          statementSeparatorPattern: "-- name:[\\s]+.*",
+          statements: {
+            separatorPattern: "-- name:[\\s]+.*",
+            diagnosticsLevels: {
+              disableFlag: "warning",
+            },
+          },
         })
         .build()
       server = setupTestServer(settings, new RecordLogger())
+
+      const diagnostics = await validateSampleFile(
+        "queries/correct_query_with_multiple_statements.pgsql",
+      )
+
+      if (!diagnostics) {
+        throw new Error("")
+      }
+      if (diagnostics?.length === 0) {
+        throw new Error("")
+      }
+      // warning for disabled statement
+      expect(diagnostics[0].severity).toBe(2)
+      expect(diagnostics[0].message).toContain("Validation disabled")
     })
 
-    it("Correct query with multiple statements", async () => {
+    it("Shows no diagnostic by default", async () => {
+      const settings = new SettingsBuilder()
+        .with({
+          keywordQueryParameterPattern: [
+            "@{keyword}",
+            "sqlc\\.arg\\('{keyword}'\\)",
+            "sqlc\\.narg\\('{keyword}'\\)",
+          ],
+          statements: {
+            separatorPattern: "-- name:[\\s]+.*",
+          },
+        })
+        .build()
+      server = setupTestServer(settings, new RecordLogger())
+
       const diagnostics = await validateSampleFile(
         "queries/correct_query_with_multiple_statements.pgsql",
       )

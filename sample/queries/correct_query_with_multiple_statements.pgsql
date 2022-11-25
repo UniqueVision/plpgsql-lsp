@@ -17,3 +17,13 @@ FROM
   users
 WHERE
   name = ANY(@names);
+
+-- name: DoNotValidate :many
+-- plpgsql-language-server:disable
+SELECT
+  id,
+  name
+FROM
+  users
+WHERE
+  name = ANY(@names);

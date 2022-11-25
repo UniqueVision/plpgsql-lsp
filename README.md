@@ -305,4 +305,8 @@ FROM
   users
 WHERE
   name = ANY(@names);
+
+-- name: DoNotValidate :many
+-- plpgsql-language-server:disable
+SELECT * FROM inexistent_table; -- no error raised for this statement
 ```
