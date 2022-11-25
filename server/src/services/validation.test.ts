@@ -325,12 +325,12 @@ describe("Validate Tests", () => {
         .with({
           migrations: {
             folder: "src/__tests__/__fixtures__/migrations/migrations_test/",
-            upFilePattern: ".up.sql",
-            downFilePattern: ".down.sql",
+            upFilePattern: ".up.pgsql",
+            downFilePattern: ".down.pgsql",
             postMigrations: {
               // eslint-disable-next-line max-len
               folder: "src/__tests__/__fixtures__/migrations/migrations_test/post-migrations",
-              filePattern: ".sql",
+              filePattern: ".pgsql",
             },
           },
         })
@@ -356,7 +356,7 @@ describe("Validate Tests", () => {
 
     it("Analyzing latest migration file", async () => {
       const diagnostics = await validateSampleFile(
-        "migrations/migrations_test/0002.up.sql",
+        "migrations/migrations_test/0002.up.pgsql",
       )
 
       expect(diagnostics).toStrictEqual([])
@@ -364,7 +364,7 @@ describe("Validate Tests", () => {
 
     it("Analyzing old migration file", async () => {
       const diagnostics = await validateSampleFile(
-        "migrations/migrations_test/0001.up.sql",
+        "migrations/migrations_test/0001.up.pgsql",
       )
 
       expect(diagnostics).toStrictEqual([])
@@ -378,8 +378,8 @@ describe("Validate Tests", () => {
         .with({
           migrations: {
             folder: "src/__tests__/__fixtures__/migrations/bad_migrations_test/",
-            upFilePattern: ".up.sql",
-            downFilePattern: ".down.sql",
+            upFilePattern: ".up.pgsql",
+            downFilePattern: ".down.pgsql",
           },
         })
         .build()
@@ -388,7 +388,7 @@ describe("Validate Tests", () => {
 
     it("Bad latest migration file", async () => {
       const diagnostics = await validateSampleFile(
-        "migrations/bad_migrations_test/0002.up.sql",
+        "migrations/bad_migrations_test/0002.up.pgsql",
       )
       if (!diagnostics) {
         throw new Error("")
