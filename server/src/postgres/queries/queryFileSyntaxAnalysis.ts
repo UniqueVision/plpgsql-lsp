@@ -2,7 +2,9 @@ import fs from "fs/promises"
 import glob from "glob-promise"
 import path from "path"
 import { DatabaseError } from "pg"
-import { Diagnostic, DiagnosticSeverity, Logger, Range } from "vscode-languageserver"
+import {
+  Diagnostic, DiagnosticSeverity, Logger, Range, uinteger,
+} from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { MigrationError } from "@/errors"
@@ -45,15 +47,13 @@ export async function queryFileSyntaxAnalysis(
     statementSepRE = new RegExp(`(${options.statements.separatorPattern})`, "g")
     preparedStatements = documentText.split(statementSepRE)
   }
-  const migrations = settings.migrations
-
   const pgClient = await pgPool.connect()
 
   try {
     await pgClient.query("BEGIN")
 
-    if (migrations) {
-      await runMigration(pgClient, document, migrations, logger)
+    if (settings.migrations) {
+      await runMigration(pgClient, document, settings.migrations, logger)
     }
   } catch (error: unknown) {
     if (error instanceof MigrationError) {
@@ -74,56 +74,20 @@ export async function queryFileSyntaxAnalysis(
   const statementNames: string[] = []
   for (let i = 0; i < preparedStatements.length; i++) {
     const currentPosition = preparedStatements.slice(0, i).join("").length
-
-    let statement = preparedStatements[i]
-      // do not execute the current file (e.g. migrations)
-      .replace(BEGIN_RE, (m) => "-".repeat(m.length))
-      .replace(COMMIT_RE, (m) => "-".repeat(m.length))
-      .replace(ROLLBACK_RE, (m) => "-".repeat(m.length))
-
-    if (options.statements && DISABLE_STATEMENT_VALIDATION_RE.test(statement)) {
-      if (options.statements?.diagnosticsLevels?.disableFlag === "warning") {
-        diagnostics.push({
-          severity: DiagnosticSeverity.Warning,
-          range: getRange(documentText, currentPosition),
-          message: "Validation disabled",
-        })
-      }
-
-      continue
-    }
-
-    const queryParameterInfo = getQueryParameterInfo(
+    const statement = queryStatement(
       document,
-      statement.replace(SQL_COMMENT_RE, ""), // ignore possible matches with comments
+      preparedStatements[i],
+      currentPosition,
+      statementNames,
+      options,
       settings,
       logger,
     )
-
-    if (queryParameterInfo !== null && !("type" in queryParameterInfo)) {
-      diagnostics.push(queryParameterInfo)
-
+    if ("message" in statement) {
+      diagnostics.push(statement)
       continue
     }
-
-    statement = sanitizeStatement(queryParameterInfo, statement)
-
-    if (options.statements && statementSepRE?.test(statement)) {
-      if (statementNames.includes(statement)) {
-        diagnostics.push({
-          severity: DiagnosticSeverity.Error,
-          range: getRange(documentText, currentPosition),
-          message: `Duplicated statement '${statement}'`,
-        })
-        continue
-      }
-      statementNames.push(statement)
-    }
-    const [fileText, parameterNumber] = sanitizeFileWithQueryParameters(
-      statement,
-      queryParameterInfo,
-      logger,
-    )
+    const [fileText, parameterNumber] = statement
 
     try {
       await pgClient.query(fileText, Array(parameterNumber).fill(null))
@@ -273,6 +237,63 @@ async function queryMigrations(
   }
 
   return true
+}
+
+function queryStatement(
+  document: TextDocument,
+  statement: string,
+  currentPosition: number,
+  statementNames: string[],
+  options: SyntaxAnalysisOptions,
+  settings: Settings,
+  logger: Logger,
+): [string, uinteger] | Diagnostic {
+  const maskedStatement = statement
+    // do not execute the current file (e.g. migrations)
+    .replace(BEGIN_RE, (m) => "-".repeat(m.length))
+    .replace(COMMIT_RE, (m) => "-".repeat(m.length))
+    .replace(ROLLBACK_RE, (m) => "-".repeat(m.length))
+
+  if (options.statements
+    && DISABLE_STATEMENT_VALIDATION_RE.test(maskedStatement)
+    && options.statements?.diagnosticsLevels?.disableFlag === "warning"
+  ) {
+    return {
+      severity: DiagnosticSeverity.Warning,
+      range: getRange(document.getText(), currentPosition),
+      message: "Validation disabled",
+    }
+  }
+
+  const queryParameterInfo = getQueryParameterInfo(
+    document,
+    maskedStatement.replace(SQL_COMMENT_RE, ""), // ignore possible matches with comments
+    settings,
+    logger,
+  )
+
+  if (queryParameterInfo !== null && !("type" in queryParameterInfo)) {
+    return queryParameterInfo
+  }
+
+  const sanitizedStatement = sanitizeStatement(queryParameterInfo, maskedStatement)
+
+  if (options.statements) {
+    if (statementNames.includes(sanitizedStatement)) {
+      return {
+        severity: DiagnosticSeverity.Error,
+        range: getRange(document.getText(), currentPosition),
+        message: `Duplicated statement '${sanitizedStatement}'`,
+      }
+    }
+    statementNames.push(sanitizedStatement)
+  }
+
+  return sanitizeFileWithQueryParameters(
+    sanitizedStatement,
+    queryParameterInfo,
+    logger,
+  )
 }
 
 function sanitizeStatement(
