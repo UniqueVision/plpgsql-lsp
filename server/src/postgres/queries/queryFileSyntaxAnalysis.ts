@@ -5,6 +5,7 @@ import { DatabaseError } from "pg"
 import { Logger, Range } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
+import { MigrationError } from "@/errors"
 import { PostgresClient, PostgresPool } from "@/postgres"
 import {
   getQueryParameterInfo, QueryParameterInfo,
@@ -66,6 +67,13 @@ export async function queryFileSyntaxAnalysis(
       await runMigration(pgClient, document, migrations, errors, logger)
     }
   } catch (error: unknown) {
+    if (error instanceof MigrationError) {
+      errors.push({
+        range: getTextAllRange(document),
+        message: `Migrations (${error.document.uri}): ${error.message}`,
+      })
+    }
+
     // Restart transaction.
     await pgClient.query("ROLLBACK")
     await pgClient.query("BEGIN")
@@ -140,17 +148,6 @@ export async function queryFileSyntaxAnalysis(
   pgClient.release()
 
   return [errors, warnings]
-}
-
-function migrationError(
-  document: TextDocument,
-  error: DatabaseError,
-  file: string,
-) : SyntaxError {
-  return {
-    range: getTextAllRange(document),
-    message: `Migrations (${file}): ${error.message}`,
-  }
 }
 
 function statementError(
@@ -264,16 +261,13 @@ async function queryMigrations(
 
       await pgClient.query(migration)
     } catch (error: unknown) {
-      errors.push(migrationError(document, error as DatabaseError, file))
+      const errorMessage = (error as DatabaseError).message
 
       logger.error(
-        `Stopping migration execution at ${path.basename(file)}: ${error}`,
+        `Stopping migration execution at ${path.basename(file)}: ${errorMessage}`,
       )
 
-      await pgClient.query("ROLLBACK")
-      await pgClient.query("BEGIN")
-
-      return false
+      throw new MigrationError(document, errorMessage)
     }
   }
 

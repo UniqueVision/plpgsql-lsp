@@ -1,3 +1,5 @@
+import { TextDocument } from "vscode-languageserver-textdocument"
+
 export class PlpgsqlLanguageServerError extends Error {
   get name(): string {
     return this.constructor.name
@@ -63,5 +65,13 @@ export class WorkspaceValidationTargetFilesEmptyError
   extends PlpgsqlLanguageServerError {
   constructor() {
     super("\"settings.workspaceValidationTargetFiles\" is empty.")
+  }
+}
+
+export class MigrationError
+  extends PlpgsqlLanguageServerError {
+
+  constructor(public document: TextDocument, message: string) {
+    super(message)
   }
 }
