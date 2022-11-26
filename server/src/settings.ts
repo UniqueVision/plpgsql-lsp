@@ -20,22 +20,16 @@ export interface StatementsSettings {
   separatorPattern: string;
 }
 
-export type DiagnosticLevel = "ignore" | "warning";
+export type DiagnosticLevel = "disable" | "warning";
 
 export interface StatementsDiagnosticLevelSettings {
   disableFlag?: DiagnosticLevel;
 }
 
 export interface MigrationsSettings {
-  folder: string;
-  upFilePattern: string;
-  downFilePattern: string;
-  postMigrations?: PostMigrationsSettings;
-}
-
-export interface PostMigrationsSettings {
-  folder: string;
-  filePattern: string;
+  upFiles: string[];
+  downFiles: string[];
+  postMigrationFiles?: string[];
 }
 
 export const DEFAULT_SETTINGS: Settings = {

@@ -141,7 +141,7 @@
           "default": "public",
           "description": "Default schema name."
         },
-        "plpgsqlLanguageServer.analyzeOn": {
+        "plpgsqlLanguageServer.validateOn": {
           "scope": "resource",
           "type": "string",
           "enum": [
@@ -149,7 +149,7 @@
             "change"
           ],
           "default": "change",
-          "description": "Specify when to analyze files. Default: 'change'"
+          "description": "Specify when to validate files. Default: 'change'"
         },
         "plpgsqlLanguageServer.queryParameterPattern": {
           "scope": "resource",
@@ -184,9 +184,9 @@
                 "disableFlag": {
                   "scope": "resource",
                   "type": "string",
-                  "default": "ignore",
+                  "default": "disable",
                   "enum": [
-                    "ignore",
+                    "disable",
                     "warning"
                   ],
                   "description": "Set diagnostic level for the disabled validation flag."
@@ -201,48 +201,42 @@
         },
         "plpgsqlLanguageServer.migrations": {
           "properties": {
-            "folder": {
+            "upFiles": {
               "scope": "resource",
-              "type": "string",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Up migrations file glob pattern. Executed by sorted filename order.",
               "required": true,
-              "example": "db/migrations",
-              "description": "Relative path to migration files."
+              "example": [
+                "*.up.pgsql"
+              ]
             },
-            "upFilePattern": {
+            "downFiles": {
               "scope": "resource",
-              "type": "string",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Down migrations file glob pattern. Executed by sorted filename order.",
               "required": true,
-              "example": ".up.pgsql",
-              "description": "Up migrations file pattern. Executed by sorted filename order."
+              "example": [
+                "*.down.pgsql"
+              ]
             },
-            "downFilePattern": {
+            "postMigrationFiles": {
               "scope": "resource",
-              "type": "string",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Post-migration file glob pattern. Executed by sorted filename order.",
               "required": true,
-              "example": ".down.pgsql",
-              "description": "Down migrations file pattern. Executed by sorted filename order."
-            },
-            "postMigrations": {
-              "default": null,
-              "scope": "resource",
-              "type": "object",
-              "description": "If set, post migration scripts will be run after migrations.",
-              "properties": {
-                "folder": {
-                  "scope": "resource",
-                  "type": "string",
-                  "required": true,
-                  "example": "db/post-migrations",
-                  "description": "Relative path to post-migration files."
-                },
-                "filePattern": {
-                  "scope": "resource",
-                  "type": "string",
-                  "required": true,
-                  "example": ".pgsql",
-                  "description": "Post-migration file pattern. Executed by sorted filename order."
-                }
-              }
+              "default": [],
+              "example": [
+                "*.post.pgsql"
+              ]
             }
           },
           "scope": "resource",

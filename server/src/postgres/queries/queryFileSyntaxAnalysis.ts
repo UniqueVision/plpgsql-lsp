@@ -1,4 +1,5 @@
 import fs from "fs/promises"
+import glob from "glob-promise"
 import path from "path"
 import { DatabaseError } from "pg"
 import { Logger, Range } from "vscode-languageserver"
@@ -10,6 +11,7 @@ import {
   sanitizeFileWithQueryParameters,
 } from "@/postgres/parameters"
 import { Settings, StatementsSettings } from "@/settings"
+import { asyncFlatMap } from "@/utilities/functool"
 import { neverReach } from "@/utilities/neverReach"
 import { getNonSpaceCharacter, getTextAllRange } from "@/utilities/text"
 
@@ -60,32 +62,35 @@ export async function queryFileSyntaxAnalysis(
     await pgClient.query("BEGIN")
 
     if (migrations) {
-      const upMigrationFiles = (await fs.readdir(migrations.folder))
-        .filter(file => file.endsWith(migrations.upFilePattern))
+      const upMigrationFiles = (
+        await asyncFlatMap(
+          migrations.upFiles,
+          (filePattern) => glob.promise(filePattern),
+        ))
         .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
-        .map(file => path.join(migrations.folder, file))
 
-      const downMigrationFiles = (await fs.readdir(migrations.folder))
-        .filter(file => file.endsWith(migrations.downFilePattern))
+      const downMigrationFiles = (
+        await asyncFlatMap(
+          migrations.downFiles,
+          (filePattern) => glob.promise(filePattern),
+        ))
         .sort((a, b) => b.localeCompare(a, undefined, { numeric: true }))
-        .map(file => path.join(migrations.folder, file))
 
-      let shouldContinue = await runMigrations(
-        downMigrationFiles, migrations.folder,
-      )
+      const postMigrationFiles = (
+        await asyncFlatMap(
+          migrations.postMigrationFiles ?? [],
+          (filePattern) => glob.promise(filePattern),
+        ))
+        .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+
+      let shouldContinue = await runMigrations(downMigrationFiles)
 
       if (shouldContinue) {
-        shouldContinue = await runMigrations(upMigrationFiles, migrations.folder)
+        shouldContinue = await runMigrations(upMigrationFiles)
       }
 
-      const postMigrations = migrations.postMigrations
-      if (postMigrations && shouldContinue) {
-        const postMigrationFiles = (await fs.readdir(postMigrations.folder))
-          .filter(file => file.endsWith(postMigrations.filePattern))
-          .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
-          .map(file => path.join(postMigrations.folder, file))
-
-        await runMigrations(postMigrationFiles, postMigrations.folder)
+      if (shouldContinue) {
+        shouldContinue = await runMigrations(postMigrationFiles)
       }
     }
 
@@ -195,11 +200,10 @@ export async function queryFileSyntaxAnalysis(
 
   async function runMigrations(
     files: string[],
-    folder: string,
   ): Promise<boolean> {
     for await (const file of files) {
       try {
-        if (document.uri.endsWith(path.relative(folder, file))) {
+        if (document.uri.endsWith(file)) {
           // allow us to revisit and work on any migration/post-migration file
           logger.info("Stopping execution at the current file")
 

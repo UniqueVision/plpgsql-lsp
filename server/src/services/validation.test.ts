@@ -324,14 +324,18 @@ describe("Validate Tests", () => {
       const settings = new SettingsBuilder()
         .with({
           migrations: {
-            folder: "src/__tests__/__fixtures__/migrations/migrations_test/",
-            upFilePattern: ".up.pgsql",
-            downFilePattern: ".down.pgsql",
-            postMigrations: {
+            upFiles: [
               // eslint-disable-next-line max-len
-              folder: "src/__tests__/__fixtures__/migrations/migrations_test/post-migrations",
-              filePattern: ".pgsql",
-            },
+              "src/__tests__/__fixtures__/migrations/migrations_test/*.up.pgsql",
+            ],
+            downFiles: [
+              // eslint-disable-next-line max-len
+              "src/__tests__/__fixtures__/migrations/migrations_test/*.down.pgsql",
+            ],
+            postMigrationFiles: [
+              // eslint-disable-next-line max-len
+              "src/__tests__/__fixtures__/migrations/migrations_test/post-migrations/*.pgsql",
+            ],
           },
         })
         .build()
@@ -377,9 +381,14 @@ describe("Validate Tests", () => {
       const settings = new SettingsBuilder()
         .with({
           migrations: {
-            folder: "src/__tests__/__fixtures__/migrations/bad_migrations_test/",
-            upFilePattern: ".up.pgsql",
-            downFilePattern: ".down.pgsql",
+            upFiles: [
+              // eslint-disable-next-line max-len
+              "src/__tests__/__fixtures__/migrations/bad_migrations_test/*.up.pgsql",
+            ],
+            downFiles: [
+              // eslint-disable-next-line max-len
+              "src/__tests__/__fixtures__/migrations/bad_migrations_test/*.down.pgsql",
+            ],
           },
         })
         .build()
