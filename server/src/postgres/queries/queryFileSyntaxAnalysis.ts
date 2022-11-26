@@ -45,7 +45,7 @@ export async function queryFileSyntaxAnalysis(
   settings: Settings,
   logger: Logger,
 ): Promise<[SyntaxError[], SyntaxWarning[]]> {
-  const errors = []
+  const errors: SyntaxError[] = []
   const warnings = []
   const documentText = document.getText()
 
@@ -63,7 +63,7 @@ export async function queryFileSyntaxAnalysis(
     await pgClient.query("BEGIN")
 
     if (migrations) {
-      await runMigration(pgClient, document, migrations, logger)
+      await runMigration(pgClient, document, migrations, errors, logger)
     }
   } catch (error: unknown) {
     // Restart transaction.
@@ -187,6 +187,7 @@ async function runMigration(
   pgClient: PostgresClient,
   document: TextDocument,
   migrations: MigrationsSettings,
+  errors: SyntaxError[],
   logger: Logger,
 ) {
   const upMigrationFiles = (
@@ -210,30 +211,30 @@ async function runMigration(
     ))
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
 
-  if (upMigrationFiles.filter(file => document.uri.endsWith(file)).length
-    + downMigrationFiles.filter(file => document.uri.endsWith(file)).length
-    + postMigrationFiles.filter(file => document.uri.endsWith(file)).length === 0
-  ) {
-    return false
-  }
+  // if (upMigrationFiles.filter(file => document.uri.endsWith(file)).length
+  //   + downMigrationFiles.filter(file => document.uri.endsWith(file)).length
+  //   + postMigrationFiles.filter(file => document.uri.endsWith(file)).length === 0
+  // ) {
+  //   return false
+  // }
 
   let shouldContinue = true
 
   if (shouldContinue) {
     shouldContinue = await queryMigrations(
-      pgClient, document, downMigrationFiles, logger,
+      pgClient, document, downMigrationFiles, errors, logger,
     )
   }
 
   if (shouldContinue) {
     shouldContinue = await queryMigrations(
-      pgClient, document, upMigrationFiles, logger,
+      pgClient, document, upMigrationFiles, errors, logger,
     )
   }
 
   if (shouldContinue) {
     shouldContinue = await queryMigrations(
-      pgClient, document, postMigrationFiles, logger,
+      pgClient, document, postMigrationFiles, errors, logger,
     )
   }
 }
@@ -242,6 +243,7 @@ async function queryMigrations(
   pgClient: PostgresClient,
   document: TextDocument,
   files: string[],
+  errors: SyntaxError[],
   logger: Logger,
 ): Promise<boolean> {
   for await (const file of files) {
@@ -262,7 +264,7 @@ async function queryMigrations(
 
       await pgClient.query(migration)
     } catch (error: unknown) {
-      migrationError(document, error as DatabaseError, file)
+      errors.push(migrationError(document, error as DatabaseError, file))
 
       logger.error(
         `Stopping migration execution at ${path.basename(file)}: ${error}`,
