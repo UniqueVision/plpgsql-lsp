@@ -2,7 +2,7 @@ import fs from "fs/promises"
 import glob from "glob-promise"
 import path from "path"
 import { DatabaseError } from "pg"
-import { Logger, Range } from "vscode-languageserver"
+import { Diagnostic, DiagnosticSeverity, Logger, Range } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
 import { MigrationError } from "@/errors"
@@ -23,20 +23,10 @@ const ROLLBACK_RE = /^([\s]*rollback[\s]*;)/igm
 
 const DISABLE_STATEMENT_VALIDATION_RE = /^ *-- +plpgsql-language-server:disable *$/m
 
-export interface SyntaxError {
-  range: Range;
-  message: string;
-}
-
-export interface SyntaxWarning {
-  range: Range;
-  message: string;
-}
-
 export type SyntaxAnalysisOptions = {
-  isComplete: boolean;
-  queryParameterInfo: QueryParameterInfo | null;
-  statements?: StatementsSettings;
+  isComplete: boolean
+  queryParameterInfo: QueryParameterInfo | null
+  statements?: StatementsSettings
 };
 
 export async function queryFileSyntaxAnalysis(
@@ -45,9 +35,8 @@ export async function queryFileSyntaxAnalysis(
   options: SyntaxAnalysisOptions,
   settings: Settings,
   logger: Logger,
-): Promise<[SyntaxError[], SyntaxWarning[]]> {
-  const errors: SyntaxError[] = []
-  const warnings = []
+): Promise<Diagnostic[]> {
+  const diagnostics: Diagnostic[] = []
   const documentText = document.getText()
 
   let preparedStatements = [documentText]
@@ -64,13 +53,14 @@ export async function queryFileSyntaxAnalysis(
     await pgClient.query("BEGIN")
 
     if (migrations) {
-      await runMigration(pgClient, document, migrations, errors, logger)
+      await runMigration(pgClient, document, migrations, logger)
     }
   } catch (error: unknown) {
     if (error instanceof MigrationError) {
-      errors.push({
+      diagnostics.push({
+        severity: DiagnosticSeverity.Error,
         range: getTextAllRange(document),
-        message: `Migrations (${error.document.uri}): ${error.message}`,
+        message: error.message,
       })
     }
 
@@ -93,7 +83,8 @@ export async function queryFileSyntaxAnalysis(
 
     if (options.statements && DISABLE_STATEMENT_VALIDATION_RE.test(statement)) {
       if (options.statements?.diagnosticsLevels?.disableFlag === "warning") {
-        warnings.push({
+        diagnostics.push({
+          severity: DiagnosticSeverity.Warning,
           range: getRange(documentText, currentPosition),
           message: "Validation disabled",
         })
@@ -108,7 +99,10 @@ export async function queryFileSyntaxAnalysis(
       settings,
       logger,
     )
+
     if (queryParameterInfo !== null && !("type" in queryParameterInfo)) {
+      diagnostics.push(queryParameterInfo)
+
       continue
     }
 
@@ -116,7 +110,8 @@ export async function queryFileSyntaxAnalysis(
 
     if (options.statements && statementSepRE?.test(statement)) {
       if (statementNames.includes(statement)) {
-        errors.push({
+        diagnostics.push({
+          severity: DiagnosticSeverity.Error,
           range: getRange(documentText, currentPosition),
           message: `Duplicated statement '${statement}'`,
         })
@@ -133,7 +128,7 @@ export async function queryFileSyntaxAnalysis(
     try {
       await pgClient.query(fileText, Array(parameterNumber).fill(null))
     } catch (error: unknown) {
-      errors.push(statementError(
+      diagnostics.push(statementError(
         document,
         options,
         error as DatabaseError,
@@ -147,7 +142,7 @@ export async function queryFileSyntaxAnalysis(
   await pgClient.query("ROLLBACK")
   pgClient.release()
 
-  return [errors, warnings]
+  return diagnostics
 }
 
 function statementError(
@@ -156,7 +151,7 @@ function statementError(
   error: DatabaseError,
   currentPosition: number,
   logger: Logger,
-): SyntaxError {
+): Diagnostic {
   const databaseError = error as DatabaseError
   const code = databaseError.code ?? "unknown"
   const message = databaseError.message
@@ -177,14 +172,17 @@ function statementError(
     }
   })()
 
-  return { range, message }
+  return {
+    severity: DiagnosticSeverity.Error,
+    range,
+    message,
+  }
 }
 
 async function runMigration(
   pgClient: PostgresClient,
   document: TextDocument,
   migrations: MigrationsSettings,
-  errors: SyntaxError[],
   logger: Logger,
 ) {
   const upMigrationFiles = (
@@ -223,19 +221,19 @@ async function runMigration(
 
   if (shouldContinue) {
     shouldContinue = await queryMigrations(
-      pgClient, document, downMigrationFiles, errors, logger,
+      pgClient, document, downMigrationFiles, logger,
     )
   }
 
   if (shouldContinue) {
     shouldContinue = await queryMigrations(
-      pgClient, document, upMigrationFiles, errors, logger,
+      pgClient, document, upMigrationFiles, logger,
     )
   }
 
   if (shouldContinue) {
     shouldContinue = await queryMigrations(
-      pgClient, document, postMigrationFiles, errors, logger,
+      pgClient, document, postMigrationFiles, logger,
     )
   }
 }
@@ -244,7 +242,6 @@ async function queryMigrations(
   pgClient: PostgresClient,
   document: TextDocument,
   files: string[],
-  errors: SyntaxError[],
   logger: Logger,
 ): Promise<boolean> {
   for await (const file of files) {

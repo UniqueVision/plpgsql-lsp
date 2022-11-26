@@ -76,58 +76,13 @@ async function validateSyntaxAnalysis(
   settings: Settings,
   logger: Logger,
 ): Promise<Diagnostic[]> {
-  const diagnostics: Diagnostic[]= []
-  const [errors, warnings] = await queryFileSyntaxAnalysis(
+  return await queryFileSyntaxAnalysis(
     pgPool,
     document,
-    {
-      isComplete: options.isComplete,
-      queryParameterInfo: options.queryParameterInfo,
-      statements:options.statements,
-    },
+    options,
     settings,
     logger,
   )
-
-  const _diagnostics = [
-    {
-      items: errors,
-      severity: DiagnosticSeverity.Error,
-      messagePrefix: "Syntax: ",
-    },
-    {
-      items: warnings,
-      severity: DiagnosticSeverity.Warning,
-      messagePrefix: "",
-    },
-  ]
-
-  _diagnostics.forEach(_diagnostic => {
-    diagnostics.push(..._diagnostic.items.map(({ range, message }) => {
-      const diagnostic: Diagnostic = {
-        severity: _diagnostic.severity,
-        range,
-        message,
-      }
-
-      if (options.hasDiagnosticRelatedInformationCapability) {
-        diagnostic.relatedInformation = [
-          {
-            location: {
-              uri: document.uri,
-              range: Object.assign({}, diagnostic.range),
-            },
-            message: _diagnostic.messagePrefix + message,
-          },
-        ]
-      }
-
-      return diagnostic
-    }))
-
-  })
-
-  return diagnostics
 }
 
 async function validateStaticAnalysis(
