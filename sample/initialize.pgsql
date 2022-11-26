@@ -5,3 +5,4 @@ CREATE SCHEMA public;
 CREATE SCHEMA campaign;
 
 CREATE EXTENSION plpgsql_check;
+CREATE EXTENSION pgcrypto;

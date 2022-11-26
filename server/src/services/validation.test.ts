@@ -391,8 +391,11 @@ describe("Validate Tests", () => {
         "migrations/bad_migrations_test/0002.up.pgsql",
       )
       if (!diagnostics) {
-        throw new Error("")
+        throw new Error("diagnotics is undefined")
       }
+
+      expect(diagnostics.length).toEqual(1)
+
       expect(diagnostics[0].message)
         .toContain("column \"fff\" referenced in foreign key constraint does not exist")
     })
@@ -402,11 +405,15 @@ describe("Validate Tests", () => {
         "queries/correct_query_with_migrations_run.pgsql",
       )
       if (!diagnostics) {
-        throw new Error("")
+        throw new Error("diagnotics is undefined")
       }
+
+      expect(diagnostics.length).toEqual(2)
+
       // global failed migration message
       expect(diagnostics[0].message)
         .toContain("column \"fff\" referenced in foreign key constraint does not exist")
+
       // since migrations failed, everything is rolled back and query fails
       expect(diagnostics[1].message)
         .toContain("relation \"migrations_test.users\" does not exist")
