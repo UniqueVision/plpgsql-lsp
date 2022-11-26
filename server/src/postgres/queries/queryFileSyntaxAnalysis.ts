@@ -87,10 +87,10 @@ export async function queryFileSyntaxAnalysis(
       diagnostics.push(statement)
       continue
     }
-    const [fileText, parameterNumber] = statement
+    const { sanitizedStatement, parameterSize } = statement
 
     try {
-      await pgClient.query(fileText, Array(parameterNumber).fill(null))
+      await pgClient.query(sanitizedStatement, Array(parameterSize).fill(null))
     } catch (error: unknown) {
       diagnostics.push(statementError(
         document,
@@ -247,7 +247,7 @@ function queryStatement(
   options: SyntaxAnalysisOptions,
   settings: Settings,
   logger: Logger,
-): [string, uinteger] | Diagnostic {
+): {sanitizedStatement: string, parameterSize: uinteger} | Diagnostic {
   const maskedStatement = statement
     // do not execute the current file (e.g. migrations)
     .replace(BEGIN_RE, (m) => "-".repeat(m.length))
@@ -276,24 +276,28 @@ function queryStatement(
     return queryParameterInfo
   }
 
-  const sanitizedStatement = sanitizeStatement(queryParameterInfo, maskedStatement)
+  const sanitized = sanitizeStatement(queryParameterInfo, maskedStatement)
 
   if (options.statements) {
-    if (statementNames.includes(sanitizedStatement)) {
+    if (statementNames.includes(sanitized)) {
       return {
         severity: DiagnosticSeverity.Error,
         range: getRange(document.getText(), currentPosition),
-        message: `Duplicated statement '${sanitizedStatement}'`,
+        message: `Duplicated statement '${sanitized}'`,
       }
     }
-    statementNames.push(sanitizedStatement)
+    statementNames.push(sanitized)
   }
 
-  return sanitizeFileWithQueryParameters(
-    sanitizedStatement,
+  const [sanitizedStatement, parameterSize] = sanitizeFileWithQueryParameters(
+    sanitized,
     queryParameterInfo,
     logger,
   )
+
+  return {
+    sanitizedStatement, parameterSize,
+  }
 }
 
 function sanitizeStatement(
