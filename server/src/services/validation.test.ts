@@ -336,6 +336,7 @@ describe("Validate Tests", () => {
               // eslint-disable-next-line max-len
               "src/__tests__/__fixtures__/migrations/migrations_test/post-migrations/*.pgsql",
             ],
+            target: "all",
           },
         })
         .build()
@@ -389,6 +390,7 @@ describe("Validate Tests", () => {
               // eslint-disable-next-line max-len
               "src/__tests__/__fixtures__/migrations/bad_migrations_test/*.down.pgsql",
             ],
+            target: "all",
           },
         })
         .build()
@@ -425,6 +427,63 @@ describe("Validate Tests", () => {
 
       // since migrations failed, everything is rolled back and query fails
       expect(diagnostics[1].message)
+        .toContain("relation \"migrations_test.users\" does not exist")
+    })
+  })
+
+  describe("Migrations executed before analyzing query on migration file", function () {
+    beforeEach(() => {
+      const settings = new SettingsBuilder()
+        .with({
+          migrations: {
+            upFiles: [
+              // eslint-disable-next-line max-len
+              "src/__tests__/__fixtures__/migrations/migrations_test/*.up.pgsql",
+            ],
+            downFiles: [
+              // eslint-disable-next-line max-len
+              "src/__tests__/__fixtures__/migrations/migrations_test/*.down.pgsql",
+            ],
+            postMigrationFiles: [
+              // eslint-disable-next-line max-len
+              "src/__tests__/__fixtures__/migrations/migrations_test/post-migrations/*.pgsql",
+            ],
+            target: "up/down",
+          },
+        })
+        .build()
+      server = setupTestServer(settings, new RecordLogger())
+    })
+
+    it("Analyzing latest migration file", async () => {
+      const diagnostics = await validateSampleFile(
+        "migrations/migrations_test/0002.up.pgsql",
+      )
+
+      expect(diagnostics).toStrictEqual([])
+    })
+
+    it("Analyzing old migration file", async () => {
+      const diagnostics = await validateSampleFile(
+        "migrations/migrations_test/0001.up.pgsql",
+      )
+
+      expect(diagnostics).toStrictEqual([])
+    })
+
+    it("Correct query without migration", async () => {
+      const diagnostics = await validateSampleFile(
+        "queries/correct_query_with_migrations_run.pgsql",
+      )
+
+      if (!diagnostics) {
+        throw new Error("diagnotics is undefined")
+      }
+
+      expect(diagnostics.length).toEqual(1)
+
+      // need migration, but this file is not migration file.
+      expect(diagnostics[0].message)
         .toContain("relation \"migrations_test.users\" does not exist")
     })
   })
