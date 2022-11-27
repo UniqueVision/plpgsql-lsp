@@ -31,7 +31,15 @@
     ],
     "plpgsqlLanguageServer.workspaceValidationTargetFiles": [
       "definitions/**/*.pgsql"
-    ]
+    ],
+    "plpgsqlLanguageServer.statements": {
+      "separatorPattern": "-- name:[\\s]+.*"
+    },
+    "plpgsqlLanguageServer.migrations": {
+      "upFiles": ["migrations/migrations_test/*.up.pgsql"],
+      "downFiles": ["migrations/migrations_test/*.down.pgsql"],
+      "target": "up/down"
+    }
   },
   "extensions": {
     "recommendations": []
