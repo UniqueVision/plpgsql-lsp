@@ -279,7 +279,7 @@ If you want to validate multiple statements individually, you can do so by givin
     "sqlc\\.arg\\s*\\('{keyword}'\\)",
     "sqlc\\.narg\\s*\\('{keyword}'\\)",
   ],
-  "plpgsqlLanguageServer.statementSeparatorPattern": "-- name:[\\s]+.*",
+  "plpgsqlLanguageServer.statements.separatorPattern": "-- name:[\\s]+.*",
 }
 ```
 
