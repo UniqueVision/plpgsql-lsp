@@ -225,11 +225,11 @@ async function queryMigrations(
 
       await pgClient.query(migration)
     } catch (error: unknown) {
-      const errorMessage = (error as DatabaseError).message
+      const queryError = (error as DatabaseError).message
 
-      logger.error(
-        `Stopping migration execution at ${path.basename(file)}: ${errorMessage}`,
-      )
+      // eslint-disable-next-line max-len
+      const errorMessage = `Stopping migration execution at ${path.basename(file)}: ${queryError}`
+      logger.error(errorMessage)
 
       throw new MigrationError(document, errorMessage)
     }
