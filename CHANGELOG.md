@@ -2,6 +2,11 @@
 
 ## Unreleased - TBD
 
+## [v2.10.0](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.10.0) - 2022/11/27
+- Add migrations feature. [#58](https://github.com/UniqueVision/plpgsql-lsp/pull/58) [#66](https://github.com/UniqueVision/plpgsql-lsp/pull/66)
+- Add `validateOn` option. [#64](https://github.com/UniqueVision/plpgsql-lsp/pull/64)
+- Add `migrations.target` option. [#68](https://github.com/UniqueVision/plpgsql-lsp/pull/68)
+
 ## [v2.9.0](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.9.0) - 2022/11/07
 - Support multiple statements. [#56](https://github.com/UniqueVision/plpgsql-lsp/pull/56), [#57](https://github.com/UniqueVision/plpgsql-lsp/pull/57), [#59](https://github.com/UniqueVision/plpgsql-lsp/pull/59)
 
