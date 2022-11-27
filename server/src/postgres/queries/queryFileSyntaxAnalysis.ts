@@ -225,10 +225,11 @@ async function queryMigrations(
 
       await pgClient.query(migration)
     } catch (error: unknown) {
-      const queryError = (error as DatabaseError).message
+      const databaseErrorMessage = (error as DatabaseError).message
+      const filename = path.basename(file)
+      const errorMessage =
+        `Stopping migration execution at ${filename}: ${databaseErrorMessage}`
 
-      // eslint-disable-next-line max-len
-      const errorMessage = `Stopping migration execution at ${path.basename(file)}: ${queryError}`
       logger.error(errorMessage)
 
       throw new MigrationError(document, errorMessage)
@@ -246,7 +247,7 @@ function queryStatement(
   options: SyntaxAnalysisOptions,
   settings: Settings,
   logger: Logger,
-): {sanitizedStatement: string, parameterSize: uinteger} | Diagnostic {
+): { sanitizedStatement: string, parameterSize: uinteger } | Diagnostic {
   const maskedStatement = statement
     // do not execute the current file (e.g. migrations)
     .replace(BEGIN_RE, (m) => "-".repeat(m.length))
