@@ -1,6 +1,8 @@
 # Change Log
 
 ## Unreleased - TBD
+## [v2.10.1](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.10.1) - 2022/11/27
+- Update CHANGELOG, sample.
 
 ## [v2.10.0](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.10.0) - 2022/11/27
 - Add migrations feature. [#58](https://github.com/UniqueVision/plpgsql-lsp/pull/58) [#66](https://github.com/UniqueVision/plpgsql-lsp/pull/66)
