@@ -1,7 +1,7 @@
 {
   "name": "vscode-plpgsql-lsp",
-  "displayName": "PL/pgSQL Language Server",
-  "description": "VSCode PL/pgSQL Language Server.",
+  "displayName": "PostgresSQL Language Server",
+  "description": "VSCode PostgreSQL and PL/pgSQL Language Server.",
   "license": "MIT",
   "version": "2.10.2",
   "icon": "images/postgres.png",
@@ -12,9 +12,12 @@
   "publisher": "uniquevision",
   "categories": [],
   "keywords": [
+    "postgres",
     "Postgres",
     "PostgreSQL",
+    "PL",
     "plpgsql",
+    "PL/pgSQL",
     "Language Server"
   ],
   "engines": {
