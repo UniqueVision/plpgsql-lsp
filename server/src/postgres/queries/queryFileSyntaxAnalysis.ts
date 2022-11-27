@@ -146,7 +146,7 @@ async function runMigration(
   document: TextDocument,
   migrations: MigrationsSettings,
   logger: Logger,
-) {
+): Promise<void> {
   const upMigrationFiles = (
     await asyncFlatMap(
       migrations.upFiles,
@@ -168,16 +168,17 @@ async function runMigration(
     ))
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
 
-  // NOTE: When the number of migration files is large, this process is too heavy.
-  //       Ideally, it should be executed only when a migration file is being edited.
-  //       This may not be what the proposer intended.
-  //
-  // if (upMigrationFiles.filter(file => document.uri.endsWith(file)).length
-  //   + downMigrationFiles.filter(file => document.uri.endsWith(file)).length
-  //   + postMigrationFiles.filter(file => document.uri.endsWith(file)).length === 0
-  // ) {
-  //   return false
-  // }
+  const migrationTarget = migrations?.target ?? "up/down"
+
+  if (migrationTarget === "up/down"
+    && (
+      // Check if it is not a migration file.
+      upMigrationFiles.filter(file => document.uri.endsWith(file)).length
+      + downMigrationFiles.filter(file => document.uri.endsWith(file)).length === 0
+    )
+  ) {
+    return
+  }
 
   let shouldContinue = true
 

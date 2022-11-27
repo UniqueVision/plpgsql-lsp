@@ -237,6 +237,16 @@
               "example": [
                 "*.post.pgsql"
               ]
+            },
+            "target": {
+              "scope": "resource",
+              "type": "string",
+              "enum": [
+                "all",
+                "up/down"
+              ],
+              "default": "up/down",
+              "description": "Specify target files to be migrated in the background. Default: 'up/down'"
             }
           },
           "scope": "resource",

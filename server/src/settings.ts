@@ -30,6 +30,7 @@ export interface MigrationsSettings {
   upFiles: string[];
   downFiles: string[];
   postMigrationFiles?: string[];
+  target?: "all" | "up/down"
 }
 
 export const DEFAULT_SETTINGS: Settings = {
