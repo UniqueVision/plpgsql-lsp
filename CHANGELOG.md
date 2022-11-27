@@ -1,6 +1,10 @@
 # Change Log
 
 ## Unreleased - TBD
+## [v2.10.2](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.10.2) - 2022/11/27
+- Fix: normalize migration file path. [#69](https://github.com/UniqueVision/plpgsql-lsp/pull/69)
+- Update: output migration error message. [#70](https://github.com/UniqueVision/plpgsql-lsp/pull/70)
+
 ## [v2.10.1](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.10.1) - 2022/11/27
 - Update CHANGELOG, sample.
 
