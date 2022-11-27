@@ -209,7 +209,7 @@ async function queryMigrations(
 ): Promise<boolean> {
   for await (const file of files) {
     try {
-      if (document.uri.endsWith(file)) {
+      if (document.uri.endsWith(path.normalize(file))) {
         // allow us to revisit and work on any migration/post-migration file
         logger.info("Stopping migration execution at the current file")
 
