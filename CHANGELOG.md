@@ -1,6 +1,9 @@
 # Change Log
 
 ## Unreleased - TBD
+## [v2.11.0](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.11.0) - 2022/11/28
+- Rename: display title changed `PL/pgSQL Language Server` to `Postgres Languaeg Server`. [#71](https://github.com/UniqueVision/plpgsql-lsp/pull/71)
+
 ## [v2.10.2](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.10.2) - 2022/11/27
 - Fix: normalize migration file path. [#69](https://github.com/UniqueVision/plpgsql-lsp/pull/69)
 - Update: output migration error message. [#70](https://github.com/UniqueVision/plpgsql-lsp/pull/70)
