@@ -35,6 +35,18 @@ export function getWordRangeAtPosition(
     return Range.create(line, startChar, line, endChar)
 }
 
+export function getCurrentLineFromIndex(fileText: string, index: number) {
+  const rangeLines = fileText.slice(0, index).split("\n")
+  const lineSize = rangeLines.length - 1
+
+  return Range.create(
+    lineSize,
+    getNonSpaceCharacter(rangeLines[lineSize]),
+    lineSize,
+    rangeLines[lineSize].length,
+  )
+}
+
 export function findIndexFromBuffer(
   fileText: string, searchWord: string, byteOffset?: uinteger,
 ): number {

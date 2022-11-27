@@ -3,7 +3,7 @@ import glob from "glob-promise"
 import path from "path"
 import { DatabaseError } from "pg"
 import {
-  Diagnostic, DiagnosticSeverity, Logger, Range, uinteger,
+  Diagnostic, DiagnosticSeverity, Logger, uinteger,
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
@@ -16,7 +16,7 @@ import {
 import { MigrationsSettings, Settings, StatementsSettings } from "@/settings"
 import { asyncFlatMap } from "@/utilities/functool"
 import { neverReach } from "@/utilities/neverReach"
-import { getNonSpaceCharacter, getTextAllRange } from "@/utilities/text"
+import { getCurrentLineFromIndex, getTextAllRange } from "@/utilities/text"
 
 const SQL_COMMENT_RE = /\/\*[\s\S]*?\*\/|([^:]|^)--.*$/gm
 const BEGIN_RE = /^([\s]*begin[\s]*;)/igm
@@ -73,11 +73,12 @@ export async function queryFileSyntaxAnalysis(
 
   const statementNames: string[] = []
   for (let i = 0; i < preparedStatements.length; i++) {
-    const currentPosition = preparedStatements.slice(0, i).join("").length
+    // Query each statements.
+    const currentTextIndex = preparedStatements.slice(0, i).join("").length
     const statement = queryStatement(
       document,
       preparedStatements[i],
-      currentPosition,
+      currentTextIndex,
       statementNames,
       options,
       settings,
@@ -96,7 +97,7 @@ export async function queryFileSyntaxAnalysis(
         document,
         options,
         error as DatabaseError,
-        currentPosition,
+        currentTextIndex,
         logger,
       ))
     } finally {
@@ -113,7 +114,7 @@ function statementError(
   document: TextDocument,
   options: SyntaxAnalysisOptions,
   error: DatabaseError,
-  currentPosition: number,
+  currentTextIndex: number,
   logger: Logger,
 ): Diagnostic {
   const databaseError = error as DatabaseError
@@ -124,13 +125,10 @@ function statementError(
   }
 
   const range = (() => {
-    if (
-      error instanceof DatabaseError
-        && error.position !== undefined
-    ) {
-      const errorPosition = Number(error.position) + currentPosition
+    if (error instanceof DatabaseError && error.position !== undefined) {
+      const errorPosition = Number(error.position) + currentTextIndex
 
-      return getRange(document.getText(), errorPosition)
+      return getCurrentLineFromIndex(document.getText(), errorPosition)
     } else {
       return getTextAllRange(document)
     }
@@ -242,7 +240,7 @@ async function queryMigrations(
 function queryStatement(
   document: TextDocument,
   statement: string,
-  currentPosition: number,
+  currentTextIndex: number,
   statementNames: string[],
   options: SyntaxAnalysisOptions,
   settings: Settings,
@@ -260,7 +258,7 @@ function queryStatement(
   ) {
     return {
       severity: DiagnosticSeverity.Warning,
-      range: getRange(document.getText(), currentPosition),
+      range: getCurrentLineFromIndex(document.getText(), currentTextIndex),
       message: "Validation disabled",
     }
   }
@@ -282,7 +280,7 @@ function queryStatement(
     if (statementNames.includes(sanitized)) {
       return {
         severity: DiagnosticSeverity.Error,
-        range: getRange(document.getText(), currentPosition),
+        range: getCurrentLineFromIndex(document.getText(), currentTextIndex),
         message: `Duplicated statement '${sanitized}'`,
       }
     }
@@ -371,16 +369,5 @@ function makeParamPatternInStringPattern(
     + paramPattern.replace("{keyword}", "[^']*?")
     + "(?='(?:[^']*'[^']*')*[^']*$)",
     "g",
-  )
-}
-
-function getRange(documentTextx: string, errorPosition: number) {
-  const errorLines = documentTextx.slice(0, errorPosition).split("\n")
-
-  return Range.create(
-    errorLines.length - 1,
-    getNonSpaceCharacter(errorLines[errorLines.length - 1]),
-    errorLines.length - 1,
-    errorLines[errorLines.length - 1].length,
   )
 }
