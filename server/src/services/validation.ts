@@ -14,6 +14,7 @@ type ValidateTextDocumentOptions = {
   queryParameterInfo: QueryParameterInfo | null,
   statements?: StatementsSettings,
   plpgsqlCheckSchema?: string,
+  migrations?: Settings["migrations"]
 }
 
 export async function validateTextDocument(
@@ -106,6 +107,7 @@ async function validateStaticAnalysis(
       isComplete: options.isComplete,
       queryParameterInfo: options.queryParameterInfo,
       plpgsqlCheckSchema: options.plpgsqlCheckSchema,
+      migrations: options.migrations,
     },
     logger,
   )

@@ -298,10 +298,10 @@ export function parseIndexCreateStatements(
     return []
   }
 
-  const idxname = IndexStmt?.idxname
+  let idxname = IndexStmt?.idxname
 
   if (idxname === undefined) {
-    throw new ParsedTypeError("IndexStmt.idxname is undefined!")
+    idxname = ""
   }
 
   const indexNameLocation = findIndexFromBuffer(

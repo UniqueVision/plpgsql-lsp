@@ -40,7 +40,7 @@ export async function parseFunctions(
   const triggers: TriggerInfo[] = []
   stmtements.forEach(
     (statement) => {
-      logger.info(`Statically analyzing: ${JSON.stringify(statement)}`)
+      // logger.info(`Statically analyzing: ${JSON.stringify(statement)}`)
 
       if (statement?.stmt?.CreateFunctionStmt !== undefined ) {
         try {

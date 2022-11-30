@@ -1,12 +1,15 @@
 import { Logger, Range, uinteger } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
+import { MigrationError } from "@/errors"
 import { PostgresPool } from "@/postgres"
 import {
   QueryParameterInfo,
   sanitizeFileWithQueryParameters,
 } from "@/postgres/parameters"
 import { FunctionInfo, TriggerInfo } from "@/postgres/parsers/parseFunctions"
+import { runMigration } from "@/postgres/queries/migrations"
+import { Settings } from "@/settings"
 import { getLineRangeFromBuffer, getTextAllRange } from "@/utilities/text"
 
 export interface StaticAnalysisErrorRow {
@@ -33,6 +36,7 @@ export type StaticAnalysisOptions = {
   isComplete: boolean,
   queryParameterInfo: QueryParameterInfo | null
   plpgsqlCheckSchema?: string
+  migrations?: Settings["migrations"]
 }
 
 export async function queryFileStaticAnalysis(
@@ -48,9 +52,10 @@ export async function queryFileStaticAnalysis(
     document.getText(), options.queryParameterInfo, logger,
   )
 
-  const plpgsqlCheckSchema = options.plpgsqlCheckSchema
-
   const pgClient = await pgPool.connect()
+
+  const plpgsqlCheckSchema = options.plpgsqlCheckSchema
+  // outside transaction
   if (plpgsqlCheckSchema) {
     await pgClient.query(`
     SELECT
@@ -65,6 +70,27 @@ export async function queryFileStaticAnalysis(
 
   try {
     await pgClient.query("BEGIN")
+
+    if (options.migrations) {
+      await runMigration(pgClient, document, options.migrations, logger)
+    }
+  } catch (error: unknown) {
+    if (error instanceof MigrationError) {
+      errors.push({
+        level: "",
+        range: getTextAllRange(document),
+        message: error.message,
+      })
+    }
+
+    // Restart transaction.
+    await pgClient.query("ROLLBACK")
+    await pgClient.query("BEGIN")
+  } finally {
+    await pgClient.query("SAVEPOINT migrations")
+  }
+
+  try {
     await pgClient.query(
       fileText, Array(parameterNumber).fill(null),
     )
@@ -115,7 +141,7 @@ export async function queryFileStaticAnalysis(
     }
   }
   catch (error: unknown) {
-    await pgClient.query("ROLLBACK")
+    await pgClient.query("ROLLBACK to migrations")
     await pgClient.query("BEGIN")
     if (options.isComplete) {
       const message = (error as Error).message
@@ -156,7 +182,7 @@ export async function queryFileStaticAnalysis(
     }
   }
   catch (error: unknown) {
-    await pgClient.query("ROLLBACK")
+    await pgClient.query("ROLLBACK to migrations")
     await pgClient.query("BEGIN")
     if (options.isComplete) {
       const message = (error as Error).message
