@@ -6,6 +6,7 @@ export interface Settings {
   password?: string;
   definitionFiles: string[];
   defaultSchema: string;
+  plpgsqlCheckSchema?: string;
   queryParameterPattern: string | string[];
   keywordQueryParameterPattern?: string | string[];
   enableExecuteFileQueryCommand: boolean;
@@ -41,6 +42,7 @@ export const DEFAULT_SETTINGS: Settings = {
   password: undefined,
   definitionFiles: ["**/*.psql", "**/*.pgsql"],
   defaultSchema: "public",
+  plpgsqlCheckSchema: undefined,
   queryParameterPattern: /\$[1-9][0-9]*/.source,
   keywordQueryParameterPattern: undefined,
   enableExecuteFileQueryCommand: true,

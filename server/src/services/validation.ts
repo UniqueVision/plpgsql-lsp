@@ -13,6 +13,7 @@ type ValidateTextDocumentOptions = {
   hasDiagnosticRelatedInformationCapability: boolean,
   queryParameterInfo: QueryParameterInfo | null,
   statements?: StatementsSettings,
+  plpgsqlCheckSchema?: string,
 }
 
 export async function validateTextDocument(
@@ -91,13 +92,20 @@ async function validateStaticAnalysis(
   options: ValidateTextDocumentOptions,
   logger: Logger,
 ): Promise<Diagnostic[]> {
+  const [functions, triggers] = await parseFunctions(
+    document.uri,
+    options.queryParameterInfo,
+    logger,
+  )
   const errors = await queryFileStaticAnalysis(
     pgPool,
     document,
-    await parseFunctions(document.uri, options.queryParameterInfo, logger),
+    functions,
+    triggers,
     {
       isComplete: options.isComplete,
       queryParameterInfo: options.queryParameterInfo,
+      plpgsqlCheckSchema: options.plpgsqlCheckSchema,
     },
     logger,
   )
