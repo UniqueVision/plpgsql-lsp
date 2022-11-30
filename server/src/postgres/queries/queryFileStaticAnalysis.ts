@@ -48,7 +48,7 @@ export async function queryFileStaticAnalysis(
   logger: Logger,
 ): Promise<StaticAnalysisError[]> {
   const errors: StaticAnalysisError[] = []
-  const [fileText, parameterNumber] = sanitizeFileWithQueryParameters(
+  const [fileText] = sanitizeFileWithQueryParameters(
     document.getText(), options.queryParameterInfo, logger,
   )
 
@@ -91,9 +91,9 @@ export async function queryFileStaticAnalysis(
   }
 
   try {
-    await pgClient.query(
-      fileText, Array(parameterNumber).fill(null),
-    )
+    // await pgClient.query(
+    //   fileText, Array(parameterNumber).fill(null),
+    // )
 
     const extensionCheck = await pgClient.query(`
       SELECT
@@ -134,6 +134,8 @@ export async function queryFileStaticAnalysis(
 
       const rows: StaticAnalysisErrorRow[] = result.rows
       if (rows.length === 0) {
+        await pgClient.query("SAVEPOINT migrations")
+
         continue
       }
 
@@ -175,6 +177,8 @@ export async function queryFileStaticAnalysis(
 
       const rows: StaticAnalysisErrorRow[] = result.rows
       if (rows.length === 0) {
+        await pgClient.query("SAVEPOINT migrations")
+
         continue
       }
 
