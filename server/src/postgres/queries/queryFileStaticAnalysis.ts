@@ -1,14 +1,12 @@
 import { Logger, Range, uinteger } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { MigrationError } from "@/errors"
-import { PostgresPool } from "@/postgres"
+import { PostgresClient } from "@/postgres"
 import {
   QueryParameterInfo,
   sanitizeFileWithQueryParameters,
 } from "@/postgres/parameters"
 import { FunctionInfo, TriggerInfo } from "@/postgres/parsers/parseFunctions"
-import { runMigration } from "@/postgres/queries/migrations"
 import { Settings } from "@/settings"
 import { getLineRangeFromBuffer, getTextAllRange } from "@/utilities/text"
 
@@ -40,7 +38,7 @@ export type StaticAnalysisOptions = {
 }
 
 export async function queryFileStaticAnalysis(
-  pgPool: PostgresPool,
+  pgClient: PostgresClient,
   document: TextDocument,
   functionInfos: FunctionInfo[],
   triggerInfos: TriggerInfo[],
@@ -52,49 +50,7 @@ export async function queryFileStaticAnalysis(
     document.getText(), options.queryParameterInfo, logger,
   )
 
-  const pgClient = await pgPool.connect()
-
-  const plpgsqlCheckSchema = options.plpgsqlCheckSchema
-  // outside transaction
-  if (plpgsqlCheckSchema) {
-    await pgClient.query(`
-    SELECT
-    set_config(
-      'search_path',
-      current_setting('search_path') || ',${plpgsqlCheckSchema}',
-      false
-    )
-    WHERE current_setting('search_path') !~ '(^|,)${plpgsqlCheckSchema}(,|$)'
-    `)
-  }
-
   try {
-    await pgClient.query("BEGIN")
-
-    if (options.migrations) {
-      await runMigration(pgClient, document, options.migrations, logger)
-    }
-  } catch (error: unknown) {
-    if (error instanceof MigrationError) {
-      errors.push({
-        level: "",
-        range: getTextAllRange(document),
-        message: error.message,
-      })
-    }
-
-    // Restart transaction.
-    await pgClient.query("ROLLBACK")
-    await pgClient.query("BEGIN")
-  } finally {
-    await pgClient.query("SAVEPOINT migrations")
-  }
-
-  try {
-    // await pgClient.query(
-    //   fileText, Array(parameterNumber).fill(null),
-    // )
-
     const extensionCheck = await pgClient.query(`
       SELECT
         extname
@@ -134,8 +90,6 @@ export async function queryFileStaticAnalysis(
 
       const rows: StaticAnalysisErrorRow[] = result.rows
       if (rows.length === 0) {
-        await pgClient.query("SAVEPOINT migrations")
-
         continue
       }
 
@@ -143,7 +97,7 @@ export async function queryFileStaticAnalysis(
     }
   }
   catch (error: unknown) {
-    await pgClient.query("ROLLBACK to migrations")
+    await pgClient.query("ROLLBACK to validated_syntax")
     await pgClient.query("BEGIN")
     if (options.isComplete) {
       const message = (error as Error).message
@@ -153,7 +107,11 @@ export async function queryFileStaticAnalysis(
 
   try {
     for (const { functionName, location, relname } of triggerInfos) {
-      logger.warn(`trigger::: relname: ${relname} -- functionName: ${functionName}`)
+      logger.warn(`
+      trigger:::
+      relname: ${relname}
+      functionName: ${functionName}
+      location: ${location}`)
 
       const result = await pgClient.query(
         `
@@ -177,8 +135,6 @@ export async function queryFileStaticAnalysis(
 
       const rows: StaticAnalysisErrorRow[] = result.rows
       if (rows.length === 0) {
-        await pgClient.query("SAVEPOINT migrations")
-
         continue
       }
 
@@ -186,16 +142,12 @@ export async function queryFileStaticAnalysis(
     }
   }
   catch (error: unknown) {
-    await pgClient.query("ROLLBACK to migrations")
+    await pgClient.query("ROLLBACK to validated_syntax")
     await pgClient.query("BEGIN")
     if (options.isComplete) {
       const message = (error as Error).message
       logger.error(`StaticAnalysisError: ${message} (${document.uri})`)
     }
-  }
-  finally {
-    await pgClient.query("ROLLBACK")
-    pgClient.release()
   }
 
   return errors

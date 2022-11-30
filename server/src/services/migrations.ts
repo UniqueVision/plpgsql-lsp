@@ -1,6 +1,5 @@
 import fs from "fs/promises"
 import glob from "glob-promise"
-import path from "path"
 import { DatabaseError } from "pg"
 import {
   Logger,
@@ -19,7 +18,7 @@ export async function runMigration(
   document: TextDocument,
   migrations: MigrationsSettings,
   logger: Logger,
-): Promise<void> {
+): Promise<boolean> {
   const upMigrationFiles = (
     await asyncFlatMap(
       migrations.upFiles,
@@ -42,15 +41,12 @@ export async function runMigration(
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
 
   const migrationTarget = migrations?.target ?? "up/down"
+  const currentFileIsMigration =
+    upMigrationFiles.filter(file => document.uri.endsWith(file)).length
+    + downMigrationFiles.filter(file => document.uri.endsWith(file)).length !== 0
 
-  if (migrationTarget === "up/down"
-    && (
-      // Check if it is not a migration file.
-      upMigrationFiles.filter(file => document.uri.endsWith(file)).length
-      + downMigrationFiles.filter(file => document.uri.endsWith(file)).length === 0
-    )
-  ) {
-    return
+  if (migrationTarget === "up/down" && !currentFileIsMigration) {
+    return currentFileIsMigration
   }
 
   let shouldContinue = true
@@ -72,6 +68,8 @@ export async function runMigration(
       pgClient, document, postMigrationFiles, logger,
     )
   }
+
+  return currentFileIsMigration
 }
 
 async function queryMigrations(
@@ -101,10 +99,10 @@ async function queryMigrations(
       const errorMessage = (error as DatabaseError).message
 
       logger.error(
-        `Stopping migration execution at ${path.basename(file)}: ${errorMessage}`,
+        `Stopping migration execution at ${file}: ${errorMessage}`,
       )
 
-      throw new MigrationError(document, errorMessage)
+      throw new MigrationError(document, errorMessage, file)
     }
   }
 

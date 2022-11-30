@@ -4,13 +4,11 @@ import {
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { MigrationError } from "@/errors"
-import { PostgresPool } from "@/postgres"
+import { PostgresClient } from "@/postgres"
 import {
   getQueryParameterInfo, QueryParameterInfo,
   sanitizeFileWithQueryParameters,
 } from "@/postgres/parameters"
-import { runMigration } from "@/postgres/queries/migrations"
 import { Settings, StatementsSettings } from "@/settings"
 import { neverReach } from "@/utilities/neverReach"
 import {
@@ -25,7 +23,7 @@ export type SyntaxAnalysisOptions = {
 };
 
 export async function queryFileSyntaxAnalysis(
-  pgPool: PostgresPool,
+  pgClient: PostgresClient,
   document: TextDocument,
   options: SyntaxAnalysisOptions,
   settings: Settings,
@@ -39,29 +37,6 @@ export async function queryFileSyntaxAnalysis(
   if (options.statements) {
     statementSepRE = new RegExp(`(${options.statements.separatorPattern})`, "g")
     preparedStatements = documentText.split(statementSepRE)
-  }
-  const pgClient = await pgPool.connect()
-
-  try {
-    await pgClient.query("BEGIN")
-
-    if (settings.migrations) {
-      await runMigration(pgClient, document, settings.migrations, logger)
-    }
-  } catch (error: unknown) {
-    if (error instanceof MigrationError) {
-      diagnostics.push({
-        severity: DiagnosticSeverity.Error,
-        range: getTextAllRange(document),
-        message: error.message,
-      })
-    }
-
-    // Restart transaction.
-    await pgClient.query("ROLLBACK")
-    await pgClient.query("BEGIN")
-  } finally {
-    await pgClient.query("SAVEPOINT migrations")
   }
 
   const statementNames: string[] = []
@@ -93,12 +68,11 @@ export async function queryFileSyntaxAnalysis(
         currentTextIndex,
         logger,
       ))
-    } finally {
-      await pgClient.query("ROLLBACK TO migrations")
+      if (preparedStatements.length > 0) {
+        await pgClient.query("ROLLBACK TO migrations")
+      }
     }
   }
-  await pgClient.query("ROLLBACK")
-  pgClient.release()
 
   return diagnostics
 }
