@@ -8,7 +8,10 @@ import {
 } from "@/postgres/parameters"
 import { FunctionInfo, TriggerInfo } from "@/postgres/parsers/parseFunctions"
 import { Settings } from "@/settings"
-import { getLineRangeFromBuffer, getTextAllRange } from "@/utilities/text"
+import {
+  getLineRangeFromBuffer,
+  getRangeFromBuffer, getTextAllRange,
+} from "@/utilities/text"
 
 export interface StaticAnalysisErrorRow {
   procedure: string
@@ -108,7 +111,7 @@ export async function queryFileStaticAnalysis(
 
   try {
     for (const triggerInfo of triggerInfos) {
-      const { functionName, stmtLocation, relname } = triggerInfo
+      const { functionName, stmtLocation, relname, stmtLen } = triggerInfo
       logger.warn(`
       trigger:::
       relname: ${relname}
@@ -140,7 +143,7 @@ export async function queryFileStaticAnalysis(
         continue
       }
 
-      extractError(rows, stmtLocation)
+      extractError(rows, stmtLocation, stmtLen)
     }
   }
   catch (error: unknown) {
@@ -157,30 +160,35 @@ export async function queryFileStaticAnalysis(
   function extractError(
     rows: StaticAnalysisErrorRow[],
     location: number | undefined,
+    stmtLen?: number,
   ) {
     rows.forEach(
 	      (row) => {
-        let range: Range
-        // FIXME getLineRangeFromBuffer
-        // range may be larger than byte count for some cases at the end of the doc and throw err reading length of undefined.
-        // both fileText.length and location from parsed stmt are correct
-        try {
-          range = (() => {
-	          return (location === undefined)
-	            ? getTextAllRange(document)
-	            : getLineRangeFromBuffer(
-	              fileText,
-	              location,
-                row.lineno ? row.lineno - 1 : 0,
-	            ) ?? getTextAllRange(document)
+        const range = (() => {
+	          if (location === undefined) {
+            return getTextAllRange(document)
+          }
+	          if (stmtLen) {
+            return getRangeFromBuffer(
+              fileText,
+              location + 1,
+              location + 1 + stmtLen,
+            )
+          }
+
+          const lineRange = getLineRangeFromBuffer(
+            fileText,
+            location,
+            row.lineno ? row.lineno - 1 : 0,
+          )
+
+          if (!lineRange) {
+            return getTextAllRange(document)
+          }
+
+          return lineRange
 	        })()
-        } catch (error: unknown) {
-          logger.error(`Could not extract error from row.
-          message: ${JSON.stringify(row.message)}
-          lineno: ${row.lineno}
-          location: ${location}`)
-          range = getTextAllRange(document)
-        }
+
 	        errors.push({
 	          level: row.level, range, message: row.message,
 	        })

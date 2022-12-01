@@ -16,6 +16,7 @@ export interface TriggerInfo {
   functionName: string,
   relname: string,
   stmtLocation?: number,
+  stmtLen: number,
 }
 
 export async function parseFunctions(
@@ -138,7 +139,8 @@ function getCreateTriggers(
         {
           functionName,
           relname,
-          stmtLocation: statement?.stmt_location,
+          stmtLocation: statement.stmt_location,
+          stmtLen: statement.stmt_len,
         },
       ]
     },

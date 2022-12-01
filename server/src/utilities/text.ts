@@ -88,7 +88,7 @@ export function getLineRangeFromBuffer(
   fileText: string, index: uinteger, offsetLine: uinteger = 0,
 ): Range | undefined {
   const textLines = Buffer.from(fileText)
-    .slice(0, index)
+    .subarray(0, index)
     .toString()
     .split("\n")
 

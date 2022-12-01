@@ -68,6 +68,24 @@ describe("Validate Tests", () => {
       ])
     })
 
+    it("TRIGGER on inexistent field", async () => {
+      const diagnostics = await validateSampleFile(
+        "definitions/function/syntax_error_trigger_column_does_not_exist.pgsql",
+      )
+
+      expect(diagnostics).toStrictEqual([
+        {
+          severity: DiagnosticSeverity.Error,
+          message: 'record "new" has no field "updated_at"',
+          range: Range.create(20, 0, 23, 47),
+        }, {
+          severity: DiagnosticSeverity.Error,
+          message: 'record "new" has no field "updated_at"',
+          range: Range.create(28, 0, 31, 47),
+        },
+      ])
+    })
+
     it("FUNCTION column does not exists", async () => {
       const diagnostics = await validateSampleFile(
         "definitions/function/syntax_error_function_column_does_not_exist.pgsql",
