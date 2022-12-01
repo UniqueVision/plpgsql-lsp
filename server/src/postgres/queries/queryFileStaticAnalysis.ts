@@ -49,6 +49,7 @@ export async function queryFileStaticAnalysis(
   const [fileText] = sanitizeFileWithQueryParameters(
     document.getText(), options.queryParameterInfo, logger,
   )
+  logger.info(`fileText.length: ${fileText.length}`)
 
   try {
     const extensionCheck = await pgClient.query(`
@@ -101,17 +102,18 @@ export async function queryFileStaticAnalysis(
     await pgClient.query("BEGIN")
     if (options.isComplete) {
       const message = (error as Error).message
-      logger.error(`StaticAnalysisError: ${message} (${document.uri})`)
+      logger.error(`StaticAnalysisError (1): ${message} (${document.uri})`)
     }
   }
 
   try {
-    for (const { functionName, location, relname } of triggerInfos) {
+    for (const triggerInfo of triggerInfos) {
+      const { functionName, stmtLocation, relname } = triggerInfo
       logger.warn(`
       trigger:::
       relname: ${relname}
       functionName: ${functionName}
-      location: ${location}`)
+      stmtLocation: ${stmtLocation}`)
 
       const result = await pgClient.query(
         `
@@ -138,7 +140,7 @@ export async function queryFileStaticAnalysis(
         continue
       }
 
-      extractError(rows, location)
+      extractError(rows, stmtLocation)
     }
   }
   catch (error: unknown) {
@@ -146,29 +148,46 @@ export async function queryFileStaticAnalysis(
     await pgClient.query("BEGIN")
     if (options.isComplete) {
       const message = (error as Error).message
-      logger.error(`StaticAnalysisError: ${message} (${document.uri})`)
+      logger.error(`StaticAnalysisError (2): ${message} (${document.uri})`)
     }
   }
 
   return errors
 
-  function extractError(rows: StaticAnalysisErrorRow[], location: number | undefined) {
+  function extractError(
+    rows: StaticAnalysisErrorRow[],
+    location: number | undefined,
+  ) {
     rows.forEach(
-      (row) => {
-        const range = (() => {
-          return (location === undefined)
-            ? getTextAllRange(document)
-            : getLineRangeFromBuffer(
-              fileText,
-              location,
-              row.lineno ? row.lineno - 1 : 0,
-            ) ?? getTextAllRange(document)
-        })()
+	      (row) => {
+        let range: Range
+        // FIXME getLineRangeFromBuffer
+        // range may be larger than byte count for some cases at the end of the doc and throw err reading length of undefined.
+        // both fileText.length and location from parsed stmt are correct
+        try {
+          range = (() => {
+	          return (location === undefined)
+	            ? getTextAllRange(document)
+	            : getLineRangeFromBuffer(
+	              fileText,
+	              location,
+                row.lineno ? row.lineno - 1 : 0,
+	            ) ?? getTextAllRange(document)
+	        })()
+        } catch (error: unknown) {
+          logger.error(`Could not extract error from row.
+          message: ${JSON.stringify(row.message)}
+          lineno: ${row.lineno}
+          location: ${location}`)
+          range = getTextAllRange(document)
+        }
+	        errors.push({
+	          level: row.level, range, message: row.message,
+	        })
 
-        errors.push({
-          level: row.level, range, message: row.message,
-        })
-      },
-    )
+	      }
+      ,
+	    )
+
   }
 }

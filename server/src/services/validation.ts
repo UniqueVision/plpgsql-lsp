@@ -161,7 +161,7 @@ async function validateStaticAnalysis(
   options: ValidateTextDocumentOptions,
   logger: Logger,
 ): Promise<Diagnostic[]> {
-  const [functions, triggers] = await parseFunctions(
+  const [functionInfos, triggerInfos] = await parseFunctions(
     document.uri,
     options.queryParameterInfo,
     logger,
@@ -169,8 +169,8 @@ async function validateStaticAnalysis(
   const errors = await queryFileStaticAnalysis(
     pgClient,
     document,
-    functions,
-    triggers,
+    functionInfos,
+    triggerInfos,
     {
       isComplete: options.isComplete,
       queryParameterInfo: options.queryParameterInfo,
