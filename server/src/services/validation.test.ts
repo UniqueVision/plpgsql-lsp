@@ -74,7 +74,7 @@ describe("Validate Tests", () => {
 
     it("TRIGGER on inexistent field", async () => {
       const diagnostics = await validateSampleFile(
-        "definitions/function/static_error_trigger_column_does_not_exist.pgsql",
+        "definitions/trigger/static_error_trigger_column_does_not_exist.pgsql",
       )
 
       expect(diagnostics).toStrictEqual([
@@ -90,13 +90,21 @@ describe("Validate Tests", () => {
       ])
     })
 
-    // TODO
-    it.skip("static analysis disabled on invalid statement", async () => {
+    it("static analysis disabled on invalid statement", async () => {
       const diagnostics = await validateSampleFile(
-        "definitions/function/static_error_disabled.pgsql",
+        "definitions/trigger/static_error_disabled.pgsql",
       )
 
-      expect(diagnostics).toStrictEqual([])
+      if (!diagnostics) {
+        throw new Error("")
+      }
+      if (diagnostics?.length === 0) {
+        throw new Error("")
+      }
+
+      expect(diagnostics).toHaveLength(1)
+      expect(diagnostics[0].message)
+        .toContain("record \"new\" has no field \"updated_at\"")
     })
 
     it("FUNCTION column does not exists", async () => {

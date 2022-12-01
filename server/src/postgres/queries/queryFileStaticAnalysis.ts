@@ -8,6 +8,7 @@ import {
 } from "@/postgres/parameters"
 import { FunctionInfo, TriggerInfo } from "@/postgres/parsers/parseFunctions"
 import { Settings } from "@/settings"
+import { DISABLE_STATIC_VALIDATION_RE } from "@/utilities/regex"
 import {
   getLineRangeFromBuffer,
   getRangeFromBuffer, getTextAllRange,
@@ -162,40 +163,44 @@ export async function queryFileStaticAnalysis(
     location: number | undefined,
     stmtLen?: number,
   ) {
-    rows.forEach(
-	      (row) => {
-        const range = (() => {
-	          if (location === undefined) {
-            return getTextAllRange(document)
-          }
-	          if (stmtLen) {
-            return getRangeFromBuffer(
-              fileText,
-              location + 1,
-              location + 1 + stmtLen,
-            )
+    rows.forEach((row) => {
+      const range = (() => {
+        if (location === undefined) {
+          return getTextAllRange(document)
+        }
+        if (stmtLen) {
+          const stmt = fileText.slice(location + 1, location + 1 + stmtLen)
+          if (DISABLE_STATIC_VALIDATION_RE
+            .test(stmt)) {
+            return
           }
 
-          const lineRange = getLineRangeFromBuffer(
+          return getRangeFromBuffer(
             fileText,
-            location,
-            row.lineno ? row.lineno - 1 : 0,
+            location + 1,
+            location + 1 + stmtLen,
           )
+        }
+        const lineRange = getLineRangeFromBuffer(
+          fileText,
+          location,
+          row.lineno ? row.lineno - 1 : 0,
+        )
 
-          if (!lineRange) {
-            return getTextAllRange(document)
-          }
+        if (!lineRange) {
+          return getTextAllRange(document)
+        }
 
-          return lineRange
-	        })()
+        return lineRange
+      })()
 
-	        errors.push({
-	          level: row.level, range, message: row.message,
-	        })
+      if (!range) {
+        return
+      }
 
-	      }
-      ,
-	    )
-
+      errors.push({
+        level: row.level, range, message: row.message,
+      })
+    })
   }
 }

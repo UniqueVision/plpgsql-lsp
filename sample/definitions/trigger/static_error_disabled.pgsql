@@ -14,8 +14,11 @@ begin
 end;
 $function$;
 
--- TODO some kind of flag for disabling static analysis only per statement
 -- plpgsql-language-server:disable-static
+create trigger update_users_2_modtime_disabled -- error silenced
+  before update on users_2 for each row
+  execute function update_updated_at_column ();
+
 create trigger update_users_2_modtime -- should raise error
   before update on users_2 for each row
   execute function update_updated_at_column ();
