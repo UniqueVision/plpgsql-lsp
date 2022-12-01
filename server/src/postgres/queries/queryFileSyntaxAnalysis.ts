@@ -116,7 +116,7 @@ function queryStatement(
   options: SyntaxAnalysisOptions,
   settings: Settings,
   logger: Logger,
-): {sanitizedStatement: string, parameterSize: uinteger} | Diagnostic {
+): { sanitizedStatement: string, parameterSize: uinteger } | Diagnostic {
   const maskedStatement = statement
     // do not execute the current file (e.g. migrations)
     .replace(BEGIN_RE, (m) => "-".repeat(m.length))
