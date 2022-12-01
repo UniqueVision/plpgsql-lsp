@@ -1,0 +1,403 @@
+[
+  {
+    "RawStmt": {
+      "stmt": {
+        "DropStmt": {
+          "objects": [
+            {
+              "List": {
+                "items": [
+                  {
+                    "String": {
+                      "str": "users_1"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "removeType": "OBJECT_TABLE",
+          "behavior": "DROP_CASCADE",
+          "missing_ok": true
+        }
+      },
+      "stmt_len": 36
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "DropStmt": {
+          "objects": [
+            {
+              "List": {
+                "items": [
+                  {
+                    "String": {
+                      "str": "users_2"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "removeType": "OBJECT_TABLE",
+          "behavior": "DROP_CASCADE",
+          "missing_ok": true
+        }
+      },
+      "stmt_len": 37
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "DropStmt": {
+          "objects": [
+            {
+              "List": {
+                "items": [
+                  {
+                    "String": {
+                      "str": "users_3"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "removeType": "OBJECT_TABLE",
+          "behavior": "DROP_CASCADE",
+          "missing_ok": true
+        }
+      },
+      "stmt_len": 37
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "CreateStmt": {
+          "relation": {
+            "relname": "users_1",
+            "inh": true,
+            "relpersistence": "p"
+          },
+          "tableElts": [
+            {
+              "ColumnDef": {
+                "colname": "id",
+                "typeName": {
+                  "names": [
+                    {
+                      "String": {
+                        "str": "pg_catalog"
+                      }
+                    },
+                    {
+                      "String": {
+                        "str": "int4"
+                      }
+                    }
+                  ],
+                  "typemod": -1
+                },
+                "is_local": true,
+                "constraints": [
+                  {
+                    "Constraint": {
+                      "contype": "CONSTR_NOTNULL"
+                    }
+                  },
+                  {
+                    "Constraint": {
+                      "contype": "CONSTR_PRIMARY"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "ColumnDef": {
+                "colname": "updated_at",
+                "typeName": {
+                  "names": [
+                    {
+                      "String": {
+                        "str": "pg_catalog"
+                      }
+                    },
+                    {
+                      "String": {
+                        "str": "timestamptz"
+                      }
+                    }
+                  ],
+                  "typemod": -1
+                },
+                "is_local": true,
+                "constraints": [
+                  {
+                    "Constraint": {
+                      "contype": "CONSTR_NOTNULL"
+                    }
+                  },
+                  {
+                    "Constraint": {
+                      "contype": "CONSTR_DEFAULT",
+                      "raw_expr": {
+                        "FuncCall": {
+                          "funcname": [
+                            {
+                              "String": {
+                                "str": "now"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "oncommit": "ONCOMMIT_NOOP"
+        }
+      },
+      "stmt_len": 122
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "CreateStmt": {
+          "relation": {
+            "relname": "users_2",
+            "inh": true,
+            "relpersistence": "p"
+          },
+          "tableElts": [
+            {
+              "ColumnDef": {
+                "colname": "id",
+                "typeName": {
+                  "names": [
+                    {
+                      "String": {
+                        "str": "pg_catalog"
+                      }
+                    },
+                    {
+                      "String": {
+                        "str": "int4"
+                      }
+                    }
+                  ],
+                  "typemod": -1
+                },
+                "is_local": true,
+                "constraints": [
+                  {
+                    "Constraint": {
+                      "contype": "CONSTR_NOTNULL"
+                    }
+                  },
+                  {
+                    "Constraint": {
+                      "contype": "CONSTR_PRIMARY"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "oncommit": "ONCOMMIT_NOOP"
+        }
+      },
+      "stmt_len": 59
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "CreateStmt": {
+          "relation": {
+            "relname": "users_3",
+            "inh": true,
+            "relpersistence": "p"
+          },
+          "tableElts": [
+            {
+              "ColumnDef": {
+                "colname": "id",
+                "typeName": {
+                  "names": [
+                    {
+                      "String": {
+                        "str": "pg_catalog"
+                      }
+                    },
+                    {
+                      "String": {
+                        "str": "int4"
+                      }
+                    }
+                  ],
+                  "typemod": -1
+                },
+                "is_local": true,
+                "constraints": [
+                  {
+                    "Constraint": {
+                      "contype": "CONSTR_NOTNULL"
+                    }
+                  },
+                  {
+                    "Constraint": {
+                      "contype": "CONSTR_PRIMARY"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "oncommit": "ONCOMMIT_NOOP"
+        }
+      },
+      "stmt_len": 59
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "CreateFunctionStmt": {
+          "replace": true,
+          "funcname": [
+            {
+              "String": {
+                "str": "update_updated_at_column"
+              }
+            }
+          ],
+          "returnType": {
+            "names": [
+              {
+                "String": {
+                  "str": "trigger"
+                }
+              }
+            ],
+            "typemod": -1
+          },
+          "options": [
+            {
+              "DefElem": {
+                "defname": "language",
+                "arg": {
+                  "String": {
+                    "str": "plpgsql"
+                  }
+                },
+                "defaction": "DEFELEM_UNSPEC"
+              }
+            },
+            {
+              "DefElem": {
+                "defname": "as",
+                "arg": {
+                  "List": {
+                    "items": [
+                      {
+                        "String": {
+                          "str": "\nbegin\n  new.updated_at = NOW();\n  return new;\nend;\n"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "defaction": "DEFELEM_UNSPEC"
+              }
+            }
+          ]
+        }
+      },
+      "stmt_len": 171
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "CreateTrigStmt": {
+          "trigname": "update_users_3_modtime",
+          "relation": {
+            "relname": "users_3",
+            "inh": true,
+            "relpersistence": "p"
+          },
+          "funcname": [
+            {
+              "String": {
+                "str": "update_updated_at_column"
+              }
+            }
+          ],
+          "row": true,
+          "timing": 2,
+          "events": 16
+        }
+      },
+      "stmt_len": 190
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "CreateTrigStmt": {
+          "trigname": "update_users_1_modtime",
+          "relation": {
+            "relname": "users_1",
+            "inh": true,
+            "relpersistence": "p"
+          },
+          "funcname": [
+            {
+              "String": {
+                "str": "update_updated_at_column"
+              }
+            }
+          ],
+          "row": true,
+          "timing": 2,
+          "events": 16
+        }
+      },
+      "stmt_len": 126
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "CreateTrigStmt": {
+          "trigname": "update_users_2_modtime",
+          "relation": {
+            "relname": "users_2",
+            "inh": true,
+            "relpersistence": "p"
+          },
+          "funcname": [
+            {
+              "String": {
+                "str": "update_updated_at_column"
+              }
+            }
+          ],
+          "row": true,
+          "timing": 2,
+          "events": 16
+        }
+      },
+      "stmt_len": 148
+    }
+  }
+]

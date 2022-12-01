@@ -1,6 +1,10 @@
+import glob from "glob-promise"
+import path from "path"
 import { Diagnostic, DiagnosticSeverity, Range } from "vscode-languageserver"
 
-import { DEFAULT_LOAD_FILE_OPTIONS, LoadFileOptions } from "@/__tests__/helpers/file"
+import {
+  DEFAULT_LOAD_FILE_OPTIONS, LoadFileOptions, sampleDirPath,
+} from "@/__tests__/helpers/file"
 import { RecordLogger } from "@/__tests__/helpers/logger"
 import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
@@ -70,7 +74,7 @@ describe("Validate Tests", () => {
 
     it("TRIGGER on inexistent field", async () => {
       const diagnostics = await validateSampleFile(
-        "definitions/function/syntax_error_trigger_column_does_not_exist.pgsql",
+        "definitions/function/static_error_trigger_column_does_not_exist.pgsql",
       )
 
       expect(diagnostics).toStrictEqual([
@@ -84,6 +88,15 @@ describe("Validate Tests", () => {
           range: Range.create(32, 0, 35, 47),
         },
       ])
+    })
+
+    // TODO
+    it.skip("static analysis disabled on invalid statement", async () => {
+      const diagnostics = await validateSampleFile(
+        "definitions/function/static_error_disabled.pgsql",
+      )
+
+      expect(diagnostics).toStrictEqual([])
     })
 
     it("FUNCTION column does not exists", async () => {
@@ -107,6 +120,18 @@ describe("Validate Tests", () => {
       )
 
       expect(diagnostics).toStrictEqual([])
+    })
+
+
+    it("correct schemas", async () => {
+      const schemas = (await glob.promise(path.join(sampleDirPath(), "schemas/*.sql")))
+        .map(file => path.relative(sampleDirPath(), file))
+
+      schemas.forEach(async (schema) => {
+        const diagnostics = await validateSampleFile(schema)
+
+        expect(diagnostics).toStrictEqual([])
+      })
     })
 
     it("Syntax error query", async () => {

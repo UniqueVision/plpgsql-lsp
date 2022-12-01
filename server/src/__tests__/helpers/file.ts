@@ -37,7 +37,7 @@ export async function loadSampleFile(
   }
 }
 
-function sampleDirPath(): string {
+export function sampleDirPath(): string {
   return path.join(__dirname, "..", "__fixtures__")
 }
 
