@@ -40,7 +40,6 @@ export async function parseFunctions(
   const triggers: TriggerInfo[] = []
   stmtements.forEach(
     (statement) => {
-      // logger.info(`Statically analyzing: ${JSON.stringify(statement)}`)
 
       if (statement?.stmt?.CreateFunctionStmt !== undefined ) {
         try {
@@ -52,6 +51,7 @@ export async function parseFunctions(
       }
 
       if (statement?.stmt?.CreateTrigStmt !== undefined ) {
+        logger.info(`Statically analyzing trigger: ${JSON.stringify(statement)}`)
         try {
           triggers.push(...getCreateTriggers(statement))
         }
@@ -117,9 +117,14 @@ function getCreateTriggers(
   if (funcname === undefined) {
     throw new ParsedTypeError("createTriggerStmt.funcname is undefined!")
   }
-  const relname = createTriggerStmt.relation?.relname
-  if (relname === undefined) {
+  let relname = createTriggerStmt.relation?.relname || ""
+  if (relname === "") {
     throw new ParsedTypeError("createTriggerStmt.relation?.relname is undefined!")
+  }
+
+  const schema = createTriggerStmt.relation?.schemaname
+  if (schema) {
+    relname = `${schema}.${relname}`
   }
 
   return funcname.flatMap(

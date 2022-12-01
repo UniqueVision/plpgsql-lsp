@@ -1,5 +1,6 @@
 import fs from "fs/promises"
 import glob from "glob-promise"
+import path from "path"
 import { DatabaseError } from "pg"
 import {
   Logger,
@@ -25,6 +26,7 @@ export async function runMigration(
       (filePattern) => glob.promise(filePattern),
     ))
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+    .map(file => path.normalize(file))
 
   const downMigrationFiles = (
     await asyncFlatMap(
@@ -32,6 +34,7 @@ export async function runMigration(
       (filePattern) => glob.promise(filePattern),
     ))
     .sort((a, b) => b.localeCompare(a, undefined, { numeric: true }))
+    .map(file => path.normalize(file))
 
   const postMigrationFiles = (
     await asyncFlatMap(
@@ -39,6 +42,7 @@ export async function runMigration(
       (filePattern) => glob.promise(filePattern),
     ))
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+    .map(file => path.normalize(file))
 
   const migrationTarget = migrations?.target ?? "up/down"
   const currentFileIsMigration =

@@ -1,8 +1,6 @@
 import path from "path"
 import { Diagnostic, DiagnosticSeverity, Logger } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
-import { URI } from "vscode-uri"
-import { uriToFsPath } from "vscode-uri/lib/umd/uri"
 
 import { MigrationError } from "@/errors"
 import { PostgresClient, PostgresPool } from "@/postgres"
