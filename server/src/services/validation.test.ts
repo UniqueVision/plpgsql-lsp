@@ -77,11 +77,11 @@ describe("Validate Tests", () => {
         {
           severity: DiagnosticSeverity.Error,
           message: 'record "new" has no field "updated_at"',
-          range: Range.create(20, 0, 23, 47),
+          range: Range.create(24, 0, 27, 47),
         }, {
           severity: DiagnosticSeverity.Error,
           message: 'record "new" has no field "updated_at"',
-          range: Range.create(28, 0, 31, 47),
+          range: Range.create(32, 0, 35, 47),
         },
       ])
     })

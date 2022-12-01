@@ -2,6 +2,81 @@
   {
     "RawStmt": {
       "stmt": {
+        "DropStmt": {
+          "objects": [
+            {
+              "List": {
+                "items": [
+                  {
+                    "String": {
+                      "str": "users_1"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "removeType": "OBJECT_TABLE",
+          "behavior": "DROP_CASCADE",
+          "missing_ok": true
+        }
+      },
+      "stmt_len": 36
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "DropStmt": {
+          "objects": [
+            {
+              "List": {
+                "items": [
+                  {
+                    "String": {
+                      "str": "users_2"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "removeType": "OBJECT_TABLE",
+          "behavior": "DROP_CASCADE",
+          "missing_ok": true
+        }
+      },
+      "stmt_len": 37
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
+        "DropStmt": {
+          "objects": [
+            {
+              "List": {
+                "items": [
+                  {
+                    "String": {
+                      "str": "users_3"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "removeType": "OBJECT_TABLE",
+          "behavior": "DROP_CASCADE",
+          "missing_ok": true
+        }
+      },
+      "stmt_len": 37
+    }
+  },
+  {
+    "RawStmt": {
+      "stmt": {
         "CreateStmt": {
           "relation": {
             "relname": "users_1",
@@ -90,7 +165,7 @@
           "oncommit": "ONCOMMIT_NOOP"
         }
       },
-      "stmt_len": 120
+      "stmt_len": 122
     }
   },
   {
@@ -272,7 +347,7 @@
           "events": 16
         }
       },
-      "stmt_len": 148
+      "stmt_len": 190
     }
   },
   {

@@ -1,3 +1,7 @@
+DROP TABLE IF EXISTS users_1 CASCADE;
+DROP TABLE IF EXISTS users_2 CASCADE;
+DROP TABLE IF EXISTS users_3 CASCADE;
+
 CREATE TABLE users_1 (
   id integer not null PRIMARY KEY,
   updated_at timestamp with time zone not null DEFAULT now()
