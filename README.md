@@ -6,6 +6,8 @@
 This tool is a Language Server to support development with `PostgreSQL` and `PL/pgSQL`.  
 This is accomplished by a combination of querying the database and parsing SQL.
 
+![preview](images/preview.gif)
+
 ## Features
 
 - complete definitions.
@@ -74,8 +76,6 @@ See https://www.postgresql.org/docs/current/sql-commands.html
 
 1. Set your database connection to VSCode settings.
 1. Open `.pgsql` file and edit your code!
-
-![preview](images/preview.gif)
 
 ## VSCode Settings Sample
 
