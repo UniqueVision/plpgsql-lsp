@@ -65,7 +65,7 @@ export function findIndexFromBuffer(
 
 export function getPositionFromBuffer(fileText: string, index: uinteger): Position {
   const textLines = Buffer.from(fileText)
-    .slice(0, index)
+    .subarray(0, index)
     .toString()
     .split("\n")
 

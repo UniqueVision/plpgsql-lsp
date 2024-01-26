@@ -44,12 +44,6 @@
     "comma-spacing": "error",
     "no-unused-vars": "off",
     "space-before-blocks": "error",
-    "@typescript-eslint/no-implicit-any-catch": [
-      "error",
-      {
-        "allowExplicitAny": true
-      }
-    ],
     "object-curly-spacing": [
       "error",
       "always"
