@@ -1,9 +1,9 @@
 # PostgreSQL Language Server
 
-[![Marketplace Version](https://vsmarketplacebadge.apphb.com/version/uniquevision.vscode-plpgsql-lsp.svg?label=VS%20Code%20Marketplace&logo=visual-studio-code&style=flat-square "Current Release")](https://marketplace.visualstudio.com/items?itemName=uniquevision.vscode-plpgsql-lsp)
+[![Marketplace Version](https://vsmarketplacebadges.dev/version/uniquevision.vscode-plpgsql-lsp.png?label=VS%20Code%20Marketplace&logo=visual-studio-code&style=flat-square "Current Release")](https://marketplace.visualstudio.com/items?itemName=uniquevision.vscode-plpgsql-lsp)
 [![GitHub license](https://badgen.net/github/license/Naereen/Strapdown.js?style=flat-square)](https://github.com/Naereen/StrapDown.js/blob/master/LICENSE)
 
-This tool is a Language Server to support development with `PostgreSQL` and `PL/pgSQL`.  
+This tool is a Language Server to support development with `PostgreSQL` and `PL/pgSQL`.
 This is accomplished by a combination of querying the database and parsing SQL.
 
 ![preview](images/preview.gif)
@@ -123,13 +123,13 @@ Also, you can use it by CodeLens when your file is valid.
 
 If you want to disable this feature, try this
 
-```jsonc 
+```jsonc
 {
   "plpgsqlLanguageServer.enableExecuteFileQueryCommand": false
 }
 ```
 
-Shortcuts are not supported by default, 
+Shortcuts are not supported by default,
 but can be configured by adding the following setting to "keybindings.json".
 
 ```jsonc

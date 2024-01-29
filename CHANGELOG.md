@@ -1,4 +1,7 @@
 # Change Log
+## [v2.11.3](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.11.2) - 2023/01/30
+- Update: node version changed to 18 and update libraries.
+
 ## [v2.11.2](https://github.com/UniqueVision/plpgsql-lsp/tree/v2.11.2) - 2023/01/30
 - Update: node version changed to 18 and update libraries.
 
