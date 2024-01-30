@@ -42,6 +42,7 @@
     "watch": "webpack --watch",
     "package:linux": "vsce package --target linux-x64",
     "package:mac": "vsce package --target darwin-x64",
+    "package:arm_mac": "vsce package --target darwin-arm64",
     "package:windows": "vsce package --target win32-x64",
     "lint": "eslint ./client/src ./server/src --ext .ts,.tsx --fix",
     "postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
@@ -260,7 +261,7 @@
         "plpgsqlLanguageServer.enableExecuteFileQueryCommand": {
           "scope": "resource",
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "Enable/Disable \"Execute the Current File Query\" command."
         },
         "plpgsqlLanguageServer.workspaceValidationTargetFiles": {
