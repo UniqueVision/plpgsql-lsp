@@ -1,6 +1,10 @@
+import glob from "glob-promise"
+import path from "path"
 import { Diagnostic, DiagnosticSeverity, Range } from "vscode-languageserver"
 
-import { DEFAULT_LOAD_FILE_OPTIONS, LoadFileOptions } from "@/__tests__/helpers/file"
+import {
+  DEFAULT_LOAD_FILE_OPTIONS, LoadFileOptions, sampleDirPath,
+} from "@/__tests__/helpers/file"
 import { RecordLogger } from "@/__tests__/helpers/logger"
 import { setupTestServer } from "@/__tests__/helpers/server"
 import { SettingsBuilder } from "@/__tests__/helpers/settings"
@@ -68,6 +72,41 @@ describe("Validate Tests", () => {
       ])
     })
 
+    it("TRIGGER on inexistent field", async () => {
+      const diagnostics = await validateSampleFile(
+        "definitions/trigger/static_error_trigger_column_does_not_exist.pgsql",
+      )
+
+      expect(diagnostics).toStrictEqual([
+        {
+          severity: DiagnosticSeverity.Error,
+          message: 'record "new" has no field "updated_at"',
+          range: Range.create(24, 0, 27, 47),
+        }, {
+          severity: DiagnosticSeverity.Error,
+          message: 'record "new" has no field "updated_at"',
+          range: Range.create(32, 0, 35, 47),
+        },
+      ])
+    })
+
+    it("static analysis disabled on invalid statement", async () => {
+      const diagnostics = await validateSampleFile(
+        "definitions/trigger/static_error_disabled.pgsql",
+      )
+
+      if (!diagnostics) {
+        throw new Error("")
+      }
+      if (diagnostics?.length === 0) {
+        throw new Error("")
+      }
+
+      expect(diagnostics).toHaveLength(1)
+      expect(diagnostics[0].message)
+        .toContain("record \"new\" has no field \"updated_at\"")
+    })
+
     it("FUNCTION column does not exists", async () => {
       const diagnostics = await validateSampleFile(
         "definitions/function/syntax_error_function_column_does_not_exist.pgsql",
@@ -89,6 +128,18 @@ describe("Validate Tests", () => {
       )
 
       expect(diagnostics).toStrictEqual([])
+    })
+
+
+    it("correct schemas", async () => {
+      const schemas = (await glob.promise(path.join(sampleDirPath(), "schemas/*.sql")))
+        .map(file => path.relative(sampleDirPath(), file))
+
+      schemas.forEach(async (schema) => {
+        const diagnostics = await validateSampleFile(schema)
+
+        expect(diagnostics).toStrictEqual([])
+      })
     })
 
     it("Syntax error query", async () => {

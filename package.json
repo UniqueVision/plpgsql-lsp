@@ -258,6 +258,11 @@
           "type": "object",
           "description": "If set, migrations will be applied for all analyses. If the current file is a migration file, execution will run until the previous migration."
         },
+        "plpgsqlLanguageServer.plpgsqlCheckSchema": {
+          "scope": "resource",
+          "type": "string",
+          "description": "Schema where plpgsql_check is installed."
+        },
         "plpgsqlLanguageServer.enableExecuteFileQueryCommand": {
           "scope": "resource",
           "type": "boolean",

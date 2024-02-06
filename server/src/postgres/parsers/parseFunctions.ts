@@ -12,14 +12,21 @@ export interface FunctionInfo {
   location: number | undefined,
 }
 
+export interface TriggerInfo {
+  functionName: string,
+  relname: string,
+  stmtLocation?: number,
+  stmtLen: number,
+}
+
 export async function parseFunctions(
   uri: URI,
   queryParameterInfo: QueryParameterInfo | null,
   logger: Logger,
-): Promise<FunctionInfo[]> {
+): Promise<[FunctionInfo[], TriggerInfo[]]> {
   const fileText = await readFileFromUri(uri)
   if (fileText === null) {
-    return []
+    return [[], []]
   }
 
   const [sanitizedFileText] = sanitizeFileWithQueryParameters(
@@ -28,23 +35,37 @@ export async function parseFunctions(
 
   const stmtements = await parseStmtements(uri, sanitizedFileText, logger)
   if (stmtements === undefined) {
-    return []
+    return [[], []]
   }
-
-  return stmtements.flatMap(
+  const functions: FunctionInfo[] = []
+  const triggers: TriggerInfo[] = []
+  stmtements.forEach(
     (statement) => {
-      if (statement?.stmt?.CreateFunctionStmt !== undefined) {
+
+      if (statement?.stmt?.CreateFunctionStmt !== undefined ) {
         try {
-          return getCreateFunctions(statement)
+          functions.push(...getCreateFunctions(statement))
         }
         catch (error: unknown) {
           logger.error(`ParseFunctionError: ${(error as Error).message} (${uri})`)
         }
       }
 
-      return []
+      if (statement?.stmt?.CreateTrigStmt !== undefined ) {
+        logger.info(`Statically analyzing trigger: ${JSON.stringify(statement)}`)
+        try {
+          triggers.push(...getCreateTriggers(statement))
+        }
+        catch (error: unknown) {
+          logger.error(`ParseFunctionError: ${(error as Error).message} (${uri})`)
+        }
+      }
     },
   )
+
+  logger.error(JSON.stringify(triggers))
+
+  return [functions, triggers]
 }
 
 function getCreateFunctions(
@@ -78,6 +99,48 @@ function getCreateFunctions(
         {
           functionName,
           location: locationCandidates?.[0] ?? undefined,
+        },
+      ]
+    },
+  )
+}
+
+
+function getCreateTriggers(
+  statement: Statement,
+): TriggerInfo[] {
+  const createTriggerStmt = statement?.stmt?.CreateTrigStmt
+  if (createTriggerStmt === undefined) {
+    return []
+  }
+
+  const funcname = createTriggerStmt.funcname
+  if (funcname === undefined) {
+    throw new ParsedTypeError("createTriggerStmt.funcname is undefined!")
+  }
+  let relname = createTriggerStmt.relation?.relname || ""
+  if (relname === "") {
+    throw new ParsedTypeError("createTriggerStmt.relation?.relname is undefined!")
+  }
+
+  const schema = createTriggerStmt.relation?.schemaname
+  if (schema) {
+    relname = `${schema}.${relname}`
+  }
+
+  return funcname.flatMap(
+    (funcname) => {
+      const functionName = funcname.String.str
+      if (functionName === undefined) {
+        return []
+      }
+
+      return [
+        {
+          functionName,
+          relname,
+          stmtLocation: statement.stmt_location,
+          stmtLen: statement.stmt_len,
         },
       ]
     },

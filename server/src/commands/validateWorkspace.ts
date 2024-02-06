@@ -64,6 +64,7 @@ export async function validateFile(
             options.hasDiagnosticRelatedInformationCapability,
           queryParameterInfo,
           statements: settings.statements,
+          plpgsqlCheckSchema: settings.plpgsqlCheckSchema,
         },
         settings,
         logger,

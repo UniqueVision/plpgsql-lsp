@@ -1,18 +1,24 @@
+import path from "path"
 import { Diagnostic, DiagnosticSeverity, Logger } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
 
-import { PostgresPool } from "@/postgres"
+import { MigrationError } from "@/errors"
+import { PostgresClient, PostgresPool } from "@/postgres"
 import { QueryParameterInfo } from "@/postgres/parameters"
 import { parseFunctions } from "@/postgres/parsers/parseFunctions"
 import { queryFileStaticAnalysis } from "@/postgres/queries/queryFileStaticAnalysis"
 import { queryFileSyntaxAnalysis } from "@/postgres/queries/queryFileSyntaxAnalysis"
+import { runMigration } from "@/services/migrations"
 import { Settings, StatementsSettings } from "@/settings"
+import { getTextAllRange } from "@/utilities/text"
 
 type ValidateTextDocumentOptions = {
   isComplete: boolean,
   hasDiagnosticRelatedInformationCapability: boolean,
   queryParameterInfo: QueryParameterInfo | null,
   statements?: StatementsSettings,
+  plpgsqlCheckSchema?: string,
+  migrations?: Settings["migrations"]
 }
 
 export async function validateTextDocument(
@@ -22,27 +28,91 @@ export async function validateTextDocument(
   settings: Settings,
   logger: Logger,
 ): Promise<Diagnostic[]> {
-  let diagnostics: Diagnostic[] = []
-  diagnostics = await validateSyntaxAnalysis(
-    pgPool,
+  const diagnostics: Diagnostic[] = []
+
+  const pgClient = await pgPool.connect()
+
+  await setupEnvironment(pgClient, options)
+
+  try {
+    await pgClient.query("BEGIN")
+
+    if (settings.migrations) {
+      await runMigration(
+        pgClient,
+        document,
+        settings.migrations,
+        logger,
+      )
+    }
+  } catch (error: unknown) {
+    if (error instanceof MigrationError) {
+      diagnostics.push({
+        severity: DiagnosticSeverity.Error,
+        range: getTextAllRange(document),
+        message: `${error.migrationPath}: ${error.message}`,
+        relatedInformation: [
+          {
+            location: {
+              uri: path.resolve(error.migrationPath),
+              range: getTextAllRange(document),
+            },
+            message: error.message,
+          },
+        ],
+      })
+    }
+
+    // Restart transaction.
+    await pgClient.query("ROLLBACK")
+    await pgClient.query("BEGIN")
+  } finally {
+    await pgClient.query("SAVEPOINT migrations")
+  }
+
+  const syntaxDiagnostics = await validateSyntaxAnalysis(
+    pgClient,
     document,
     options,
     settings,
     logger,
   )
+  diagnostics.push(...syntaxDiagnostics)
 
-  // TODO static analysis for statements
-  // if (diagnostics.filter(d => d.severity === DiagnosticSeverity.Error).length === 0) {
-  if (diagnostics.length === 0) {
-    diagnostics = await validateStaticAnalysis(
-      pgPool,
+  if (diagnostics.filter(d => d.severity === DiagnosticSeverity.Error).length === 0) {
+    await pgClient.query("SAVEPOINT validated_syntax")
+    const staticDiagnostics = await validateStaticAnalysis(
+      pgClient,
       document,
       options,
       logger,
     )
+    diagnostics.push(...staticDiagnostics)
   }
 
+  await pgClient.query("ROLLBACK")
+  pgClient.release()
+
   return diagnostics
+}
+
+async function setupEnvironment(
+  pgClient: PostgresClient,
+  options: ValidateTextDocumentOptions,
+) {
+  const plpgsqlCheckSchema = options.plpgsqlCheckSchema
+  // outside transaction
+  if (plpgsqlCheckSchema) {
+    await pgClient.query(`
+    SELECT
+    set_config(
+      'search_path',
+      current_setting('search_path') || ',${plpgsqlCheckSchema}',
+      false
+    )
+    WHERE current_setting('search_path') !~ '(^|,)${plpgsqlCheckSchema}(,|$)'
+    `)
+  }
 }
 
 export async function isCorrectFileValidation(
@@ -70,14 +140,14 @@ export async function isCorrectFileValidation(
 }
 
 async function validateSyntaxAnalysis(
-  pgPool: PostgresPool,
+  pgClient: PostgresClient,
   document: TextDocument,
   options: ValidateTextDocumentOptions,
   settings: Settings,
   logger: Logger,
 ): Promise<Diagnostic[]> {
   return await queryFileSyntaxAnalysis(
-    pgPool,
+    pgClient,
     document,
     options,
     settings,
@@ -86,18 +156,26 @@ async function validateSyntaxAnalysis(
 }
 
 async function validateStaticAnalysis(
-  pgPool: PostgresPool,
+  pgClient: PostgresClient,
   document: TextDocument,
   options: ValidateTextDocumentOptions,
   logger: Logger,
 ): Promise<Diagnostic[]> {
+  const [functionInfos, triggerInfos] = await parseFunctions(
+    document.uri,
+    options.queryParameterInfo,
+    logger,
+  )
   const errors = await queryFileStaticAnalysis(
-    pgPool,
+    pgClient,
     document,
-    await parseFunctions(document.uri, options.queryParameterInfo, logger),
+    functionInfos,
+    triggerInfos,
     {
       isComplete: options.isComplete,
       queryParameterInfo: options.queryParameterInfo,
+      plpgsqlCheckSchema: options.plpgsqlCheckSchema,
+      migrations: options.migrations,
     },
     logger,
   )

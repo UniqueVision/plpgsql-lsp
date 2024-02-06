@@ -112,6 +112,7 @@ export interface CreateTrigStmt {
 }
 
 export interface CreateTrigStmtRelation {
+  schemaname?: string
   relname: string
   inh: boolean
   relpersistence: string

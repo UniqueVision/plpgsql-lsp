@@ -71,7 +71,10 @@ export class WorkspaceValidationTargetFilesEmptyError
 export class MigrationError
   extends PlpgsqlLanguageServerError {
 
-  constructor(public document: TextDocument, message: string) {
+  public migrationPath: string
+
+  constructor(public document: TextDocument, message: string, migrationPath: string) {
     super(message)
+    this.migrationPath = migrationPath
   }
 }
